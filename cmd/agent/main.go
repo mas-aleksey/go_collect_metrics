@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -16,7 +15,7 @@ var reportInterval = 10 * time.Second
 var pollInterval = 2 * time.Second
 
 func postMetric(client *http.Client, mType string, mName string, mValue string) {
-	endpoint, _ := url.JoinPath(baseUrl, "update", mType, mName, mValue)
+	endpoint := baseUrl + "/update/" + mType + "/" + mName + "/" + mValue
 	response, err := client.Post(endpoint, "text/plain", nil)
 	if err != nil {
 		fmt.Println(err)
