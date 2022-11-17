@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math/rand"
 	"runtime"
 )
@@ -15,6 +16,7 @@ func (s *Statistic) Collect() {
 	s.Counter++
 	s.RndValue = rand.Float64()
 	runtime.ReadMemStats(&s.Rtm)
+	fmt.Println("Collect statistic", s.Counter)
 }
 
 func NewStatistic() *Statistic {
