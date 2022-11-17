@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
-	"net/url"
 	"reflect"
 	"utils"
 )
@@ -33,7 +32,7 @@ func (mc MetricClient) SendMetrics(statistic utils.Statistic) {
 }
 
 func (mc MetricClient) postMetric(metric utils.Metric) (string, error) {
-	endpoint, _ := url.JoinPath(mc.baseUrl, "update", string(metric.Type), metric.Name, metric.Value)
+	endpoint := mc.baseUrl + "/update/" + string(metric.Type) + "/" + metric.Name + "/" + metric.Value
 	response, err := mc.client.Post(endpoint, "text/plain", nil)
 	if err != nil {
 		return "", errors.Wrap(err, "unable to complete Post request")
