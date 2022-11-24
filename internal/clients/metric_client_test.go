@@ -9,16 +9,16 @@ import (
 )
 
 func TestNewMetricClient(t *testing.T) {
-	expected := MetricClient{baseUrl: "localhost:8080", client: &http.Client{}}
+	expected := MetricClient{baseURL: "localhost:8080", client: &http.Client{}}
 	result := NewMetricClient("localhost:8080")
 	assert.Equal(t, result, expected)
 }
 
 func TestMetricClient_postMetric(t *testing.T) {
 	metric := utils.NewMetric("type", "name", "value")
-	wantUrl := "/update/type/name/value"
+	wantURL := "/update/type/name/value"
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, r.URL.Path, wantUrl)
+		assert.Equal(t, r.URL.Path, wantURL)
 		assert.Equal(t, r.Method, "POST")
 		assert.Equal(t, r.Header.Get("Content-Type"), "text/plain")
 		w.WriteHeader(http.StatusOK)
