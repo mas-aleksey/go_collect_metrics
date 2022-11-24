@@ -14,9 +14,9 @@ type MetricClient struct {
 	client  *http.Client
 }
 
-func NewMetricClient(baseUrl string) MetricClient {
+func NewMetricClient(baseURL string) MetricClient {
 	return MetricClient{
-		baseURL: baseUrl,
+		baseURL: baseURL,
 		client:  &http.Client{},
 	}
 }
