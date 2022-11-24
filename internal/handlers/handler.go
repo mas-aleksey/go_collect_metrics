@@ -19,10 +19,11 @@ func SaveMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 				http.Error(w, errMsg, http.StatusNotFound)
 				return
 			}
-			if r.Header.Get("Content-Type") != "text/plain" {
-				http.Error(w, "Expected 'Content-Type' only 'text/plain'", http.StatusBadRequest)
-				return
-			}
+			// Q: check text/plain is requited in task
+			//if r.Header.Get("Content-Type") != "text/plain" {
+			//	http.Error(w, "Expected 'Content-Type' only 'text/plain'", http.StatusBadRequest)
+			//	return
+			//}
 			metric := utils.NewMetric(fragments[2], fragments[3], fragments[4])
 
 			if !metric.IsValidType() {
