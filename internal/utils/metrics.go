@@ -4,15 +4,6 @@ import (
 	"strconv"
 )
 
-func contains(v string, a []string) bool {
-	for _, i := range a {
-		if i == v {
-			return true
-		}
-	}
-	return false
-}
-
 type MetricType string
 
 const (
@@ -38,37 +29,6 @@ func (m Metric) IsValidType() bool {
 	switch m.Type {
 	case GaugeMetricType, CounterMetricType:
 		return true
-	default:
-		return false
-	}
-}
-
-func IsValidGaugeMetricName(n string) bool {
-	switch {
-	case contains(n, RuntimeMetricNames):
-		return true
-	case n == "RandomValue":
-		return true
-	default:
-		return false
-	}
-}
-
-func IsValidCounterMetricName(n string) bool {
-	switch n {
-	case "PollCount":
-		return true
-	default:
-		return false
-	}
-}
-
-func (m Metric) IsValidName() bool {
-	switch m.Type {
-	case GaugeMetricType:
-		return IsValidGaugeMetricName(m.Name)
-	case CounterMetricType:
-		return IsValidCounterMetricName(m.Name)
 	default:
 		return false
 	}

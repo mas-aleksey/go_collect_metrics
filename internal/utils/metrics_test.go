@@ -33,69 +33,6 @@ func TestMetric_IsValidType(t *testing.T) {
 	}
 }
 
-func TestIsValidCounterMetricName(t *testing.T) {
-	tests := []struct {
-		name  string
-		mName string
-		want  bool
-	}{
-		{name: "counter PollCount name", mName: "PollCount", want: true},
-		{name: "counter Wrong name", mName: "Wrong", want: false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := NewMetric("counter", tt.mName, "value")
-			assert.Equal(t, tt.want, m.IsValidName())
-		})
-	}
-}
-
-func TestIsValidGaugeMetricName(t *testing.T) {
-	tests := []struct {
-		name  string
-		mName string
-		want  bool
-	}{
-		{name: "gauge RandomValue name", mName: "RandomValue", want: true},
-		{name: "gauge Alloc name", mName: "Alloc", want: true},
-		{name: "gauge HeapObjects name", mName: "HeapObjects", want: true},
-		{name: "gauge MSpanSys name", mName: "MSpanSys", want: true},
-		{name: "gauge TotalAlloc name", mName: "TotalAlloc", want: true},
-		{name: "gauge Wrong name", mName: "Wrong", want: false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := NewMetric("gauge", tt.mName, "value")
-			assert.Equal(t, tt.want, m.IsValidName())
-		})
-	}
-}
-
-func TestMetric_IsValidName(t *testing.T) {
-	tests := []struct {
-		name  string
-		mType string
-		mName string
-		want  bool
-	}{
-		{name: "gauge RandomValue name", mType: "gauge", mName: "RandomValue", want: true},
-		{name: "gauge Alloc name", mType: "gauge", mName: "Alloc", want: true},
-		{name: "gauge HeapObjects name", mType: "gauge", mName: "HeapObjects", want: true},
-		{name: "gauge MSpanSys name", mType: "gauge", mName: "MSpanSys", want: true},
-		{name: "gauge TotalAlloc name", mType: "gauge", mName: "TotalAlloc", want: true},
-		{name: "gauge Wrong name", mType: "gauge", mName: "Wrong", want: false},
-		{name: "counter PollCount name", mType: "counter", mName: "PollCount", want: true},
-		{name: "counter Wrong name", mType: "counter", mName: "Wrong", want: false},
-		{name: "wrong type", mType: "wrong", mName: "name", want: false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := NewMetric(tt.mType, tt.mName, "value")
-			assert.Equal(t, tt.want, m.IsValidName())
-		})
-	}
-}
-
 func TestMetric_IsValidValue(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -115,26 +52,6 @@ func TestMetric_IsValidValue(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := NewMetric(tt.mType, tt.mName, tt.mValue)
 			assert.Equal(t, tt.want, m.IsValidValue())
-		})
-	}
-}
-
-func Test_contains(t *testing.T) {
-	type args struct {
-		value string
-		array []string
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{name: "contains in arr", args: args{"Alloc", RuntimeMetricNames}, want: true},
-		{name: "not contains in arr", args: args{"Wrong", RuntimeMetricNames}, want: false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, contains(tt.args.value, tt.args.array))
 		})
 	}
 }

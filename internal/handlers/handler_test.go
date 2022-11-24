@@ -61,27 +61,15 @@ func TestUpdateMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:        "check 400 invalid metric type",
+			name:        "check 502 invalid metric type",
 			method:      http.MethodPost,
 			contentType: "text/plain",
 			request:     "/update/type/name/value",
 			memStorage:  nil,
 			want: want{
 				contentType: "text/plain; charset=utf-8",
-				statusCode:  400,
+				statusCode:  501,
 				message:     "Invalid metric type\n",
-			},
-		},
-		{
-			name:        "check 400 invalid metric name",
-			method:      http.MethodPost,
-			contentType: "text/plain",
-			request:     "/update/gauge/name/value",
-			memStorage:  nil,
-			want: want{
-				contentType: "text/plain; charset=utf-8",
-				statusCode:  400,
-				message:     "Invalid metric name\n",
 			},
 		},
 		{
@@ -138,7 +126,7 @@ func TestUpdateMetricHandler(t *testing.T) {
 			request := httptest.NewRequest(tt.method, tt.request, nil)
 			request.Header.Set("Content-Type", tt.contentType)
 			w := httptest.NewRecorder()
-			h := UpdateMetricHandler(tt.memStorage)
+			h := SaveMetricHandler(tt.memStorage)
 			h.ServeHTTP(w, request)
 			result := w.Result()
 

@@ -8,7 +8,7 @@ import (
 	"utils"
 )
 
-func UpdateMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func SaveMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Request:", r.Method, r.URL)
 		switch r.Method {
@@ -26,11 +26,7 @@ func UpdateMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			metric := utils.NewMetric(fragments[2], fragments[3], fragments[4])
 
 			if !metric.IsValidType() {
-				http.Error(w, "Invalid metric type", http.StatusBadRequest)
-				return
-			}
-			if !metric.IsValidName() {
-				http.Error(w, "Invalid metric name", http.StatusBadRequest)
+				http.Error(w, "Invalid metric type", http.StatusNotImplemented)
 				return
 			}
 			if !metric.IsValidValue() {
