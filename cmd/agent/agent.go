@@ -1,9 +1,9 @@
 package main
 
 import (
-	"clients"
+	"github.com/tiraill/go_collect_metrics/internal/clients"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"time"
-	"utils"
 )
 
 var reportInterval = 10 * time.Second

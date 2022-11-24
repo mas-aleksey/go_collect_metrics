@@ -1,8 +1,8 @@
 package storage
 
 import (
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"strconv"
-	"utils"
 )
 
 type MemStorage struct {

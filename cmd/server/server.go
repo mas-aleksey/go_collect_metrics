@@ -1,10 +1,10 @@
 package main
 
 import (
-	"handlers"
+	"github.com/tiraill/go_collect_metrics/internal/handlers"
+	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"log"
 	"net/http"
-	"storage"
 )
 
 func main() {

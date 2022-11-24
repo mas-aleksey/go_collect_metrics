@@ -3,10 +3,10 @@ package clients
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"net/http"
 	"reflect"
-	"utils"
 )
 
 type MetricClient struct {

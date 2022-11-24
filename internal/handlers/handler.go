@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"net/http"
-	"storage"
 	"strings"
-	"utils"
 )
 
 func SaveMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
@@ -19,11 +19,6 @@ func SaveMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 				http.Error(w, errMsg, http.StatusNotFound)
 				return
 			}
-			// Q: check text/plain is requited in task
-			//if r.Header.Get("Content-Type") != "text/plain" {
-			//	http.Error(w, "Expected 'Content-Type' only 'text/plain'", http.StatusBadRequest)
-			//	return
-			//}
 			metric := utils.NewMetric(fragments[2], fragments[3], fragments[4])
 
 			if !metric.IsValidType() {

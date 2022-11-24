@@ -2,10 +2,10 @@ package clients
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"utils"
 )
 
 func TestNewMetricClient(t *testing.T) {

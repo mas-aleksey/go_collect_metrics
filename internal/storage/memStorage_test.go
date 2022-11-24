@@ -2,8 +2,8 @@ package storage
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"testing"
-	"utils"
 )
 
 func TestMemStorage_SaveMetric(t *testing.T) {
