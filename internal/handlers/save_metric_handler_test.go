@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestUpdateMetricHandler(t *testing.T) {
+func TestSaveMetricHandler(t *testing.T) {
 	type want struct {
 		statusCode int
 		message    string
@@ -29,7 +29,7 @@ func TestUpdateMetricHandler(t *testing.T) {
 			memStorage: nil,
 			want: want{
 				statusCode: 405,
-				message:    "Method GET not allowed\n",
+				message:    "",
 			},
 		},
 		{
@@ -39,11 +39,11 @@ func TestUpdateMetricHandler(t *testing.T) {
 			memStorage: nil,
 			want: want{
 				statusCode: 404,
-				message:    "Wrong path. Expected: 'HOST/update/metric_type/metric_name/metric_value'\n",
+				message:    "404 page not found\n",
 			},
 		},
 		{
-			name:       "check 502 invalid metric type",
+			name:       "check 501 invalid metric type",
 			method:     http.MethodPost,
 			request:    "/update/type/name/value",
 			memStorage: nil,
@@ -95,12 +95,15 @@ func TestUpdateMetricHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			request := httptest.NewRequest(tt.method, tt.request, nil)
-			w := httptest.NewRecorder()
-			h := SaveMetricHandler(tt.memStorage)
-			h.ServeHTTP(w, request)
-			result := w.Result()
+			r := GetRouter(tt.memStorage)
+			ts := httptest.NewServer(r)
+			defer ts.Close()
 
+			client := &http.Client{}
+
+			request, _ := http.NewRequest(tt.method, ts.URL+tt.request, nil)
+			result, err := client.Do(request)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)
 
 			resBody, err := io.ReadAll(result.Body)
