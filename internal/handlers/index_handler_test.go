@@ -47,7 +47,7 @@ var fillPage = `<!DOCTYPE html>
 			
       			<tr>
               		<td>Alloc</td>
-              		<td>111.222000</td>
+              		<td>111.222</td>
       			</tr>
 			
       			<tr>

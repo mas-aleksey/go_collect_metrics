@@ -21,7 +21,7 @@ func ToStr(v interface{}) string {
 	case int64:
 		return strconv.FormatInt(val, 10)
 	case float64:
-		return strconv.FormatFloat(val, 'f', 6, 64)
+		return strconv.FormatFloat(val, 'f', 3, 64)
 	case uint32:
 		return strconv.FormatUint(uint64(val), 10)
 	default:

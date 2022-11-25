@@ -83,7 +83,7 @@ func TestGetValueMetricHandler(t *testing.T) {
 			memStorage: testMemStorage,
 			want: want{
 				statusCode: 200,
-				message:    "111.222000",
+				message:    "111.222",
 			},
 		},
 		{
