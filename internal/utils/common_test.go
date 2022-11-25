@@ -19,7 +19,7 @@ func TestToStr(t *testing.T) {
 	t.Run("float64 to str", func(t *testing.T) {
 		var input = 333.333
 		out := ToStr(input)
-		assert.Equal(t, "333.333000", out)
+		assert.Equal(t, "333.333", out)
 	})
 	t.Run("uint32 to str", func(t *testing.T) {
 		var input uint32 = 444
