@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"net/http"
 )
 
-func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func SetValueJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		defer r.Body.Close()
@@ -20,17 +21,18 @@ func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 			return
 		}
-
 		if !metric.IsValidType() {
 			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
 			return
 		}
-		if !metric.IsValidValue() {
-			http.Error(w, "Invalid metric value", http.StatusBadRequest)
+		ok := storage.SetJSONMetricValue(&metric)
+		if !ok {
+			http.Error(w, "Metric not found", http.StatusNotFound)
 			return
 		}
-		storage.SaveJSONMetric(metric)
+		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
+		rest, _ := json.Marshal(metric)
+		w.Write(rest)
 	}
 }

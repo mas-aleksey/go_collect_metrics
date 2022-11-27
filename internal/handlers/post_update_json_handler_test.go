@@ -100,7 +100,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			memStorage: storage.NewMemStorage(),
 			want: want{
 				statusCode: 200,
-				message:    "",
+				message:    `{"id":"Alloc","type":"gauge","value":123.456}`,
 			},
 		},
 		{
@@ -110,7 +110,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			memStorage: storage.NewMemStorage(),
 			want: want{
 				statusCode: 200,
-				message:    "",
+				message:    `{"id":"PoolCounter","type":"counter","delta":123}`,
 			},
 		},
 	}
@@ -123,7 +123,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			client := &http.Client{}
 
 			var body = []byte(tt.jsonData)
-			request, _ := http.NewRequest(tt.method, ts.URL+"/update", bytes.NewBuffer(body))
+			request, _ := http.NewRequest(tt.method, ts.URL+"/update/", bytes.NewBuffer(body))
 			result, err := client.Do(request)
 			require.NoError(t, err)
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)
