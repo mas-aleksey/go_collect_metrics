@@ -37,15 +37,32 @@ func (m *MemStorage) SaveJSONMetric(metrics utils.JSONMetric) {
 	}
 }
 
-func (m *MemStorage) GetMetricValue(metric utils.Metric) (string, bool) {
+func (m *MemStorage) SetMetricValue(metric *utils.Metric) bool {
 	switch metric.Type {
 	case utils.GaugeMetricType:
 		val, ok := m.GaugeMetrics[metric.Name]
-		return utils.ToStr(val), ok
+		metric.Value = utils.ToStr(val)
+		return ok
 	case utils.CounterMetricType:
 		val, ok := m.CounterMetrics[metric.Name]
-		return utils.ToStr(val), ok
+		metric.Value = utils.ToStr(val)
+		return ok
 	default:
-		return "", false
+		return false
+	}
+}
+
+func (m *MemStorage) SetJSONMetricValue(metric *utils.JSONMetric) bool {
+	switch metric.MType {
+	case "gauge":
+		val, ok := m.GaugeMetrics[metric.ID]
+		metric.Value = &val
+		return ok
+	case "counter":
+		val, ok := m.CounterMetrics[metric.ID]
+		metric.Delta = &val
+		return ok
+	default:
+		return false
 	}
 }
