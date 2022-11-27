@@ -4,22 +4,22 @@ import (
 	"encoding/json"
 )
 
-type JsonMetric struct {
+type JSONMetric struct {
 	ID    string   `json:"id"`              // имя метрики
 	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
 	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
 	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
 }
 
-func NewJsonMetric(body []byte) (JsonMetric, error) {
-	metric := JsonMetric{}
+func NewJsonMetric(body []byte) (JSONMetric, error) {
+	metric := JSONMetric{}
 	if err := json.Unmarshal(body, &metric); err != nil {
 		return metric, err
 	}
 	return metric, nil
 }
 
-func (m JsonMetric) IsValidType() bool {
+func (m JSONMetric) IsValidType() bool {
 	switch m.MType {
 	case "gauge", "counter":
 		return true
@@ -28,7 +28,7 @@ func (m JsonMetric) IsValidType() bool {
 	}
 }
 
-func (m JsonMetric) IsValidValue() bool {
+func (m JSONMetric) IsValidValue() bool {
 	switch m.MType {
 	case "gauge":
 		return m.Value != nil
