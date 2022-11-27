@@ -50,7 +50,7 @@ func TestMemStorage_SaveMetric(t *testing.T) {
 
 func TestMemStorage_SaveJsonMetric(t *testing.T) {
 	safeJSONMetric := func(body []byte) utils.JSONMetric {
-		m, _ := utils.NewJsonMetric(body)
+		m, _ := utils.NewJSONMetric(body)
 		return m
 	}
 	type want struct {

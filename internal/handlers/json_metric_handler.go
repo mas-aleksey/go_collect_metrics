@@ -15,7 +15,7 @@ func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		metric, err := utils.NewJsonMetric(body)
+		metric, err := utils.NewJSONMetric(body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 			return

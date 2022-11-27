@@ -11,7 +11,7 @@ type JSONMetric struct {
 	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
 }
 
-func NewJsonMetric(body []byte) (JSONMetric, error) {
+func NewJSONMetric(body []byte) (JSONMetric, error) {
 	metric := JSONMetric{}
 	if err := json.Unmarshal(body, &metric); err != nil {
 		return metric, err

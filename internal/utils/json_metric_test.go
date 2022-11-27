@@ -67,9 +67,9 @@ func TestNewJsonMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewJsonMetric(tt.body)
+			got, err := NewJSONMetric(tt.body)
 			assert.Equal(t, tt.errMsg, errorMsg(err))
-			assert.Equalf(t, tt.want, got, "NewJsonMetric(%v)", tt.body)
+			assert.Equalf(t, tt.want, got, "NewJSONMetric(%v)", tt.body)
 		})
 	}
 }
