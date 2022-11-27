@@ -60,7 +60,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			memStorage: nil,
 			want: want{
 				statusCode: 422,
-				message:    "json: cannot unmarshal string into Go struct field JsonMetric.value of type float64\n",
+				message:    "json: cannot unmarshal string into Go struct field JSONMetric.value of type float64\n",
 			},
 		},
 		{
@@ -80,7 +80,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			memStorage: nil,
 			want: want{
 				statusCode: 422,
-				message:    "json: cannot unmarshal string into Go struct field JsonMetric.delta of type int64\n",
+				message:    "json: cannot unmarshal string into Go struct field JSONMetric.delta of type int64\n",
 			},
 		},
 		{
