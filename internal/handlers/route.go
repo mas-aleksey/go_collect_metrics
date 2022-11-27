@@ -14,6 +14,6 @@ func GetRouter(memStorage *storage.MemStorage) *chi.Mux {
 	r.Get("/", IndexHandler(memStorage))
 	r.Get("/value/{mType}/{mName}", GetValueMetricHandler(memStorage))
 	r.Post("/update/{mType}/{mName}/{mValue}", SaveMetricHandler(memStorage))
-	r.Post("/update", SaveJsonMetricHandler(memStorage))
+	r.Post("/update", SaveJSONMetricHandler(memStorage))
 	return r
 }

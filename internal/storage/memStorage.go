@@ -28,7 +28,7 @@ func (m *MemStorage) SaveMetric(metric utils.Metric) {
 	}
 }
 
-func (m *MemStorage) SaveJsonMetric(metrics utils.JsonMetric) {
+func (m *MemStorage) SaveJSONMetric(metrics utils.JsonMetric) {
 	switch metrics.MType {
 	case "gauge":
 		m.GaugeMetrics[metrics.ID] = *metrics.Value
