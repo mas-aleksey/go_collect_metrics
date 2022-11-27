@@ -28,6 +28,15 @@ func (m *MemStorage) SaveMetric(metric utils.Metric) {
 	}
 }
 
+func (m *MemStorage) SaveJsonMetric(metrics utils.JsonMetric) {
+	switch metrics.MType {
+	case "gauge":
+		m.GaugeMetrics[metrics.ID] = *metrics.Value
+	case "counter":
+		m.CounterMetrics[metrics.ID] += *metrics.Delta
+	}
+}
+
 func (m *MemStorage) GetMetricValue(metric utils.Metric) (string, bool) {
 	switch metric.Type {
 	case utils.GaugeMetricType:
