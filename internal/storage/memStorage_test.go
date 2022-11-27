@@ -86,7 +86,7 @@ func TestMemStorage_SaveJsonMetric(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := NewMemStorage()
 			for _, metric := range tt.metrics {
-				m.SaveJsonMetric(metric)
+				m.SaveJSONMetric(metric)
 			}
 			assert.Equal(t, m.GaugeMetrics, tt.want.gaugeMetrics)
 			assert.Equal(t, m.CounterMetrics, tt.want.counterMetrics)
