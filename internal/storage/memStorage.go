@@ -29,7 +29,7 @@ func (m *MemStorage) SaveMetric(metric utils.Metric) {
 		m.GaugeMetrics[metric.Name] = val
 	case utils.CounterMetricType:
 		val, _ := strconv.ParseInt(metric.Value, 10, 64)
-		m.CounterMetrics[metric.Name] = val
+		m.CounterMetrics[metric.Name] += val
 	}
 }
 

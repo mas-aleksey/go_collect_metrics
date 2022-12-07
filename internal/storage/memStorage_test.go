@@ -32,7 +32,7 @@ func TestMemStorage_SaveMetric(t *testing.T) {
 			},
 			want: want{
 				gaugeMetrics:   map[string]float64{"RandomValue": 333.333, "Alloc": 123.456, "Frees": 0, "Sys": 555},
-				counterMetrics: map[string]int64{"PollCount": 3},
+				counterMetrics: map[string]int64{"PollCount": 6},
 			},
 		},
 	}

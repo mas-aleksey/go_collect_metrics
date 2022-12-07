@@ -15,13 +15,12 @@ func TestNewStatistic(t *testing.T) {
 
 func TestStatistic_Collect(t *testing.T) {
 	statistic := NewStatistic()
-	stat1 := *statistic
-	statistic.Collect()
-	stat2 := *statistic
 
-	assert.Equal(t, int64(0), stat1.Counter)
-	assert.Equal(t, int64(1), stat2.Counter)
-	assert.NotEqual(t, stat1, stat2)
-	assert.NotEqual(t, stat1.Counter, stat2.Counter)
-	assert.NotEqual(t, stat1.RndValue, stat2.RndValue)
+	assert.Equal(t, int64(0), statistic.Counter)
+	rnd1 := statistic.RndValue
+	statistic.Collect()
+
+	rnd2 := statistic.RndValue
+	assert.Equal(t, int64(1), statistic.Counter)
+	assert.NotEqual(t, rnd1, rnd2)
 }
