@@ -51,6 +51,7 @@ func IndexHandler(storage *storage.MemStorage) http.HandlerFunc {
 		for k, v := range storage.CounterMetrics {
 			data.Metrics = append(data.Metrics, MetricData{Name: k, Value: utils.ToStr(v)})
 		}
+		w.Header().Set("content-type", "text/html")
 		fpT, _ := template.New("metrics").Parse(pageTemp)
 		err := fpT.Execute(w, data)
 		if err != nil {

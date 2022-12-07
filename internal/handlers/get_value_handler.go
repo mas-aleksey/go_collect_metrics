@@ -22,7 +22,7 @@ func GetValueMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			http.Error(w, "Metric not found", http.StatusNotFound)
 			return
 		}
-		w.Header().Set("content-type", "plain/text")
+		w.Header().Set("content-type", "text/plain")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(value))
 	}

@@ -21,7 +21,9 @@ func NewMetricClient(baseURL string) MetricClient {
 	}
 }
 
-func (mc MetricClient) SendMetrics(statistic utils.Statistic) {
+func (mc MetricClient) SendMetrics(statistic *utils.Statistic) {
+	statistic.Mutex.RLock()
+	defer statistic.Mutex.RUnlock()
 	_, _ = mc.postMetric(utils.NewMetric("counter", "PollCount", utils.ToStr(statistic.Counter)))
 	for _, metricName := range utils.RuntimeMetricNames {
 		val := reflect.ValueOf(&statistic.Rtm).Elem().FieldByName(metricName).Interface()

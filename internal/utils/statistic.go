@@ -4,15 +4,19 @@ import (
 	"fmt"
 	"math/rand"
 	"runtime"
+	"sync"
 )
 
 type Statistic struct {
 	Counter  int64
 	RndValue float64
 	Rtm      runtime.MemStats
+	Mutex    sync.RWMutex
 }
 
 func (s *Statistic) Collect() {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
 	s.Counter++
 	s.RndValue = rand.Float64()
 	runtime.ReadMemStats(&s.Rtm)

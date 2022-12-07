@@ -41,6 +41,6 @@ func TestMetricClient_SendMetrics(t *testing.T) {
 	}))
 	defer svr.Close()
 	mc := NewMetricClient(svr.URL)
-	mc.SendMetrics(*statistic)
+	mc.SendMetrics(statistic)
 	assert.Equal(t, len(urls), expectedCount)
 }

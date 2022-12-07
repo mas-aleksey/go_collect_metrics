@@ -12,13 +12,17 @@ var pollInterval = 2 * time.Second
 func reportStatistic(statistic *utils.Statistic) {
 	metricClient := clients.NewMetricClient("http://127.0.0.1:8080")
 	ticker := time.NewTicker(reportInterval)
+	defer ticker.Stop()
+
 	for range ticker.C {
-		metricClient.SendMetrics(*statistic)
+		metricClient.SendMetrics(statistic)
 	}
 }
 
 func updateStatistic(statistic *utils.Statistic) {
 	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+
 	for range ticker.C {
 		statistic.Collect()
 	}
