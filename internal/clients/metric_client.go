@@ -50,6 +50,7 @@ func (mc MetricClient) SendReport(report *utils.Report) error {
 func (mc MetricClient) postMetric(metric utils.Metric) error {
 	endpoint := mc.baseURL + "/update/" + string(metric.Type) + "/" + metric.Name + "/" + metric.Value
 	response, err := mc.client.Post(endpoint, "text/plain", nil)
+	defer response.Body.Close()
 	if err != nil {
 		return errors.Wrap(err, "unable to complete Post request")
 	}
