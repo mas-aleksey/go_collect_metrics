@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestNewMetricClient(t *testing.T) {
-	expected := MetricClient{baseURL: "localhost:8080", client: &http.Client{}}
-	result := NewMetricClient("localhost:8080")
+	expected := MetricClient{baseURL: "localhost:8080", client: &http.Client{Timeout: 1 * time.Second}}
+	result := NewMetricClient("localhost:8080", 1*time.Second)
 	assert.Equal(t, result, expected)
 }
 
@@ -24,23 +25,20 @@ func TestMetricClient_postMetric(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL)
-	out, err := mc.postMetric(metric)
+	mc := NewMetricClient(svr.URL, 1*time.Second)
+	err := mc.postMetric(metric)
 	assert.Nil(t, err)
-	assert.Equal(t, out, "")
 }
 
 func TestMetricClient_SendMetrics(t *testing.T) {
-	expectedCount := 29
 	statistic := utils.NewStatistic()
-	urls := make([]string, 0)
+	report := utils.NewReport(statistic)
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Log(r.URL.Path)
-		urls = append(urls, r.URL.Path)
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL)
-	mc.SendMetrics(statistic)
-	assert.Equal(t, len(urls), expectedCount)
+	mc := NewMetricClient(svr.URL, 1*time.Second)
+	err := mc.SendReport(report)
+	assert.Nil(t, err)
 }

@@ -1,12 +1,11 @@
 package clients
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
-	"io"
 	"net/http"
-	"reflect"
+	"sync"
+	"time"
 )
 
 type MetricClient struct {
@@ -14,35 +13,48 @@ type MetricClient struct {
 	client  *http.Client
 }
 
-func NewMetricClient(baseURL string) MetricClient {
+func NewMetricClient(baseURL string, timeout time.Duration) MetricClient {
 	return MetricClient{
 		baseURL: baseURL,
-		client:  &http.Client{},
+		client: &http.Client{
+			Timeout: timeout,
+		},
 	}
 }
 
-func (mc MetricClient) SendMetrics(statistic *utils.Statistic) {
-	statistic.Mutex.RLock()
-	defer statistic.Mutex.RUnlock()
-	_, _ = mc.postMetric(utils.NewMetric("counter", "PollCount", utils.ToStr(statistic.Counter)))
-	for _, metricName := range utils.RuntimeMetricNames {
-		val := reflect.ValueOf(&statistic.Rtm).Elem().FieldByName(metricName).Interface()
-		_, _ = mc.postMetric(utils.NewMetric("gauge", metricName, utils.ToStr(val)))
+func (mc MetricClient) SendReport(report *utils.Report) error {
+	var wg sync.WaitGroup
+	errChains := make(chan error, utils.ReportCount)
+
+	for _, metric := range report.Metrics {
+		wg.Add(1)
+		metric := metric
+
+		go func() {
+			defer wg.Done()
+			err := mc.postMetric(metric)
+			errChains <- err
+		}()
 	}
-	_, _ = mc.postMetric(utils.NewMetric("gauge", "RandomValue", utils.ToStr(statistic.RndValue)))
-	fmt.Println("Report statistic", statistic.Counter)
+	wg.Wait()
+	close(errChains)
+
+	for err := range errChains {
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (mc MetricClient) postMetric(metric utils.Metric) (string, error) {
+func (mc MetricClient) postMetric(metric utils.Metric) error {
 	endpoint := mc.baseURL + "/update/" + string(metric.Type) + "/" + metric.Name + "/" + metric.Value
 	response, err := mc.client.Post(endpoint, "text/plain", nil)
 	if err != nil {
-		return "", errors.Wrap(err, "unable to complete Post request")
+		return errors.Wrap(err, "unable to complete Post request")
 	}
-	defer response.Body.Close()
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return "", errors.Wrap(err, "unable to read response data")
+	if response.StatusCode != 200 {
+		return errors.New(response.Status)
 	}
-	return string(body), nil
+	return nil
 }
