@@ -68,5 +68,5 @@ func TestBaseClient_DoRequest_Failed(t *testing.T) {
 	resp, err := baseClient.DoRequest(request)
 	assert.Equal(t, Response{}, resp)
 	assert.NotNil(t, err)
-	assert.Equal(t, "Error: 400 Bad Request details: {\"msg\": \"Something went wrong\"}\n", err.Error())
+	assert.Equal(t, "error: 400 Bad Request details: {\"msg\": \"Something went wrong\"}", err.Error())
 }

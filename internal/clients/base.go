@@ -78,7 +78,7 @@ func (c *BaseClient) DoRequest(r Request) (Response, error) {
 	}
 
 	if resp.StatusCode != r.OkStatusCode {
-		return Response{}, fmt.Errorf("Error: %s details: %s\n", resp.Status, body)
+		return Response{}, fmt.Errorf("error: %s details: %s", resp.Status, body)
 	}
 
 	return Response{
