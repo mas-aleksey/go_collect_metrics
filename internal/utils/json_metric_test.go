@@ -5,7 +5,23 @@ import (
 	"testing"
 )
 
-func TestNewJsonMetric(t *testing.T) {
+func TestNewCounterJSONMetric(t *testing.T) {
+	metric := NewCounterJSONMetric("name", 123)
+	assert.Equal(t, "counter", metric.MType)
+	assert.Equal(t, "name", metric.ID)
+	assert.Equal(t, int64(123), *metric.Delta)
+	assert.Nil(t, metric.Value)
+}
+
+func TestNewGaugeJSONMetric(t *testing.T) {
+	metric := NewGaugeJSONMetric("name", 123.4)
+	assert.Equal(t, "gauge", metric.MType)
+	assert.Equal(t, "name", metric.ID)
+	assert.Equal(t, 123.4, *metric.Value)
+	assert.Nil(t, metric.Delta)
+}
+
+func TestLoadJsonMetric(t *testing.T) {
 	errorMsg := func(err error) string {
 		if err == nil {
 			return ""
@@ -67,9 +83,9 @@ func TestNewJsonMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewJSONMetric(tt.body)
+			got, err := LoadJSONMetric(tt.body)
 			assert.Equal(t, tt.errMsg, errorMsg(err))
-			assert.Equalf(t, tt.want, got, "NewJSONMetric(%v)", tt.body)
+			assert.Equalf(t, tt.want, got, "LoadJSONMetric(%v)", tt.body)
 		})
 	}
 }

@@ -10,13 +10,17 @@ type Report struct {
 	Metrics []Metric
 }
 
-func NewReport(statistic *Statistic) *Report {
-	metrics := make([]Metric, 0, ReportCount)
-	metrics = append(metrics, NewMetric("counter", "PollCount", ToStr(statistic.Counter)))
-	metrics = append(metrics, NewMetric("gauge", "RandomValue", ToStr(statistic.RndValue)))
+type JSONReport struct {
+	Metrics []JSONMetric
+}
+
+func NewJSONReport(statistic *Statistic) *JSONReport {
+	metrics := make([]JSONMetric, 0, ReportCount)
+	metrics = append(metrics, NewCounterJSONMetric("PollCount", statistic.Counter))
+	metrics = append(metrics, NewGaugeJSONMetric("RandomValue", statistic.RndValue))
 	for _, metricName := range RuntimeMetricNames {
 		val := reflect.ValueOf(&statistic.Rtm).Elem().FieldByName(metricName).Interface()
-		metrics = append(metrics, NewMetric("gauge", metricName, ToStr(val)))
+		metrics = append(metrics, NewGaugeJSONMetric(metricName, ToFloat64(val)))
 	}
-	return &Report{metrics}
+	return &JSONReport{metrics}
 }

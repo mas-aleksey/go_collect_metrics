@@ -1,28 +1,24 @@
 package clients
 
 import (
+	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"net/http"
 	"sync"
-	"time"
 )
 
 type MetricClient struct {
-	baseURL string
-	client  *http.Client
+	*BaseClient
 }
 
-func NewMetricClient(baseURL string, timeout time.Duration) MetricClient {
-	return MetricClient{
-		baseURL: baseURL,
-		client: &http.Client{
-			Timeout: timeout,
-		},
+func NewMetricClient(config ClientConfig) *MetricClient {
+	return &MetricClient{
+		BaseClient: NewBaseClient(config),
 	}
 }
 
-func (mc MetricClient) SendReport(report *utils.Report) error {
+func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	var wg sync.WaitGroup
 	errChains := make(chan error, utils.ReportCount)
 
@@ -32,7 +28,7 @@ func (mc MetricClient) SendReport(report *utils.Report) error {
 
 		go func() {
 			defer wg.Done()
-			err := mc.postMetric(metric)
+			err := mc.postJSONMetric(metric)
 			errChains <- err
 		}()
 	}
@@ -47,15 +43,27 @@ func (mc MetricClient) SendReport(report *utils.Report) error {
 	return nil
 }
 
-func (mc MetricClient) postMetric(metric utils.Metric) error {
-	endpoint := mc.baseURL + "/update/" + string(metric.Type) + "/" + metric.Name + "/" + metric.Value
-	response, err := mc.client.Post(endpoint, "text/plain", nil)
+func (mc MetricClient) getHeaders() map[string]string {
+	headers := make(map[string]string)
+	headers["Content-Type"] = "application/json"
+	return headers
+}
+
+func (mc MetricClient) postJSONMetric(metric utils.JSONMetric) error {
+	body, err := json.Marshal(metric)
 	if err != nil {
-		return errors.Wrap(err, "unable to complete Post request")
+		return errors.Wrap(err, "unable to make json")
 	}
-	defer response.Body.Close()
-	if response.StatusCode != 200 {
-		return errors.New(response.Status)
+	request := Request{
+		Method:       http.MethodPost,
+		URL:          mc.MakeURL("update/"),
+		Headers:      mc.getHeaders(),
+		Body:         body,
+		OkStatusCode: http.StatusOK,
+	}
+	_, err = mc.DoRequest(request)
+	if err != nil {
+		return errors.Wrap(err, "unable to complete update metric request")
 	}
 	return nil
 }

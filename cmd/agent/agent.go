@@ -13,14 +13,15 @@ var baseURL = "http://127.0.0.1:8080"
 var timeout = 5 * time.Second
 
 func reportStatistic(statistic *utils.Statistic) {
-	metricClient := clients.NewMetricClient(baseURL, timeout)
+	metricConfig := clients.NewClientConfig(baseURL, timeout)
+	metricClient := clients.NewMetricClient(metricConfig)
 	ticker := time.NewTicker(reportInterval)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		statCopy := statistic.Copy()
-		report := utils.NewReport(statCopy)
-		err := metricClient.SendReport(report)
+		report := utils.NewJSONReport(statCopy)
+		err := metricClient.SendJSONReport(report)
 		if err != nil {
 			fmt.Println("Fail send report", statCopy.Counter, err)
 		} else {

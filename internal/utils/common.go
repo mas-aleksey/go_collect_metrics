@@ -29,3 +29,19 @@ func ToStr(v interface{}) string {
 		return "0"
 	}
 }
+
+func ToFloat64(v interface{}) float64 {
+	switch val := v.(type) {
+	case uint64:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case float64:
+		return val
+	case uint32:
+		return float64(val)
+	default:
+		fmt.Println("Unknown type", val, reflect.TypeOf(v))
+		return float64(0)
+	}
+}

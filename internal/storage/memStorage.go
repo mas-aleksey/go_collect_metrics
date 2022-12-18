@@ -34,6 +34,9 @@ func (m *MemStorage) SaveMetric(metric utils.Metric) {
 }
 
 func (m *MemStorage) SaveJSONMetric(metrics utils.JSONMetric) {
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+
 	switch metrics.MType {
 	case "gauge":
 		m.GaugeMetrics[metrics.ID] = *metrics.Value

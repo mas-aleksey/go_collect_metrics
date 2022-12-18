@@ -50,7 +50,7 @@ func TestMemStorage_SaveMetric(t *testing.T) {
 
 func TestMemStorage_SaveJsonMetric(t *testing.T) {
 	safeJSONMetric := func(body []byte) utils.JSONMetric {
-		m, _ := utils.NewJSONMetric(body)
+		m, _ := utils.LoadJSONMetric(body)
 		return m
 	}
 	type want struct {
@@ -92,4 +92,42 @@ func TestMemStorage_SaveJsonMetric(t *testing.T) {
 			assert.Equal(t, m.CounterMetrics, tt.want.counterMetrics)
 		})
 	}
+}
+
+func TestMemStorage_SetMetricValue(t *testing.T) {
+	m := MemStorage{
+		GaugeMetrics:   map[string]float64{"name": 123.4},
+		CounterMetrics: map[string]int64{"name": 123},
+	}
+	gaugeMetric := utils.Metric{
+		Type: utils.GaugeMetricType,
+		Name: "name",
+	}
+	counterMetric := utils.Metric{
+		Type: utils.CounterMetricType,
+		Name: "name",
+	}
+	m.SetMetricValue(&gaugeMetric)
+	m.SetMetricValue(&counterMetric)
+	assert.Equal(t, "123.400", gaugeMetric.Value)
+	assert.Equal(t, "123", counterMetric.Value)
+}
+
+func TestMemStorage_SetJSONMetricValue(t *testing.T) {
+	m := MemStorage{
+		GaugeMetrics:   map[string]float64{"name": 123.4},
+		CounterMetrics: map[string]int64{"name": 123},
+	}
+	gaugeMetric := utils.JSONMetric{
+		ID:    "name",
+		MType: "gauge",
+	}
+	counterMetric := utils.JSONMetric{
+		ID:    "name",
+		MType: "counter",
+	}
+	m.SetJSONMetricValue(&counterMetric)
+	m.SetJSONMetricValue(&gaugeMetric)
+	assert.Equal(t, int64(123), *counterMetric.Delta)
+	assert.Equal(t, 123.4, *gaugeMetric.Value)
 }
