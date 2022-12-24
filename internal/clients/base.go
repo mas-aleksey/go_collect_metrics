@@ -28,23 +28,14 @@ type BaseClient struct {
 	client  *http.Client
 }
 
-type ClientConfig struct {
-	BaseURL string
-	Timeout time.Duration
-}
-
-func NewClientConfig(baseURL string, timeout time.Duration) ClientConfig {
-	return ClientConfig{
-		BaseURL: baseURL,
-		Timeout: timeout,
+func NewBaseClient(baseURL string, timeout time.Duration) *BaseClient {
+	if !strings.HasPrefix(baseURL, "http") {
+		baseURL = "http://" + baseURL
 	}
-}
-
-func NewBaseClient(config ClientConfig) *BaseClient {
 	return &BaseClient{
-		baseURL: config.BaseURL,
+		baseURL: baseURL,
 		client: &http.Client{
-			Timeout: config.Timeout,
+			Timeout: timeout,
 		},
 	}
 }
