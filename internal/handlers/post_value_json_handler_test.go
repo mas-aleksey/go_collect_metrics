@@ -87,7 +87,9 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 			client := &http.Client{}
 
 			var body = []byte(tt.jsonData)
-			request, _ := http.NewRequest(tt.method, ts.URL+"/value/", bytes.NewBuffer(body))
+			request, err := http.NewRequest(tt.method, ts.URL+"/value/", bytes.NewBuffer(body))
+			require.NoError(t, err)
+
 			result, err := client.Do(request)
 			require.NoError(t, err)
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)
@@ -101,4 +103,36 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 			assert.Equal(t, tt.want.message, string(resBody))
 		})
 	}
+}
+
+func TestCompressedSetValueJSONMetricHandler(t *testing.T) {
+	testStorage := storage.NewMemStorage()
+	testStorage.GaugeMetrics["Alloc"] = 123.456
+	testStorage.CounterMetrics["PoolCounter"] = 50
+
+	r := GetRouter(testStorage)
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	client := &http.Client{}
+
+	var body = []byte(`{"ID":"Alloc","type":"gauge"}`)
+	request, err := http.NewRequest(http.MethodPost, ts.URL+"/value/", bytes.NewBuffer(body))
+	require.NoError(t, err)
+
+	request.Header.Set("Accept-Encoding", "gzip")
+	result, err := client.Do(request)
+	require.NoError(t, err)
+
+	assert.Equal(t, 200, result.StatusCode)
+	assert.Equal(t, "gzip", result.Header.Get("Content-Encoding"))
+	assert.Equal(t, "73", result.Header.Get("Content-Length"))
+
+	resBody, err := io.ReadAll(result.Body)
+	require.NoError(t, err)
+
+	err = result.Body.Close()
+	require.NoError(t, err)
+
+	assert.NotNil(t, resBody)
 }

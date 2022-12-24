@@ -113,3 +113,32 @@ func TestGetIndexMetricHandler(t *testing.T) {
 		})
 	}
 }
+
+func TestGetCompressedPage(t *testing.T) {
+
+	testMemStorage := storage.NewMemStorage()
+	testMemStorage.GaugeMetrics["Alloc"] = 111.222
+	testMemStorage.CounterMetrics["PollCount"] = 333
+
+	r := GetRouter(testMemStorage)
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, ts.URL, nil)
+	require.NoError(t, err)
+	req.Header.Set("Accept-Encoding", "gzip")
+
+	result, err := client.Do(req)
+	require.NoError(t, err)
+	assert.Equal(t, 200, result.StatusCode)
+	assert.Equal(t, "gzip", result.Header.Get("Content-Encoding"))
+	assert.Equal(t, "225", result.Header.Get("Content-Length"))
+
+	resBody, err := io.ReadAll(result.Body)
+	require.NoError(t, err)
+
+	err = result.Body.Close()
+	require.NoError(t, err)
+	assert.NotNil(t, resBody)
+}

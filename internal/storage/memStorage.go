@@ -3,7 +3,6 @@ package storage
 import (
 	"encoding/json"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
-	"log"
 	"os"
 	"strconv"
 	"sync"
@@ -104,12 +103,6 @@ func (m *MemStorage) SaveToFile(filename string) error {
 	defer m.Mutex.RUnlock()
 
 	file, err := os.Create(filename)
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			log.Printf("Close file error: %s", err)
-		}
-	}(file)
 
 	if err != nil {
 		return err
@@ -119,6 +112,10 @@ func (m *MemStorage) SaveToFile(filename string) error {
 		return err
 	}
 	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+	err = file.Close()
 	if err != nil {
 		return err
 	}
