@@ -26,7 +26,7 @@ func init() {
 	address = flag.String("a", "127.0.0.1:8080", "server address")
 	restore = flag.Bool("r", true, "restore flag")
 	storeInterval = flag.Duration("i", 30*time.Second, "store interval")
-	storeFile = flag.String("f", "devops-metrics-db.json", "store file")
+	storeFile = flag.String("f", "/tmp/devops-metrics-db.json", "store file")
 }
 
 func saveStorage(storage *storage.MemStorage, config utils.ServerConfig) {
