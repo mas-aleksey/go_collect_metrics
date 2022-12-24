@@ -6,15 +6,16 @@ import (
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type MetricClient struct {
 	*BaseClient
 }
 
-func NewMetricClient(config ClientConfig) *MetricClient {
+func NewMetricClient(baseURL string, timeout time.Duration) *MetricClient {
 	return &MetricClient{
-		BaseClient: NewBaseClient(config),
+		BaseClient: NewBaseClient(baseURL, timeout),
 	}
 }
 

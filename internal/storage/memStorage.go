@@ -1,15 +1,17 @@
 package storage
 
 import (
+	"encoding/json"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
+	"os"
 	"strconv"
 	"sync"
 )
 
 type MemStorage struct {
-	GaugeMetrics   map[string]float64
-	CounterMetrics map[string]int64
-	Mutex          sync.RWMutex
+	GaugeMetrics   map[string]float64 `json:"GaugeMetrics"`
+	CounterMetrics map[string]int64   `json:"CounterMetrics"`
+	Mutex          sync.RWMutex       `json:"-"`
 }
 
 func NewMemStorage() *MemStorage {
@@ -79,4 +81,36 @@ func (m *MemStorage) SetJSONMetricValue(metric *utils.JSONMetric) bool {
 	default:
 		return false
 	}
+}
+
+func (m *MemStorage) LoadFromFile(filename string) error {
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, m)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MemStorage) SaveToFile(filename string) error {
+	m.Mutex.RLock()
+	defer m.Mutex.RUnlock()
+
+	file, err := os.Create(filename)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	data, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	file.Write(data)
+	return nil
 }
