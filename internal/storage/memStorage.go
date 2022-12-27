@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"os"
 	"strconv"
@@ -84,6 +85,9 @@ func (m *MemStorage) SetJSONMetricValue(metric *utils.JSONMetric) bool {
 }
 
 func (m *MemStorage) LoadFromFile(filename string) error {
+	if filename == "" {
+		return fmt.Errorf("filename is empty")
+	}
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
 
@@ -99,6 +103,9 @@ func (m *MemStorage) LoadFromFile(filename string) error {
 }
 
 func (m *MemStorage) SaveToFile(filename string) error {
+	if filename == "" {
+		return fmt.Errorf("filename is empty")
+	}
 	m.Mutex.RLock()
 	defer m.Mutex.RUnlock()
 

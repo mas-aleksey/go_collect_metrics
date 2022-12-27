@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"compress/gzip"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
@@ -135,10 +136,16 @@ func TestGetCompressedPage(t *testing.T) {
 	assert.Equal(t, "gzip", result.Header.Get("Content-Encoding"))
 	assert.Equal(t, "225", result.Header.Get("Content-Length"))
 
-	resBody, err := io.ReadAll(result.Body)
+	gzipReader, err := gzip.NewReader(result.Body)
+	require.NoError(t, err)
+
+	resBody, err := io.ReadAll(gzipReader)
 	require.NoError(t, err)
 
 	err = result.Body.Close()
 	require.NoError(t, err)
-	assert.NotNil(t, resBody)
+	err = gzipReader.Close()
+	require.NoError(t, err)
+
+	assert.Equal(t, fillPage, string(resBody))
 }

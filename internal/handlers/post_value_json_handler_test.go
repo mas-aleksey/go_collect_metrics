@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"compress/gzip"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
@@ -117,10 +118,19 @@ func TestCompressedSetValueJSONMetricHandler(t *testing.T) {
 	client := &http.Client{}
 
 	var body = []byte(`{"ID":"Alloc","type":"gauge"}`)
-	request, err := http.NewRequest(http.MethodPost, ts.URL+"/value/", bytes.NewBuffer(body))
+	var b bytes.Buffer
+	w := gzip.NewWriter(&b)
+	_, err := w.Write(body)
+	require.NoError(t, err)
+	err = w.Close()
+	require.NoError(t, err)
+
+	request, err := http.NewRequest(http.MethodPost, ts.URL+"/value/", &b)
 	require.NoError(t, err)
 
 	request.Header.Set("Accept-Encoding", "gzip")
+	request.Header.Set("Content-Encoding", "gzip")
+	request.Header.Set("Content-Type", "application/json")
 	result, err := client.Do(request)
 	require.NoError(t, err)
 
@@ -128,11 +138,16 @@ func TestCompressedSetValueJSONMetricHandler(t *testing.T) {
 	assert.Equal(t, "gzip", result.Header.Get("Content-Encoding"))
 	assert.Equal(t, "73", result.Header.Get("Content-Length"))
 
-	resBody, err := io.ReadAll(result.Body)
+	gzipReader, err := gzip.NewReader(result.Body)
+	require.NoError(t, err)
+
+	resBody, err := io.ReadAll(gzipReader)
 	require.NoError(t, err)
 
 	err = result.Body.Close()
 	require.NoError(t, err)
+	err = gzipReader.Close()
+	require.NoError(t, err)
 
-	assert.NotNil(t, resBody)
+	assert.Equal(t, `{"id":"Alloc","type":"gauge","value":123.456}`, string(resBody))
 }
