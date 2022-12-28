@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -66,7 +67,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testMemStorage := storage.NewMemStorage()
+	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
 	testMemStorage.GaugeMetrics["Alloc"] = 111.222
 	testMemStorage.CounterMetrics["PollCount"] = 333
 
@@ -77,7 +78,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 	}{
 		{
 			name:       "check 200 empty metrics",
-			memStorage: storage.NewMemStorage(),
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
 				message:    emptyPage,
@@ -117,7 +118,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 
 func TestGetCompressedPage(t *testing.T) {
 
-	testMemStorage := storage.NewMemStorage()
+	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
 	testMemStorage.GaugeMetrics["Alloc"] = 111.222
 	testMemStorage.CounterMetrics["PollCount"] = 333
 

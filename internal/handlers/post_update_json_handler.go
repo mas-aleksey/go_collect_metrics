@@ -28,6 +28,7 @@ func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			return
 		}
 		storage.SaveJSONMetric(metric)
+		storage.SaveToFileIfSyncMode()
 		storage.SetJSONMetricValue(&metric)
 
 		w.Header().Set("content-type", "application/json")

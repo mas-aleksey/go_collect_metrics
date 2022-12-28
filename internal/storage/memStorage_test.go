@@ -38,7 +38,7 @@ func TestMemStorage_SaveMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := NewMemStorage()
+			m := NewMemStorage(utils.MemStorageConfig{})
 			for _, metric := range tt.metrics {
 				m.SaveMetric(metric)
 			}
@@ -84,7 +84,7 @@ func TestMemStorage_SaveJsonMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := NewMemStorage()
+			m := NewMemStorage(utils.MemStorageConfig{})
 			for _, metric := range tt.metrics {
 				m.SaveJSONMetric(metric)
 			}

@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -17,7 +18,7 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testStorage := storage.NewMemStorage()
+	testStorage := storage.NewMemStorage(utils.MemStorageConfig{})
 	testStorage.GaugeMetrics["Alloc"] = 123.456
 	testStorage.CounterMetrics["PoolCounter"] = 50
 
@@ -107,7 +108,7 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 }
 
 func TestCompressedSetValueJSONMetricHandler(t *testing.T) {
-	testStorage := storage.NewMemStorage()
+	testStorage := storage.NewMemStorage(utils.MemStorageConfig{})
 	testStorage.GaugeMetrics["Alloc"] = 123.456
 	testStorage.CounterMetrics["PoolCounter"] = 50
 

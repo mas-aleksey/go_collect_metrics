@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"github.com/tiraill/go_collect_metrics/internal/handlers"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
@@ -29,38 +28,35 @@ func init() {
 	storeFile = flag.String("f", "/tmp/devops-metrics-db.json", "store file")
 }
 
-func saveStorage(storage *storage.MemStorage, config utils.ServerConfig) {
-	ticker := time.NewTicker(config.StoreInterval)
+func saveStorage(storage *storage.MemStorage) {
+	if storage.Config.StoreInterval == 0 {
+		return
+	}
+	ticker := time.NewTicker(storage.Config.StoreInterval)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		err := storage.SaveToFile(config.StoreFile)
-		if err != nil {
-			log.Print("Failed save to file", err)
-		} else {
-			log.Print("Save storage to file")
-		}
+		storage.SaveToFileWithLog()
 	}
 }
 
 func main() {
 	flag.Parse()
-	config := utils.MakeServerConfig(*address, *restore, *storeInterval, *storeFile)
-	fmt.Println(config)
-	memStorage := storage.NewMemStorage()
+	serverConfig := utils.MakeServerConfig(*address)
+	storageConfig := utils.MakeMemStorageConfig(*restore, *storeInterval, *storeFile)
+
+	memStorage := storage.NewMemStorage(storageConfig)
 	router := handlers.GetRouter(memStorage)
 	srv := &http.Server{
-		Addr:    config.Address,
+		Addr:    serverConfig.Address,
 		Handler: router,
 	}
 
-	if config.Restore {
-		err := memStorage.LoadFromFile(config.StoreFile)
-		if err != nil {
-			log.Print("Failed to load memStorage from file: ", err)
-		} else {
-			log.Print("Load memStorage from file")
-		}
+	err := memStorage.LoadFromFile()
+	if err != nil {
+		log.Print("memStorage was not load from file: ", err)
+	} else {
+		log.Print("Load memStorage from file")
 	}
 
 	done := make(chan os.Signal, 1)
@@ -71,7 +67,7 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	go saveStorage(memStorage, config)
+	go saveStorage(memStorage)
 	log.Print("Server Started")
 
 	s := <-done
@@ -79,12 +75,7 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer func() {
-		err := memStorage.SaveToFile(config.StoreFile)
-		if err != nil {
-			log.Print("Failed save to file", err)
-		} else {
-			log.Print("Save storage to file")
-		}
+		memStorage.SaveToFileWithLog()
 		cancel()
 	}()
 

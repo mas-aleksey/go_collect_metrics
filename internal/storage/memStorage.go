@@ -4,21 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
+	"log"
 	"os"
 	"strconv"
 	"sync"
 )
 
 type MemStorage struct {
-	GaugeMetrics   map[string]float64 `json:"GaugeMetrics"`
-	CounterMetrics map[string]int64   `json:"CounterMetrics"`
-	Mutex          sync.RWMutex       `json:"-"`
+	GaugeMetrics   map[string]float64     `json:"GaugeMetrics"`
+	CounterMetrics map[string]int64       `json:"CounterMetrics"`
+	Mutex          sync.RWMutex           `json:"-"`
+	Config         utils.MemStorageConfig `json:"-"`
 }
 
-func NewMemStorage() *MemStorage {
+func NewMemStorage(config utils.MemStorageConfig) *MemStorage {
 	return &MemStorage{
 		GaugeMetrics:   make(map[string]float64),
 		CounterMetrics: make(map[string]int64),
+		Config:         config,
 	}
 }
 
@@ -84,14 +87,17 @@ func (m *MemStorage) SetJSONMetricValue(metric *utils.JSONMetric) bool {
 	}
 }
 
-func (m *MemStorage) LoadFromFile(filename string) error {
-	if filename == "" {
+func (m *MemStorage) LoadFromFile() error {
+	if m.Config.Restore == false {
+		return fmt.Errorf("no need restore")
+	}
+	if m.Config.StoreFile == "" {
 		return fmt.Errorf("filename is empty")
 	}
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
 
-	data, err := os.ReadFile(filename)
+	data, err := os.ReadFile(m.Config.StoreFile)
 	if err != nil {
 		return err
 	}
@@ -102,14 +108,29 @@ func (m *MemStorage) LoadFromFile(filename string) error {
 	return nil
 }
 
-func (m *MemStorage) SaveToFile(filename string) error {
-	if filename == "" {
+func (m *MemStorage) SaveToFileIfSyncMode() {
+	if m.Config.StoreInterval == 0 {
+		m.SaveToFileWithLog()
+	}
+}
+
+func (m *MemStorage) SaveToFileWithLog() {
+	err := m.SaveToFile()
+	if err != nil {
+		log.Print("Failed save to file", err)
+	} else {
+		log.Print("Save storage to file")
+	}
+}
+
+func (m *MemStorage) SaveToFile() error {
+	if m.Config.StoreFile == "" {
 		return fmt.Errorf("filename is empty")
 	}
 	m.Mutex.RLock()
 	defer m.Mutex.RUnlock()
 
-	file, err := os.Create(filename)
+	file, err := os.Create(m.Config.StoreFile)
 
 	if err != nil {
 		return err

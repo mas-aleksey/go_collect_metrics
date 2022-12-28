@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -97,7 +98,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			name:       "check 200 gauge success",
 			method:     http.MethodPost,
 			jsonData:   `{"ID":"Alloc","type":"gauge","Value":123.456}`,
-			memStorage: storage.NewMemStorage(),
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
 				message:    `{"id":"Alloc","type":"gauge","value":123.456}`,
@@ -107,7 +108,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			name:       "check 200 counter success",
 			method:     http.MethodPost,
 			jsonData:   `{"ID":"PoolCounter","type":"counter","Delta":123}`,
-			memStorage: storage.NewMemStorage(),
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
 				message:    `{"id":"PoolCounter","type":"counter","delta":123}`,

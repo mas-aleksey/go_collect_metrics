@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -15,7 +16,7 @@ func TestGetValueMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testMemStorage := storage.NewMemStorage()
+	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
 	testMemStorage.GaugeMetrics["Alloc"] = 111.222
 	testMemStorage.CounterMetrics["PollCount"] = 333
 

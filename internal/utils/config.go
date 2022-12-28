@@ -14,7 +14,10 @@ type AgentConfig struct {
 }
 
 type ServerConfig struct {
-	Address       string
+	Address string
+}
+
+type MemStorageConfig struct {
 	StoreInterval time.Duration
 	StoreFile     string
 	Restore       bool
@@ -65,9 +68,14 @@ func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval 
 	return cfg
 }
 
-func MakeServerConfig(address string, restore bool, storeInterval time.Duration, storeFile string) ServerConfig {
+func MakeServerConfig(address string) ServerConfig {
 	cfg := ServerConfig{}
 	cfg.Address = LookupString("ADDRESS", address)
+	return cfg
+}
+
+func MakeMemStorageConfig(restore bool, storeInterval time.Duration, storeFile string) MemStorageConfig {
+	cfg := MemStorageConfig{}
 	cfg.Restore = LookupBool("RESTORE", restore)
 	cfg.StoreInterval = LookupDuration("STORE_INTERVAL", storeInterval)
 	cfg.StoreFile = LookupString("STORE_FILE", storeFile)
