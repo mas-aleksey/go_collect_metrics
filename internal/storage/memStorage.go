@@ -88,7 +88,7 @@ func (m *MemStorage) SetJSONMetricValue(metric *utils.JSONMetric) bool {
 }
 
 func (m *MemStorage) LoadFromFile() error {
-	if m.Config.Restore == false {
+	if !m.Config.Restore {
 		return fmt.Errorf("no need restore")
 	}
 	if m.Config.StoreFile == "" {
