@@ -11,10 +11,12 @@ type AgentConfig struct {
 	Address        string
 	ReportInterval time.Duration
 	PollInterval   time.Duration
+	HashKey        string
 }
 
 type ServerConfig struct {
 	Address string
+	HashKey string
 }
 
 type MemStorageConfig struct {
@@ -60,17 +62,19 @@ func LookupBool(envName string, defaultValue bool) bool {
 	}
 }
 
-func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval time.Duration) AgentConfig {
+func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval time.Duration, hashKey string) AgentConfig {
 	cfg := AgentConfig{}
 	cfg.Address = LookupString("ADDRESS", address)
 	cfg.ReportInterval = LookupDuration("REPORT_INTERVAL", reportInterval)
 	cfg.PollInterval = LookupDuration("POLL_INTERVAL", pollInterval)
+	cfg.HashKey = LookupString("KEY", hashKey)
 	return cfg
 }
 
-func MakeServerConfig(address string) ServerConfig {
+func MakeServerConfig(address, hashKey string) ServerConfig {
 	cfg := ServerConfig{}
 	cfg.Address = LookupString("ADDRESS", address)
+	cfg.HashKey = LookupString("KEY", hashKey)
 	return cfg
 }
 

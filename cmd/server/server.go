@@ -19,6 +19,7 @@ var (
 	restore       *bool
 	storeInterval *time.Duration
 	storeFile     *string
+	hashKey       *string
 )
 
 func init() {
@@ -26,6 +27,7 @@ func init() {
 	restore = flag.Bool("r", true, "restore flag")
 	storeInterval = flag.Duration("i", 30*time.Second, "store interval")
 	storeFile = flag.String("f", "/tmp/devops-metrics-db.json", "store file")
+	hashKey = flag.String("k", "", "hash key")
 }
 
 func saveStorage(storage *storage.MemStorage) {
@@ -42,11 +44,11 @@ func saveStorage(storage *storage.MemStorage) {
 
 func main() {
 	flag.Parse()
-	serverConfig := utils.MakeServerConfig(*address)
+	serverConfig := utils.MakeServerConfig(*address, *hashKey)
 	storageConfig := utils.MakeMemStorageConfig(*restore, *storeInterval, *storeFile)
 
 	memStorage := storage.NewMemStorage(storageConfig)
-	router := handlers.GetRouter(memStorage)
+	router := handlers.GetRouter(memStorage, serverConfig)
 	srv := &http.Server{
 		Addr:    serverConfig.Address,
 		Handler: router,

@@ -60,3 +60,18 @@ func TestToFloat64(t *testing.T) {
 		assert.Equal(t, float64(0), out)
 	})
 }
+
+func TestCalcHash(t *testing.T) {
+	t.Run("equal hash", func(t *testing.T) {
+		assert.Equal(t, CalcHash("some_data", "123"), CalcHash("some_data", "123"))
+	})
+	t.Run("not equal keys", func(t *testing.T) {
+		assert.NotEqual(t, CalcHash("some_data", "123"), CalcHash("some_data", "321"))
+	})
+	t.Run("not equal data", func(t *testing.T) {
+		assert.NotEqual(t, CalcHash("some_data1", "123"), CalcHash("some_data2", "123"))
+	})
+	t.Run("not equal data and keys", func(t *testing.T) {
+		assert.NotEqual(t, CalcHash("some_data1", "123"), CalcHash("some_data2", "321"))
+	})
+}

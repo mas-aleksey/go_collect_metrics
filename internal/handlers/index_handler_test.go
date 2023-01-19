@@ -95,7 +95,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := GetRouter(tt.memStorage)
+			r := GetRouter(tt.memStorage, utils.ServerConfig{Address: "adr", HashKey: "key"})
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
@@ -122,7 +122,7 @@ func TestGetCompressedPage(t *testing.T) {
 	testMemStorage.GaugeMetrics["Alloc"] = 111.222
 	testMemStorage.CounterMetrics["PollCount"] = 333
 
-	r := GetRouter(testMemStorage)
+	r := GetRouter(testMemStorage, utils.ServerConfig{})
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 

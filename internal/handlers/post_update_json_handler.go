@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func SaveJSONMetricHandler(storage *storage.MemStorage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ReadBody(r)
 		if err != nil {
@@ -17,6 +17,10 @@ func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 		metric, err := utils.LoadJSONMetric(body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+			return
+		}
+		if !metric.IsValidHash(hashKey) {
+			http.Error(w, "Invalid metric hash", http.StatusBadRequest)
 			return
 		}
 		if !metric.IsValidType() {
@@ -30,6 +34,7 @@ func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 		storage.SaveJSONMetric(metric)
 		storage.SaveToFileIfSyncMode()
 		storage.SetJSONMetricValue(&metric)
+		metric.Hash = utils.CalcHash(metric.String(), hashKey)
 
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)

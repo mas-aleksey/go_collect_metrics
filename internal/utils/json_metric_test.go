@@ -6,18 +6,20 @@ import (
 )
 
 func TestNewCounterJSONMetric(t *testing.T) {
-	metric := NewCounterJSONMetric("name", 123)
+	metric := NewCounterJSONMetric("name", 123, "foo")
 	assert.Equal(t, "counter", metric.MType)
 	assert.Equal(t, "name", metric.ID)
 	assert.Equal(t, int64(123), *metric.Delta)
+	assert.Equal(t, "fe55643dfd050289512090577d279326e6e27f23f82b6b2e61232e965b8e6d5a", *metric.Hash)
 	assert.Nil(t, metric.Value)
 }
 
 func TestNewGaugeJSONMetric(t *testing.T) {
-	metric := NewGaugeJSONMetric("name", 123.4)
+	metric := NewGaugeJSONMetric("name", 123.4, "bar")
 	assert.Equal(t, "gauge", metric.MType)
 	assert.Equal(t, "name", metric.ID)
 	assert.Equal(t, 123.4, *metric.Value)
+	assert.Equal(t, "e1106794864f57461d121d23149ed87659726933abaa3f8019d82f2fa022052c", *metric.Hash)
 	assert.Nil(t, metric.Delta)
 }
 
@@ -32,6 +34,7 @@ func TestLoadJsonMetric(t *testing.T) {
 	badDelta := int64(0)
 	goodValue := 123.456
 	badValue := float64(0)
+	hash := "any_hash"
 	tests := []struct {
 		name   string
 		body   []byte
@@ -41,7 +44,7 @@ func TestLoadJsonMetric(t *testing.T) {
 		{
 			name:   "success",
 			body:   []byte(`{"ID":"PollCount","type":"counter","Delta":123,"Value":123.456}`),
-			want:   JSONMetric{"PollCount", "counter", &goodDelta, &goodValue},
+			want:   JSONMetric{"PollCount", "counter", &goodDelta, &goodValue, nil},
 			errMsg: "",
 		},
 		{
@@ -65,19 +68,19 @@ func TestLoadJsonMetric(t *testing.T) {
 		{
 			name:   "bad int64",
 			body:   []byte(`{"ID":"PollCount","type":"counter","Delta":"123","Value":123.456}`),
-			want:   JSONMetric{"PollCount", "counter", &badDelta, &goodValue},
+			want:   JSONMetric{"PollCount", "counter", &badDelta, &goodValue, nil},
 			errMsg: "json: cannot unmarshal string into Go struct field JSONMetric.delta of type int64",
 		},
 		{
 			name:   "bad float64",
 			body:   []byte(`{"ID":"PollCount","type":"counter","Delta":123,"Value":"123.456"}`),
-			want:   JSONMetric{"PollCount", "counter", &goodDelta, &badValue},
+			want:   JSONMetric{"PollCount", "counter", &goodDelta, &badValue, nil},
 			errMsg: "json: cannot unmarshal string into Go struct field JSONMetric.value of type float64",
 		},
 		{
-			name:   "bad int64 and float64",
-			body:   []byte(`{"ID":"PollCount","type":"counter","Delta":"123","Value":"123.456"}`),
-			want:   JSONMetric{"PollCount", "counter", &badDelta, &badValue},
+			name:   "bad int64 and float64 and hash",
+			body:   []byte(`{"ID":"PollCount","type":"counter","Delta":"123","Value":"123.456", "hash": "any_hash"}`),
+			want:   JSONMetric{"PollCount", "counter", &badDelta, &badValue, &hash},
 			errMsg: "json: cannot unmarshal string into Go struct field JSONMetric.delta of type int64",
 		},
 	}

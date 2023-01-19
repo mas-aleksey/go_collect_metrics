@@ -13,6 +13,8 @@ import (
 )
 
 func TestSaveJsonMetricHandler(t *testing.T) {
+	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
+	testMemStorage.CounterMetrics["PoolCounter"] = 77
 	type want struct {
 		statusCode int
 		message    string
@@ -101,7 +103,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
-				message:    `{"id":"Alloc","type":"gauge","value":123.456}`,
+				message:    `{"id":"Alloc","type":"gauge","value":123.456,"hash":"9364e01ae0e8cf907ef330aa4a9691ad1e68aa51f05f4e2e73f23b406d0ce36a"}`,
 			},
 		},
 		{
@@ -111,13 +113,33 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
-				message:    `{"id":"PoolCounter","type":"counter","delta":123}`,
+				message:    `{"id":"PoolCounter","type":"counter","delta":123,"hash":"2799917354025ae1c468eb210efe049b9818c087b6ca186b87812e382952bdcf"}`,
+			},
+		},
+		{
+			name:       "check 200 counter success invalid hash",
+			method:     http.MethodPost,
+			jsonData:   `{"id":"PoolCounter","type":"counter","delta":123,"hash":"some_text"}`,
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
+			want: want{
+				statusCode: 400,
+				message:    "Invalid metric hash\n",
+			},
+		},
+		{
+			name:       "check 200 counter success valid hash",
+			method:     http.MethodPost,
+			jsonData:   `{"id":"PoolCounter","type":"counter","delta":123,"hash":"2799917354025ae1c468eb210efe049b9818c087b6ca186b87812e382952bdcf"}`,
+			memStorage: testMemStorage,
+			want: want{
+				statusCode: 200,
+				message:    `{"id":"PoolCounter","type":"counter","delta":200,"hash":"e1265e8f3d1ecc83a870f5d5ee7a06c5b85393eed91d85e949dbf5bf4c44c765"}`,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := GetRouter(tt.memStorage)
+			r := GetRouter(tt.memStorage, utils.ServerConfig{Address: "adr", HashKey: "key"})
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 

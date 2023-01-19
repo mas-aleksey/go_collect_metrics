@@ -13,12 +13,14 @@ var (
 	reportInterval *time.Duration
 	pollInterval   *time.Duration
 	timeout        = 5 * time.Second
+	hashKey        *string
 )
 
 func init() {
 	address = flag.String("a", "127.0.0.1:8080", "server address")
 	reportInterval = flag.Duration("r", 10*time.Second, "report interval")
 	pollInterval = flag.Duration("p", 2*time.Second, "pool interval")
+	hashKey = flag.String("k", "", "hash key")
 }
 
 func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
@@ -28,7 +30,7 @@ func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
 
 	for range ticker.C {
 		statCopy := statistic.Copy()
-		report := utils.NewJSONReport(statCopy)
+		report := utils.NewJSONReport(statCopy, config.HashKey)
 		err := metricClient.SendJSONReport(report)
 		if err != nil {
 			fmt.Println("Fail send report", statCopy.Counter, err)
@@ -50,8 +52,7 @@ func updateStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
 
 func main() {
 	flag.Parse()
-	config := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval)
-	fmt.Println(config)
+	config := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey)
 	stat := utils.NewStatistic()
 	go updateStatistic(stat, config)
 	go reportStatistic(stat, config)
