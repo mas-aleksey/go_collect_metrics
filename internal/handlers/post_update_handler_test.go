@@ -11,15 +11,11 @@ import (
 	"testing"
 )
 
-func TestGetValueMetricHandler(t *testing.T) {
+func TestSaveMetricHandler(t *testing.T) {
 	type want struct {
 		statusCode int
 		message    string
 	}
-	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
-	testMemStorage.GaugeMetrics["Alloc"] = 111.222
-	testMemStorage.CounterMetrics["PollCount"] = 333
-
 	tests := []struct {
 		name       string
 		method     string
@@ -29,8 +25,8 @@ func TestGetValueMetricHandler(t *testing.T) {
 	}{
 		{
 			name:       "check 405 not allowed",
-			method:     http.MethodPost,
-			request:    "/value/type/name",
+			method:     http.MethodGet,
+			request:    "/update/type/name/value",
 			memStorage: nil,
 			want: want{
 				statusCode: 405,
@@ -39,8 +35,8 @@ func TestGetValueMetricHandler(t *testing.T) {
 		},
 		{
 			name:       "check 404 wrong path",
-			method:     http.MethodGet,
-			request:    "/value/type/name/foo",
+			method:     http.MethodPost,
+			request:    "/update/type/name",
 			memStorage: nil,
 			want: want{
 				statusCode: 404,
@@ -49,8 +45,8 @@ func TestGetValueMetricHandler(t *testing.T) {
 		},
 		{
 			name:       "check 501 invalid metric type",
-			method:     http.MethodGet,
-			request:    "/value/type/name",
+			method:     http.MethodPost,
+			request:    "/update/type/name/value",
 			memStorage: nil,
 			want: want{
 				statusCode: 501,
@@ -58,43 +54,43 @@ func TestGetValueMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:       "check 404 gauge metric not found",
-			method:     http.MethodGet,
-			request:    "/value/gauge/fooName",
-			memStorage: testMemStorage,
+			name:       "check 400 invalid gauge metric value",
+			method:     http.MethodPost,
+			request:    "/update/gauge/Alloc/value",
+			memStorage: nil,
 			want: want{
-				statusCode: 404,
-				message:    "Metric not found\n",
+				statusCode: 400,
+				message:    "Invalid metric value\n",
 			},
 		},
 		{
-			name:       "check 404 counter metric not found",
-			method:     http.MethodGet,
-			request:    "/value/counter/fooName",
-			memStorage: testMemStorage,
+			name:       "check 400 invalid counter metric value",
+			method:     http.MethodPost,
+			request:    "/update/counter/PollCount/value",
+			memStorage: nil,
 			want: want{
-				statusCode: 404,
-				message:    "Metric not found\n",
+				statusCode: 400,
+				message:    "Invalid metric value\n",
 			},
 		},
 		{
 			name:       "check 200 gauge success",
-			method:     http.MethodGet,
-			request:    "/value/gauge/Alloc",
-			memStorage: testMemStorage,
+			method:     http.MethodPost,
+			request:    "/update/gauge/Alloc/123.456",
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
-				message:    "111.222",
+				message:    "",
 			},
 		},
 		{
 			name:       "check 200 counter success",
-			method:     http.MethodGet,
-			request:    "/value/counter/PollCount",
-			memStorage: testMemStorage,
+			method:     http.MethodPost,
+			request:    "/update/counter/PollCount/123",
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
-				message:    "333",
+				message:    "",
 			},
 		},
 	}

@@ -1,26 +1,35 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/tiraill/go_collect_metrics/internal/clients"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"time"
 )
 
-var reportInterval = 10 * time.Second
-var pollInterval = 2 * time.Second
-var baseURL = "http://127.0.0.1:8080"
-var timeout = 5 * time.Second
+var (
+	address        *string
+	reportInterval *time.Duration
+	pollInterval   *time.Duration
+	timeout        = 5 * time.Second
+)
 
-func reportStatistic(statistic *utils.Statistic) {
-	metricClient := clients.NewMetricClient(baseURL, timeout)
-	ticker := time.NewTicker(reportInterval)
+func init() {
+	address = flag.String("a", "127.0.0.1:8080", "server address")
+	reportInterval = flag.Duration("r", 10*time.Second, "report interval")
+	pollInterval = flag.Duration("p", 2*time.Second, "pool interval")
+}
+
+func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
+	metricClient := clients.NewMetricClient(config.Address, timeout)
+	ticker := time.NewTicker(config.ReportInterval)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		statCopy := statistic.Copy()
-		report := utils.NewReport(statCopy)
-		err := metricClient.SendReport(report)
+		report := utils.NewJSONReport(statCopy)
+		err := metricClient.SendJSONReport(report)
 		if err != nil {
 			fmt.Println("Fail send report", statCopy.Counter, err)
 		} else {
@@ -30,8 +39,8 @@ func reportStatistic(statistic *utils.Statistic) {
 	}
 }
 
-func updateStatistic(statistic *utils.Statistic) {
-	ticker := time.NewTicker(pollInterval)
+func updateStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
+	ticker := time.NewTicker(config.PollInterval)
 	defer ticker.Stop()
 
 	for range ticker.C {
@@ -40,8 +49,11 @@ func updateStatistic(statistic *utils.Statistic) {
 }
 
 func main() {
+	flag.Parse()
+	config := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval)
+	fmt.Println(config)
 	stat := utils.NewStatistic()
-	go updateStatistic(stat)
-	go reportStatistic(stat)
+	go updateStatistic(stat, config)
+	go reportStatistic(stat, config)
 	select {}
 }

@@ -1,16 +1,18 @@
 package handlers
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestSaveMetricHandler(t *testing.T) {
+func TestSaveJsonMetricHandler(t *testing.T) {
 	type want struct {
 		statusCode int
 		message    string
@@ -18,14 +20,14 @@ func TestSaveMetricHandler(t *testing.T) {
 	tests := []struct {
 		name       string
 		method     string
-		request    string
+		jsonData   string
 		memStorage *storage.MemStorage
 		want       want
 	}{
 		{
 			name:       "check 405 not allowed",
 			method:     http.MethodGet,
-			request:    "/update/type/name/value",
+			jsonData:   `{}`,
 			memStorage: nil,
 			want: want{
 				statusCode: 405,
@@ -33,19 +35,19 @@ func TestSaveMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:       "check 404 wrong path",
+			name:       "check 422 invalid json body",
 			method:     http.MethodPost,
-			request:    "/update/type/name",
+			jsonData:   `{"message":Hello}`,
 			memStorage: nil,
 			want: want{
-				statusCode: 404,
-				message:    "404 page not found\n",
+				statusCode: 422,
+				message:    "invalid character 'H' looking for beginning of value\n",
 			},
 		},
 		{
 			name:       "check 501 invalid metric type",
 			method:     http.MethodPost,
-			request:    "/update/type/name/value",
+			jsonData:   `{"ID":"Alloc","type":"foo","Value":123}`,
 			memStorage: nil,
 			want: want{
 				statusCode: 501,
@@ -53,9 +55,19 @@ func TestSaveMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:       "check 400 invalid gauge metric value",
+			name:       "check 422 invalid gauge metric value",
 			method:     http.MethodPost,
-			request:    "/update/gauge/Alloc/value",
+			jsonData:   `{"ID":"Alloc","type":"gauge","Value":"foo"}`,
+			memStorage: nil,
+			want: want{
+				statusCode: 422,
+				message:    "json: cannot unmarshal string into Go struct field JSONMetric.value of type float64\n",
+			},
+		},
+		{
+			name:       "check 400 nil gauge metric value",
+			method:     http.MethodPost,
+			jsonData:   `{"ID":"Alloc","type":"gauge"}`,
 			memStorage: nil,
 			want: want{
 				statusCode: 400,
@@ -63,9 +75,19 @@ func TestSaveMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:       "check 400 invalid counter metric value",
+			name:       "check 422 invalid counter metric value",
 			method:     http.MethodPost,
-			request:    "/update/counter/PollCount/value",
+			jsonData:   `{"ID":"Alloc","type":"counter","Delta":"foo"}`,
+			memStorage: nil,
+			want: want{
+				statusCode: 422,
+				message:    "json: cannot unmarshal string into Go struct field JSONMetric.delta of type int64\n",
+			},
+		},
+		{
+			name:       "check 400 nil counter metric value",
+			method:     http.MethodPost,
+			jsonData:   `{"ID":"Alloc","type":"counter"}`,
 			memStorage: nil,
 			want: want{
 				statusCode: 400,
@@ -75,21 +97,21 @@ func TestSaveMetricHandler(t *testing.T) {
 		{
 			name:       "check 200 gauge success",
 			method:     http.MethodPost,
-			request:    "/update/gauge/Alloc/123.456",
-			memStorage: storage.NewMemStorage(),
+			jsonData:   `{"ID":"Alloc","type":"gauge","Value":123.456}`,
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
-				message:    "",
+				message:    `{"id":"Alloc","type":"gauge","value":123.456}`,
 			},
 		},
 		{
 			name:       "check 200 counter success",
 			method:     http.MethodPost,
-			request:    "/update/counter/PollCount/123",
-			memStorage: storage.NewMemStorage(),
+			jsonData:   `{"ID":"PoolCounter","type":"counter","Delta":123}`,
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
-				message:    "",
+				message:    `{"id":"PoolCounter","type":"counter","delta":123}`,
 			},
 		},
 	}
@@ -101,7 +123,8 @@ func TestSaveMetricHandler(t *testing.T) {
 
 			client := &http.Client{}
 
-			request, _ := http.NewRequest(tt.method, ts.URL+tt.request, nil)
+			var body = []byte(tt.jsonData)
+			request, _ := http.NewRequest(tt.method, ts.URL+"/update/", bytes.NewBuffer(body))
 			result, err := client.Do(request)
 			require.NoError(t, err)
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)

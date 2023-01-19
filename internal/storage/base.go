@@ -6,4 +6,5 @@ import (
 
 type Repositories interface {
 	SaveMetric(metric utils.Metric)
+	SaveJSONMetric(metrics utils.JSONMetric)
 }

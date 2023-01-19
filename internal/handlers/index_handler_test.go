@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"compress/gzip"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -65,7 +67,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testMemStorage := storage.NewMemStorage()
+	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
 	testMemStorage.GaugeMetrics["Alloc"] = 111.222
 	testMemStorage.CounterMetrics["PollCount"] = 333
 
@@ -76,7 +78,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 	}{
 		{
 			name:       "check 200 empty metrics",
-			memStorage: storage.NewMemStorage(),
+			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
 			want: want{
 				statusCode: 200,
 				message:    emptyPage,
@@ -112,4 +114,39 @@ func TestGetIndexMetricHandler(t *testing.T) {
 			assert.Equal(t, tt.want.message, string(resBody))
 		})
 	}
+}
+
+func TestGetCompressedPage(t *testing.T) {
+
+	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
+	testMemStorage.GaugeMetrics["Alloc"] = 111.222
+	testMemStorage.CounterMetrics["PollCount"] = 333
+
+	r := GetRouter(testMemStorage)
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, ts.URL, nil)
+	require.NoError(t, err)
+	req.Header.Set("Accept-Encoding", "gzip")
+
+	result, err := client.Do(req)
+	require.NoError(t, err)
+	assert.Equal(t, 200, result.StatusCode)
+	assert.Equal(t, "gzip", result.Header.Get("Content-Encoding"))
+	assert.Equal(t, "225", result.Header.Get("Content-Length"))
+
+	gzipReader, err := gzip.NewReader(result.Body)
+	require.NoError(t, err)
+
+	resBody, err := io.ReadAll(gzipReader)
+	require.NoError(t, err)
+
+	err = result.Body.Close()
+	require.NoError(t, err)
+	err = gzipReader.Close()
+	require.NoError(t, err)
+
+	assert.Equal(t, fillPage, string(resBody))
 }

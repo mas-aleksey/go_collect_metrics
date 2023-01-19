@@ -11,8 +11,12 @@ func GetRouter(memStorage *storage.MemStorage) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(middleware.Compress(1, "application/json", "text/html", "text/plain"))
+	r.Use(middleware.AllowContentEncoding("gzip"))
 	r.Get("/", IndexHandler(memStorage))
-	r.Get("/value/{mType}/{mName}", GetValueMetricHandler(memStorage))
+	r.Get("/value/{mType}/{mName}", SetValueMetricHandler(memStorage))
+	r.Post("/value/", SetValueJSONMetricHandler(memStorage))
 	r.Post("/update/{mType}/{mName}/{mValue}", SaveMetricHandler(memStorage))
+	r.Post("/update/", SaveJSONMetricHandler(memStorage))
 	return r
 }

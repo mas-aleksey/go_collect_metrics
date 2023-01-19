@@ -23,6 +23,7 @@ func SaveMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			return
 		}
 		storage.SaveMetric(metric)
+		storage.SaveToFileIfSyncMode()
 		w.WriteHeader(http.StatusOK)
 
 	}

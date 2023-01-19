@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func GetValueMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func SetValueMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		mType := chi.URLParam(r, "mType")
 		mName := chi.URLParam(r, "mName")
@@ -17,13 +17,13 @@ func GetValueMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
 			return
 		}
-		value, ok := storage.GetMetricValue(metric)
+		ok := storage.SetMetricValue(&metric)
 		if !ok {
 			http.Error(w, "Metric not found", http.StatusNotFound)
 			return
 		}
 		w.Header().Set("content-type", "text/plain")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(value))
+		w.Write([]byte(metric.Value))
 	}
 }

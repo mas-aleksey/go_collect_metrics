@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-func TestNewReport(t *testing.T) {
+func TestNewJSONReport(t *testing.T) {
 	statistic := NewStatistic()
-	report := NewReport(statistic)
+	report := NewJSONReport(statistic)
 
 	assert.Equal(t, len(report.Metrics), ReportCount)
 	assert.Equal(t, cap(report.Metrics), ReportCount)
