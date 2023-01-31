@@ -27,12 +27,15 @@ type StorageConfig struct {
 }
 
 func LookupString(envName, defaultValue string) string {
+	var result string
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
-		return valueEnv
+		result = valueEnv
 	} else {
-		return defaultValue
+		result = defaultValue
 	}
+	log.Printf("env %s = %s", envName, result)
+	return result
 }
 
 func LookupDuration(envName string, defaultValue time.Duration) time.Duration {

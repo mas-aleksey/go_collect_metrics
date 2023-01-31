@@ -18,7 +18,6 @@ func NewStorage(config *utils.StorageConfig) Storage {
 	if config.DatabaseDSN != "" {
 		return &PgStorage{
 			Buffer: NewBuffer(),
-			Dns:    config.DatabaseDSN,
 			Config: config,
 		}
 	} else {

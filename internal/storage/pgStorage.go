@@ -10,13 +10,12 @@ import (
 
 type PgStorage struct {
 	Buffer *Buffer
-	Dns    string
 	Conn   *pgx.Conn
 	Config *utils.StorageConfig
 }
 
 func (p *PgStorage) Init() error {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	conn, err := pgx.Connect(context.Background(), p.Config.DatabaseDSN)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		return err
@@ -42,10 +41,7 @@ func (p *PgStorage) GetBuffer() *Buffer {
 
 func (p *PgStorage) Ping() bool {
 	err := p.Conn.Ping(context.Background())
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func (p *PgStorage) Save() {

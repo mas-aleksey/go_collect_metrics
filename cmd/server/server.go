@@ -52,9 +52,9 @@ func main() {
 	db := storage.NewStorage(&storageConfig)
 	err := db.Init()
 	if err != nil {
-		log.Print("memStorage was not load from file: ", err)
+		log.Printf("Error init db: %s", err)
 	} else {
-		log.Print("Load memStorage from file")
+		log.Print("Init db success")
 	}
 
 	router := handlers.GetRouter(db, serverConfig)
