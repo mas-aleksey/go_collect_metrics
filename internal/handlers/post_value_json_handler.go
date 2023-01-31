@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SetValueJSONMetricHandler(storage *storage.MemStorage, hashKey string) http.HandlerFunc {
+func SetValueJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ReadBody(r)
 		if err != nil {
@@ -23,7 +23,7 @@ func SetValueJSONMetricHandler(storage *storage.MemStorage, hashKey string) http
 			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
 			return
 		}
-		ok := storage.SetJSONMetricValue(&metric)
+		ok := db.GetBuffer().UpdateJSONMetricValue(&metric)
 		metric.Hash = utils.CalcHash(metric.String(), hashKey)
 		if !ok {
 			http.Error(w, "Metric not found", http.StatusNotFound)

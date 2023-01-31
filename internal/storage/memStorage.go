@@ -6,116 +6,52 @@ import (
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
 	"os"
-	"strconv"
-	"sync"
 )
 
 type MemStorage struct {
-	GaugeMetrics   map[string]float64     `json:"GaugeMetrics"`
-	CounterMetrics map[string]int64       `json:"CounterMetrics"`
-	Mutex          sync.RWMutex           `json:"-"`
-	Config         utils.MemStorageConfig `json:"-"`
+	Buffer *Buffer
+	Config *utils.StorageConfig
 }
 
-func NewMemStorage(config utils.MemStorageConfig) *MemStorage {
-	return &MemStorage{
-		GaugeMetrics:   make(map[string]float64),
-		CounterMetrics: make(map[string]int64),
-		Config:         config,
-	}
-}
-
-func (m *MemStorage) SaveMetric(metric utils.Metric) {
-	m.Mutex.Lock()
-	defer m.Mutex.Unlock()
-
-	switch metric.Type {
-	case utils.GaugeMetricType:
-		val, _ := strconv.ParseFloat(metric.Value, 64)
-		m.GaugeMetrics[metric.Name] = val
-	case utils.CounterMetricType:
-		val, _ := strconv.ParseInt(metric.Value, 10, 64)
-		m.CounterMetrics[metric.Name] += val
-	}
-}
-
-func (m *MemStorage) SaveJSONMetric(metrics utils.JSONMetric) {
-	m.Mutex.Lock()
-	defer m.Mutex.Unlock()
-
-	switch metrics.MType {
-	case "gauge":
-		m.GaugeMetrics[metrics.ID] = *metrics.Value
-	case "counter":
-		m.CounterMetrics[metrics.ID] += *metrics.Delta
-	}
-}
-
-func (m *MemStorage) SetMetricValue(metric *utils.Metric) bool {
-	m.Mutex.RLock()
-	defer m.Mutex.RUnlock()
-
-	switch metric.Type {
-	case utils.GaugeMetricType:
-		val, ok := m.GaugeMetrics[metric.Name]
-		metric.Value = utils.ToStr(val)
-		return ok
-	case utils.CounterMetricType:
-		val, ok := m.CounterMetrics[metric.Name]
-		metric.Value = utils.ToStr(val)
-		return ok
-	default:
-		return false
-	}
-}
-
-func (m *MemStorage) SetJSONMetricValue(metric *utils.JSONMetric) bool {
-	m.Mutex.RLock()
-	defer m.Mutex.RUnlock()
-
-	switch metric.MType {
-	case "gauge":
-		val, ok := m.GaugeMetrics[metric.ID]
-		metric.Value = &val
-		return ok
-	case "counter":
-		val, ok := m.CounterMetrics[metric.ID]
-		metric.Delta = &val
-		return ok
-	default:
-		return false
-	}
-}
-
-func (m *MemStorage) LoadFromFile() error {
+func (m *MemStorage) Init() error {
 	if !m.Config.Restore {
 		return fmt.Errorf("no need restore")
 	}
 	if m.Config.StoreFile == "" {
 		return fmt.Errorf("filename is empty")
 	}
-	m.Mutex.Lock()
-	defer m.Mutex.Unlock()
+	m.Buffer.Mutex.Lock()
+	defer m.Buffer.Mutex.Unlock()
 
 	data, err := os.ReadFile(m.Config.StoreFile)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(data, m)
+	err = json.Unmarshal(data, m.Buffer)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *MemStorage) SaveToFileIfSyncMode() {
-	if m.Config.StoreInterval == 0 {
-		m.SaveToFileWithLog()
-	}
+func (m *MemStorage) Close() {
+	m.Save()
 }
 
-func (m *MemStorage) SaveToFileWithLog() {
-	err := m.SaveToFile()
+func (m *MemStorage) GetConfig() *utils.StorageConfig {
+	return m.Config
+}
+
+func (m *MemStorage) GetBuffer() *Buffer {
+	return m.Buffer
+}
+
+func (m *MemStorage) Ping() bool {
+	return true
+}
+
+func (m *MemStorage) Save() {
+	err := m.saveToFile()
 	if err != nil {
 		log.Print("Failed save to file", err)
 	} else {
@@ -123,19 +59,25 @@ func (m *MemStorage) SaveToFileWithLog() {
 	}
 }
 
-func (m *MemStorage) SaveToFile() error {
+func (m *MemStorage) SaveIfSyncMode() {
+	if m.Config.StoreInterval == 0 {
+		m.Save()
+	}
+}
+
+func (m *MemStorage) saveToFile() error {
 	if m.Config.StoreFile == "" {
 		return fmt.Errorf("filename is empty")
 	}
-	m.Mutex.RLock()
-	defer m.Mutex.RUnlock()
+	m.Buffer.Mutex.RLock()
+	defer m.Buffer.Mutex.RUnlock()
 
 	file, err := os.Create(m.Config.StoreFile)
 
 	if err != nil {
 		return err
 	}
-	data, err := json.Marshal(m)
+	data, err := json.Marshal(m.Buffer)
 	if err != nil {
 		return err
 	}

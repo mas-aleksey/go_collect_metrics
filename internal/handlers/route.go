@@ -8,16 +8,17 @@ import (
 	"time"
 )
 
-func GetRouter(memStorage *storage.MemStorage, config utils.ServerConfig) *chi.Mux {
+func GetRouter(db storage.Storage, config utils.ServerConfig) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(middleware.Compress(1, "application/json", "text/html", "text/plain"))
 	r.Use(middleware.AllowContentEncoding("gzip"))
-	r.Get("/", IndexHandler(memStorage))
-	r.Get("/value/{mType}/{mName}", SetValueMetricHandler(memStorage))
-	r.Post("/value/", SetValueJSONMetricHandler(memStorage, config.HashKey))
-	r.Post("/update/{mType}/{mName}/{mValue}", SaveMetricHandler(memStorage))
-	r.Post("/update/", SaveJSONMetricHandler(memStorage, config.HashKey))
+	r.Get("/", IndexHandler(db))
+	r.Get("/ping", GetPingHandler(db))
+	r.Get("/value/{mType}/{mName}", SetValueMetricHandler(db))
+	r.Post("/value/", SetValueJSONMetricHandler(db, config.HashKey))
+	r.Post("/update/{mType}/{mName}/{mValue}", SaveMetricHandler(db))
+	r.Post("/update/", SaveJSONMetricHandler(db, config.HashKey))
 	return r
 }

@@ -19,10 +19,11 @@ type ServerConfig struct {
 	HashKey string
 }
 
-type MemStorageConfig struct {
+type StorageConfig struct {
 	StoreInterval time.Duration
 	StoreFile     string
 	Restore       bool
+	DatabaseDSN   string
 }
 
 func LookupString(envName, defaultValue string) string {
@@ -78,10 +79,11 @@ func MakeServerConfig(address, hashKey string) ServerConfig {
 	return cfg
 }
 
-func MakeMemStorageConfig(restore bool, storeInterval time.Duration, storeFile string) MemStorageConfig {
-	cfg := MemStorageConfig{}
+func MakeStorageConfig(restore bool, storeInterval time.Duration, storeFile, databaseDSN string) StorageConfig {
+	cfg := StorageConfig{}
 	cfg.Restore = LookupBool("RESTORE", restore)
 	cfg.StoreInterval = LookupDuration("STORE_INTERVAL", storeInterval)
 	cfg.StoreFile = LookupString("STORE_FILE", storeFile)
+	cfg.DatabaseDSN = LookupString("DATABASE_DSN", databaseDSN)
 	return cfg
 }

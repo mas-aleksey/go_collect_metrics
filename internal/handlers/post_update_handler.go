@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SaveMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func SaveMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		mType := chi.URLParam(r, "mType")
 		mName := chi.URLParam(r, "mName")
@@ -22,8 +22,8 @@ func SaveMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			http.Error(w, "Invalid metric value", http.StatusBadRequest)
 			return
 		}
-		storage.SaveMetric(metric)
-		storage.SaveToFileIfSyncMode()
+		db.GetBuffer().PutMetric(metric)
+		db.SaveIfSyncMode()
 		w.WriteHeader(http.StatusOK)
 
 	}

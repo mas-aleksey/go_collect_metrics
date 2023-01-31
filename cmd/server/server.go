@@ -20,6 +20,7 @@ var (
 	storeInterval *time.Duration
 	storeFile     *string
 	hashKey       *string
+	databaseDSN   *string
 )
 
 func init() {
@@ -28,37 +29,38 @@ func init() {
 	storeInterval = flag.Duration("i", 30*time.Second, "store interval")
 	storeFile = flag.String("f", "/tmp/devops-metrics-db.json", "store file")
 	hashKey = flag.String("k", "", "hash key")
+	databaseDSN = flag.String("d", "", "database connection string")
 }
 
-func saveStorage(storage *storage.MemStorage) {
-	if storage.Config.StoreInterval == 0 {
+func saveStorage(db storage.Storage) {
+	if db.GetConfig().StoreInterval == 0 {
 		return
 	}
-	ticker := time.NewTicker(storage.Config.StoreInterval)
+	ticker := time.NewTicker(db.GetConfig().StoreInterval)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		storage.SaveToFileWithLog()
+		db.Save()
 	}
 }
 
 func main() {
 	flag.Parse()
 	serverConfig := utils.MakeServerConfig(*address, *hashKey)
-	storageConfig := utils.MakeMemStorageConfig(*restore, *storeInterval, *storeFile)
+	storageConfig := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
 
-	memStorage := storage.NewMemStorage(storageConfig)
-	router := handlers.GetRouter(memStorage, serverConfig)
-	srv := &http.Server{
-		Addr:    serverConfig.Address,
-		Handler: router,
-	}
-
-	err := memStorage.LoadFromFile()
+	db := storage.NewStorage(&storageConfig)
+	err := db.Init()
 	if err != nil {
 		log.Print("memStorage was not load from file: ", err)
 	} else {
 		log.Print("Load memStorage from file")
+	}
+
+	router := handlers.GetRouter(db, serverConfig)
+	srv := &http.Server{
+		Addr:    serverConfig.Address,
+		Handler: router,
 	}
 
 	done := make(chan os.Signal, 1)
@@ -69,7 +71,7 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	go saveStorage(memStorage)
+	go saveStorage(db)
 	log.Print("Server Started")
 
 	s := <-done
@@ -77,7 +79,7 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer func() {
-		memStorage.SaveToFileWithLog()
+		db.Close()
 		cancel()
 	}()
 

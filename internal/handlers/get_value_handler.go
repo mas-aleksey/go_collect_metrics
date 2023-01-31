@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SetValueMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func SetValueMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		mType := chi.URLParam(r, "mType")
 		mName := chi.URLParam(r, "mName")
@@ -17,7 +17,7 @@ func SetValueMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
 			return
 		}
-		ok := storage.SetMetricValue(&metric)
+		ok := db.GetBuffer().UpdateMetricValue(&metric)
 		if !ok {
 			http.Error(w, "Metric not found", http.StatusNotFound)
 			return

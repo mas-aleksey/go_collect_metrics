@@ -67,26 +67,26 @@ func TestGetIndexMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
-	testMemStorage.GaugeMetrics["Alloc"] = 111.222
-	testMemStorage.CounterMetrics["PollCount"] = 333
+	testMemStorage := storage.NewStorage(&utils.StorageConfig{})
+	testMemStorage.GetBuffer().GaugeMetrics["Alloc"] = 111.222
+	testMemStorage.GetBuffer().CounterMetrics["PollCount"] = 333
 
 	tests := []struct {
-		name       string
-		memStorage *storage.MemStorage
-		want       want
+		name string
+		db   storage.Storage
+		want want
 	}{
 		{
-			name:       "check 200 empty metrics",
-			memStorage: storage.NewMemStorage(utils.MemStorageConfig{}),
+			name: "check 200 empty metrics",
+			db:   storage.NewStorage(&utils.StorageConfig{}),
 			want: want{
 				statusCode: 200,
 				message:    emptyPage,
 			},
 		},
 		{
-			name:       "check 200 fill some metrics",
-			memStorage: testMemStorage,
+			name: "check 200 fill some metrics",
+			db:   testMemStorage,
 			want: want{
 				statusCode: 200,
 				message:    fillPage,
@@ -95,7 +95,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := GetRouter(tt.memStorage, utils.ServerConfig{Address: "adr", HashKey: "key"})
+			r := GetRouter(tt.db, utils.ServerConfig{Address: "adr", HashKey: "key"})
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
@@ -118,9 +118,9 @@ func TestGetIndexMetricHandler(t *testing.T) {
 
 func TestGetCompressedPage(t *testing.T) {
 
-	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
-	testMemStorage.GaugeMetrics["Alloc"] = 111.222
-	testMemStorage.CounterMetrics["PollCount"] = 333
+	testMemStorage := storage.NewStorage(&utils.StorageConfig{})
+	testMemStorage.GetBuffer().GaugeMetrics["Alloc"] = 111.222
+	testMemStorage.GetBuffer().CounterMetrics["PollCount"] = 333
 
 	r := GetRouter(testMemStorage, utils.ServerConfig{})
 	ts := httptest.NewServer(r)

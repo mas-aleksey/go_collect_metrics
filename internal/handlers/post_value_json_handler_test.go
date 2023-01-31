@@ -18,79 +18,79 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testStorage := storage.NewMemStorage(utils.MemStorageConfig{})
-	testStorage.GaugeMetrics["Alloc"] = 123.456
-	testStorage.CounterMetrics["PoolCounter"] = 50
+	testStorage := storage.NewStorage(&utils.StorageConfig{})
+	testStorage.GetBuffer().GaugeMetrics["Alloc"] = 123.456
+	testStorage.GetBuffer().CounterMetrics["PoolCounter"] = 50
 
 	tests := []struct {
-		name       string
-		method     string
-		jsonData   string
-		hashKey    string
-		memStorage *storage.MemStorage
-		want       want
+		name     string
+		method   string
+		jsonData string
+		hashKey  string
+		db       storage.Storage
+		want     want
 	}{
 		{
-			name:       "check 405 not allowed",
-			method:     http.MethodGet,
-			jsonData:   `{}`,
-			hashKey:    "",
-			memStorage: nil,
+			name:     "check 405 not allowed",
+			method:   http.MethodGet,
+			jsonData: `{}`,
+			hashKey:  "",
+			db:       nil,
 			want: want{
 				statusCode: 405,
 				message:    "",
 			},
 		},
 		{
-			name:       "check 422 invalid json body",
-			method:     http.MethodPost,
-			jsonData:   `{"message":Hello}`,
-			hashKey:    "",
-			memStorage: nil,
+			name:     "check 422 invalid json body",
+			method:   http.MethodPost,
+			jsonData: `{"message":Hello}`,
+			hashKey:  "",
+			db:       nil,
 			want: want{
 				statusCode: 422,
 				message:    "invalid character 'H' looking for beginning of value\n",
 			},
 		},
 		{
-			name:       "check 501 invalid metric type",
-			method:     http.MethodPost,
-			jsonData:   `{"ID":"Alloc","type":"foo"}`,
-			hashKey:    "",
-			memStorage: nil,
+			name:     "check 501 invalid metric type",
+			method:   http.MethodPost,
+			jsonData: `{"ID":"Alloc","type":"foo"}`,
+			hashKey:  "",
+			db:       nil,
 			want: want{
 				statusCode: 501,
 				message:    "Invalid metric type\n",
 			},
 		},
 		{
-			name:       "check 200 gauge success",
-			method:     http.MethodPost,
-			jsonData:   `{"ID":"Alloc","type":"gauge"}`,
-			hashKey:    "",
-			memStorage: testStorage,
+			name:     "check 200 gauge success",
+			method:   http.MethodPost,
+			jsonData: `{"ID":"Alloc","type":"gauge"}`,
+			hashKey:  "",
+			db:       testStorage,
 			want: want{
 				statusCode: 200,
 				message:    `{"id":"Alloc","type":"gauge","value":123.456}`,
 			},
 		},
 		{
-			name:       "check 200 counter success",
-			method:     http.MethodPost,
-			jsonData:   `{"ID":"PoolCounter","type":"counter"}`,
-			hashKey:    "",
-			memStorage: testStorage,
+			name:     "check 200 counter success",
+			method:   http.MethodPost,
+			jsonData: `{"ID":"PoolCounter","type":"counter"}`,
+			hashKey:  "",
+			db:       testStorage,
 			want: want{
 				statusCode: 200,
 				message:    `{"id":"PoolCounter","type":"counter","delta":50}`,
 			},
 		},
 		{
-			name:       "check 200 counter success with hash",
-			method:     http.MethodPost,
-			jsonData:   `{"ID":"PoolCounter","type":"counter"}`,
-			hashKey:    "some_key",
-			memStorage: testStorage,
+			name:     "check 200 counter success with hash",
+			method:   http.MethodPost,
+			jsonData: `{"ID":"PoolCounter","type":"counter"}`,
+			hashKey:  "some_key",
+			db:       testStorage,
 			want: want{
 				statusCode: 200,
 				message:    `{"id":"PoolCounter","type":"counter","delta":50,"hash":"5a58361db229f5a67734904e9feb3e46e0183195fad9a9463f26a303790d2c2e"}`,
@@ -99,7 +99,7 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := GetRouter(tt.memStorage, utils.ServerConfig{Address: "adr", HashKey: tt.hashKey})
+			r := GetRouter(tt.db, utils.ServerConfig{Address: "adr", HashKey: tt.hashKey})
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
@@ -144,9 +144,9 @@ func TestCompressedSetValueJSONMetricHandler(t *testing.T) {
 			waitBody: `{"id":"Alloc","type":"gauge","value":123.456,"hash":"13cfebd3139e6cfd5a352851d9cd909bce07429a16a87d1aaf49f6869549d899"}`,
 		},
 	}
-	testStorage := storage.NewMemStorage(utils.MemStorageConfig{})
-	testStorage.GaugeMetrics["Alloc"] = 123.456
-	testStorage.CounterMetrics["PoolCounter"] = 50
+	testStorage := storage.NewStorage(&utils.StorageConfig{})
+	testStorage.GetBuffer().GaugeMetrics["Alloc"] = 123.456
+	testStorage.GetBuffer().CounterMetrics["PoolCounter"] = 50
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
