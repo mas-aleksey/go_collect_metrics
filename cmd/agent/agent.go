@@ -29,6 +29,7 @@ func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
 	defer ticker.Stop()
 
 	for range ticker.C {
+		fmt.Println("Sending report...")
 		statCopy := statistic.Copy()
 		report := utils.NewJSONReport(statCopy, config.HashKey)
 		err := metricClient.SendJSONReport(report)

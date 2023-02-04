@@ -30,6 +30,7 @@ func init() {
 	storeFile = flag.String("f", "/tmp/devops-metrics-db.json", "store file")
 	hashKey = flag.String("k", "", "hash key")
 	databaseDSN = flag.String("d", "", "database connection string")
+	// postgresql://ml_platform_orchestrator_admin:pwd@localhost:5467/yandex
 }
 
 func saveStorage(db storage.Storage) {
