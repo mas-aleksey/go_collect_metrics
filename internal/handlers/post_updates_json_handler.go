@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
+	"log"
 	"net/http"
 )
 
@@ -30,8 +31,8 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 		db.SaveIfSyncMode()
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		resp, _ := json.Marshal(metrics)
-		//log.Print(string(resp))
+		resp, _ := json.Marshal(metrics[0])
+		log.Print(string(resp))
 		w.Write(resp)
 	}
 }
