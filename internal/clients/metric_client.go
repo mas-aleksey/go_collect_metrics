@@ -29,8 +29,15 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 
 		go func() {
 			defer wg.Done()
-			err := mc.postJSONMetric(metric)
-			errChains <- err
+			body, err := json.Marshal(metric)
+			if err != nil {
+				errChains <- err
+			} else {
+				err = mc.postBody(body, false)
+				if err != nil {
+					errChains <- err
+				}
+			}
 		}()
 	}
 	wg.Wait()
@@ -44,25 +51,33 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	return nil
 }
 
-func (mc MetricClient) getHeaders() map[string]string {
-	headers := make(map[string]string)
-	headers["Content-Type"] = "application/json"
-	return headers
-}
-
-func (mc MetricClient) postJSONMetric(metric utils.JSONMetric) error {
-	body, err := json.Marshal(metric)
+func (mc MetricClient) SendBatchJSONReport(report *utils.JSONReport) error {
+	body, err := json.Marshal(report.Metrics)
 	if err != nil {
 		return errors.Wrap(err, "unable to make json")
 	}
+	return mc.postBody(body, true)
+}
+
+func (mc MetricClient) getHeaders(compress bool) map[string]string {
+	headers := make(map[string]string)
+	headers["Content-Type"] = "application/json"
+	headers["Accept-Encoding"] = "gzip"
+	if compress {
+		headers["Content-Encoding"] = "gzip"
+	}
+	return headers
+}
+
+func (mc MetricClient) postBody(body []byte, compress bool) error {
 	request := Request{
 		Method:       http.MethodPost,
 		URL:          mc.MakeURL("update/"),
-		Headers:      mc.getHeaders(),
+		Headers:      mc.getHeaders(compress),
 		Body:         body,
 		OkStatusCode: http.StatusOK,
 	}
-	_, err = mc.DoRequest(request)
+	_, err := mc.DoRequest(request)
 	if err != nil {
 		return errors.Wrap(err, "unable to complete update metric request")
 	}

@@ -1,6 +1,8 @@
 package clients
 
 import (
+	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -51,21 +53,54 @@ func TestMetricClient_postMetric(t *testing.T) {
 			}))
 			defer svr.Close()
 			mc := NewMetricClient(svr.URL, 1*time.Second)
-			err := mc.postJSONMetric(tt.metric)
+			body, err := json.Marshal(tt.metric)
+			assert.Nil(t, err)
+			err = mc.postBody(body, false)
 			assert.Nil(t, err)
 		})
 	}
 }
 
-func TestMetricClient_SendMetrics(t *testing.T) {
+func TestMetricClient_SendJSONReport(t *testing.T) {
 	statistic := utils.NewStatistic()
 	report := utils.NewJSONReport(statistic, "")
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Log(r.URL.Path)
+		body, err := io.ReadAll(r.Body)
+		assert.Nil(t, err)
+		var metric utils.JSONMetric
+		err = json.Unmarshal(body, &metric)
+		assert.Nil(t, err)
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
 	mc := NewMetricClient(svr.URL, 1*time.Second)
 	err := mc.SendJSONReport(report)
+	assert.Nil(t, err)
+}
+
+func TestMetricClient_SendBatchJSONReport(t *testing.T) {
+	statistic := utils.NewStatistic()
+	report := utils.NewJSONReport(statistic, "")
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Log(r.URL.Path)
+		reader, err := gzip.NewReader(r.Body)
+		assert.Nil(t, err)
+		body, err := io.ReadAll(reader)
+		assert.Nil(t, err)
+
+		err = r.Body.Close()
+		assert.Nil(t, err)
+		err = reader.Close()
+		assert.Nil(t, err)
+
+		var metrics []utils.JSONMetric
+		err = json.Unmarshal(body, &metrics)
+		assert.Equal(t, 29, len(metrics))
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer svr.Close()
+	mc := NewMetricClient(svr.URL, 1*time.Second)
+	err := mc.SendBatchJSONReport(report)
 	assert.Nil(t, err)
 }

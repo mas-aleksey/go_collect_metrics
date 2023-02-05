@@ -55,13 +55,16 @@ func (p *PgStorage) Ping() bool {
 func (p *PgStorage) Save() {
 	err := p.flushBuffer()
 	if err != nil {
-		fmt.Printf("db save error %s", err)
+		fmt.Printf("db save error %s\n", err)
+	} else {
+		fmt.Println("db save success")
 	}
-	fmt.Printf("db save success")
 }
 
 func (p *PgStorage) SaveIfSyncMode() {
-	p.Save()
+	if p.Config.StoreInterval == 0 {
+		p.Save()
+	}
 }
 
 func (p *PgStorage) createTable() error {

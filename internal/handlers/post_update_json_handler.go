@@ -2,10 +2,66 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"net/http"
 )
+
+func processMetric(metric *utils.JSONMetric, hashKey string, db storage.Storage) error {
+	if !metric.IsValidHash(hashKey) {
+		return fmt.Errorf("invalid metric hash")
+	}
+	if !metric.IsValidType() {
+		return fmt.Errorf("invalid metric type")
+	}
+	if !metric.IsValidValue() {
+		return fmt.Errorf("invalid metric value")
+	}
+	db.GetBuffer().PutJSONMetric(*metric)
+	db.GetBuffer().UpdateJSONMetricValue(metric)
+	metric.Hash = utils.CalcHash(metric.String(), hashKey)
+	return nil
+}
+
+func handleOne(w http.ResponseWriter, body []byte, hashKey string, db storage.Storage) (bool, error) {
+	metric, err := utils.LoadJSONMetric(body)
+	if err != nil {
+		return false, nil
+	}
+	err = processMetric(&metric, hashKey, db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return false, err
+	}
+	db.SaveIfSyncMode()
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	rest, _ := json.Marshal(metric)
+	w.Write(rest)
+	return true, nil
+}
+
+func handleBatch(w http.ResponseWriter, body []byte, hashKey string, db storage.Storage) {
+	metrics, err := utils.LoadButchJSONMetric(body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	for i, metric := range metrics {
+		err = processMetric(&metric, hashKey, db)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		metrics[i] = metric
+	}
+	db.SaveIfSyncMode()
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	rest, _ := json.Marshal(metrics)
+	w.Write(rest)
+}
 
 func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -14,31 +70,12 @@ func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		metric, err := utils.LoadJSONMetric(body)
+		ok, err := handleOne(w, body, hashKey, db)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 			return
 		}
-		if !metric.IsValidHash(hashKey) {
-			http.Error(w, "Invalid metric hash", http.StatusBadRequest)
-			return
+		if ok != true {
+			handleBatch(w, body, hashKey, db)
 		}
-		if !metric.IsValidType() {
-			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
-			return
-		}
-		if !metric.IsValidValue() {
-			http.Error(w, "Invalid metric value", http.StatusBadRequest)
-			return
-		}
-		db.GetBuffer().PutJSONMetric(metric)
-		db.SaveIfSyncMode()
-		db.GetBuffer().UpdateJSONMetricValue(&metric)
-		metric.Hash = utils.CalcHash(metric.String(), hashKey)
-
-		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		rest, _ := json.Marshal(metric)
-		w.Write(rest)
 	}
 }

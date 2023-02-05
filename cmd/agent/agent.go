@@ -32,7 +32,7 @@ func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
 		fmt.Println("Sending report...")
 		statCopy := statistic.Copy()
 		report := utils.NewJSONReport(statCopy, config.HashKey)
-		err := metricClient.SendJSONReport(report)
+		err := metricClient.SendBatchJSONReport(report)
 		if err != nil {
 			fmt.Println("Fail send report", statCopy.Counter, err)
 		} else {

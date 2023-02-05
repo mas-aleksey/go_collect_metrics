@@ -2,6 +2,7 @@ package clients
 
 import (
 	"bytes"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"net/http"
@@ -48,8 +49,22 @@ func (c *BaseClient) MakeURL(URL string) string {
 
 func (c *BaseClient) DoRequest(r Request) (Response, error) {
 	client := &http.Client{}
+	var requestBody bytes.Buffer
 
-	req, err := http.NewRequest(r.Method, r.URL, bytes.NewBuffer(r.Body))
+	_, ok := r.Headers["Content-Encoding"]
+	if ok {
+		gz := gzip.NewWriter(&requestBody)
+		if _, err := gz.Write(r.Body); err != nil {
+			return Response{}, err
+		}
+		if err := gz.Close(); err != nil {
+			return Response{}, err
+		}
+	} else {
+		requestBody = *bytes.NewBuffer(r.Body)
+	}
+
+	req, err := http.NewRequest(r.Method, r.URL, &requestBody)
 	if err != nil {
 		return Response{}, err
 	}

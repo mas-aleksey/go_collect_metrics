@@ -37,53 +37,53 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:     "check 422 invalid json body",
+			name:     "check 400 invalid json body",
 			method:   http.MethodPost,
 			jsonData: `{"message":Hello}`,
 			db:       nil,
 			want: want{
-				statusCode: 422,
+				statusCode: 400,
 				message:    "invalid character 'H' looking for beginning of value\n",
 			},
 		},
 		{
-			name:     "check 501 invalid metric type",
+			name:     "check 400 invalid metric type",
 			method:   http.MethodPost,
 			jsonData: `{"ID":"Alloc","type":"foo","Value":123}`,
 			db:       nil,
 			want: want{
-				statusCode: 501,
-				message:    "Invalid metric type\n",
+				statusCode: 400,
+				message:    "invalid metric type\n",
 			},
 		},
 		{
-			name:     "check 422 invalid gauge metric value",
+			name:     "check 400 invalid gauge metric value",
 			method:   http.MethodPost,
-			jsonData: `{"ID":"Alloc","type":"gauge","Value":"foo"}`,
+			jsonData: `{"id":"Alloc","type":"gauge","value":"foo"}`,
 			db:       nil,
 			want: want{
-				statusCode: 422,
-				message:    "json: cannot unmarshal string into Go struct field JSONMetric.value of type float64\n",
+				statusCode: 400,
+				message:    "json: cannot unmarshal object into Go value of type []utils.JSONMetric\n",
 			},
 		},
 		{
 			name:     "check 400 nil gauge metric value",
 			method:   http.MethodPost,
-			jsonData: `{"ID":"Alloc","type":"gauge"}`,
+			jsonData: `{"id":"Alloc","type":"gauge"}`,
 			db:       nil,
 			want: want{
 				statusCode: 400,
-				message:    "Invalid metric value\n",
+				message:    "invalid metric value\n",
 			},
 		},
 		{
-			name:     "check 422 invalid counter metric value",
+			name:     "check 400 invalid counter metric value",
 			method:   http.MethodPost,
-			jsonData: `{"ID":"Alloc","type":"counter","Delta":"foo"}`,
+			jsonData: `{"id":"Alloc","type":"counter","delta":"foo"}`,
 			db:       nil,
 			want: want{
-				statusCode: 422,
-				message:    "json: cannot unmarshal string into Go struct field JSONMetric.delta of type int64\n",
+				statusCode: 400,
+				message:    "json: cannot unmarshal object into Go value of type []utils.JSONMetric\n",
 			},
 		},
 		{
@@ -93,7 +93,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			db:       nil,
 			want: want{
 				statusCode: 400,
-				message:    "Invalid metric value\n",
+				message:    "invalid metric value\n",
 			},
 		},
 		{
@@ -123,7 +123,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			db:       storage.NewStorage(&utils.StorageConfig{}),
 			want: want{
 				statusCode: 400,
-				message:    "Invalid metric hash\n",
+				message:    "invalid metric hash\n",
 			},
 		},
 		{
@@ -134,6 +134,16 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			want: want{
 				statusCode: 200,
 				message:    `{"id":"PoolCounter","type":"counter","delta":200,"hash":"e1265e8f3d1ecc83a870f5d5ee7a06c5b85393eed91d85e949dbf5bf4c44c765"}`,
+			},
+		},
+		{
+			name:     "check 200 batch metrics come",
+			method:   http.MethodPost,
+			jsonData: `[{"id":"PoolCounter","type":"counter","delta":123,"hash":"2799917354025ae1c468eb210efe049b9818c087b6ca186b87812e382952bdcf"}]`,
+			db:       testStorage,
+			want: want{
+				statusCode: 200,
+				message:    `[{"id":"PoolCounter","type":"counter","delta":323,"hash":"b039dc5a6def8ee7e5b8976f7948c3a16a743b012281ccd93cd6f5700af456c6"}]`,
 			},
 		},
 	}

@@ -34,11 +34,19 @@ func NewGaugeJSONMetric(mName string, value float64, hashKey string) JSONMetric 
 }
 
 func LoadJSONMetric(body []byte) (JSONMetric, error) {
-	metric := JSONMetric{}
+	var metric JSONMetric
 	if err := json.Unmarshal(body, &metric); err != nil {
 		return metric, err
 	}
 	return metric, nil
+}
+
+func LoadButchJSONMetric(body []byte) ([]JSONMetric, error) {
+	var metrics []JSONMetric
+	if err := json.Unmarshal(body, &metrics); err != nil {
+		return metrics, err
+	}
+	return metrics, nil
 }
 
 func (m JSONMetric) String() string {
