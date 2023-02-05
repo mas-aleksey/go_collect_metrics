@@ -3,7 +3,6 @@ package clients
 import (
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
@@ -44,7 +43,6 @@ func TestMetricClient_postMetric(t *testing.T) {
 				require.NoError(t, err)
 				err = r.Body.Close()
 				require.NoError(t, err)
-				fmt.Println(string(resBody))
 				assert.Equal(t, tt.wantBody, string(resBody))
 				assert.Equal(t, r.URL.Path, "/update/")
 				assert.Equal(t, r.Method, "POST")

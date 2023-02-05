@@ -122,6 +122,6 @@ func (p *PgStorage) flushBuffer() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("value of returnval %s", res)
+	log.Printf("value of returnval %s", res)
 	return nil
 }
