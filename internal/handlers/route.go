@@ -20,5 +20,6 @@ func GetRouter(db storage.Storage, config utils.ServerConfig) *chi.Mux {
 	r.Post("/value/", SetValueJSONMetricHandler(db, config.HashKey))
 	r.Post("/update/{mType}/{mName}/{mValue}", SaveMetricHandler(db))
 	r.Post("/update/", SaveJSONMetricHandler(db, config.HashKey))
+	r.Post("/updates/", SaveBatchJSONMetricHandler(db, config.HashKey))
 	return r
 }

@@ -24,45 +24,6 @@ func processMetric(metric *utils.JSONMetric, hashKey string, db storage.Storage)
 	return nil
 }
 
-func handleOne(w http.ResponseWriter, body []byte, hashKey string, db storage.Storage) (bool, error) {
-	metric, err := utils.LoadJSONMetric(body)
-	if err != nil {
-		return false, nil
-	}
-	err = processMetric(&metric, hashKey, db)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return false, err
-	}
-	db.SaveIfSyncMode()
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	rest, _ := json.Marshal(metric)
-	w.Write(rest)
-	return true, nil
-}
-
-func handleBatch(w http.ResponseWriter, body []byte, hashKey string, db storage.Storage) {
-	metrics, err := utils.LoadButchJSONMetric(body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	for i, metric := range metrics {
-		err = processMetric(&metric, hashKey, db)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		metrics[i] = metric
-	}
-	db.SaveIfSyncMode()
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	rest, _ := json.Marshal(metrics)
-	w.Write(rest)
-}
-
 func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ReadBody(r)
@@ -70,12 +31,20 @@ func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		ok, err := handleOne(w, body, hashKey, db)
+		metric, err := utils.LoadJSONMetric(body)
 		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if !ok {
-			handleBatch(w, body, hashKey, db)
+		err = processMetric(&metric, hashKey, db)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
+		db.SaveIfSyncMode()
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		rest, _ := json.Marshal(metric)
+		w.Write(rest)
 	}
 }

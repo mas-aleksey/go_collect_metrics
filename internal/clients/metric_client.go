@@ -33,7 +33,7 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 			if err != nil {
 				errChains <- err
 			} else {
-				err = mc.postBody(body, false)
+				err = mc.postBody(body, "update/", false)
 				if err != nil {
 					errChains <- err
 				}
@@ -56,7 +56,7 @@ func (mc MetricClient) SendBatchJSONReport(report *utils.JSONReport) error {
 	if err != nil {
 		return errors.Wrap(err, "unable to make json")
 	}
-	return mc.postBody(body, true)
+	return mc.postBody(body, "updates/", true)
 }
 
 func (mc MetricClient) getHeaders(compress bool) map[string]string {
@@ -69,10 +69,10 @@ func (mc MetricClient) getHeaders(compress bool) map[string]string {
 	return headers
 }
 
-func (mc MetricClient) postBody(body []byte, compress bool) error {
+func (mc MetricClient) postBody(body []byte, url string, compress bool) error {
 	request := Request{
 		Method:       http.MethodPost,
-		URL:          mc.MakeURL("update/"),
+		URL:          mc.MakeURL(url),
 		Headers:      mc.getHeaders(compress),
 		Body:         body,
 		OkStatusCode: http.StatusOK,

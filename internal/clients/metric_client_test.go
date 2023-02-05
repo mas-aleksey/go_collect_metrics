@@ -55,7 +55,7 @@ func TestMetricClient_postMetric(t *testing.T) {
 			mc := NewMetricClient(svr.URL, 1*time.Second)
 			body, err := json.Marshal(tt.metric)
 			assert.Nil(t, err)
-			err = mc.postBody(body, false)
+			err = mc.postBody(body, "update/", false)
 			assert.Nil(t, err)
 		})
 	}
@@ -65,7 +65,7 @@ func TestMetricClient_SendJSONReport(t *testing.T) {
 	statistic := utils.NewStatistic()
 	report := utils.NewJSONReport(statistic, "")
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Log(r.URL.Path)
+		assert.Equal(t, "/update/", r.URL.Path)
 		body, err := io.ReadAll(r.Body)
 		assert.Nil(t, err)
 		var metric utils.JSONMetric
@@ -83,7 +83,7 @@ func TestMetricClient_SendBatchJSONReport(t *testing.T) {
 	statistic := utils.NewStatistic()
 	report := utils.NewJSONReport(statistic, "")
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Log(r.URL.Path)
+		assert.Equal(t, "/updates/", r.URL.Path)
 		reader, err := gzip.NewReader(r.Body)
 		assert.Nil(t, err)
 		body, err := io.ReadAll(reader)
