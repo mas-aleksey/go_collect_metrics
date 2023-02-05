@@ -94,8 +94,7 @@ func (p *PgStorage) loadInBuffer() error {
 	}
 	for rows.Next() {
 		metric := utils.JSONMetric{}
-		err := rows.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
-		fmt.Println("metric", metric)
+		err = rows.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
 		if err != nil {
 			log.Fatal(err)
 		}

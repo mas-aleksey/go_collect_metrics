@@ -20,6 +20,7 @@ func processMetric(metric *utils.JSONMetric, hashKey string, db storage.Storage)
 	}
 	db.GetBuffer().PutJSONMetric(*metric)
 	db.GetBuffer().UpdateJSONMetricValue(metric)
+	db.SaveIfSyncMode()
 	metric.Hash = utils.CalcHash(metric.String(), hashKey)
 	return nil
 }
@@ -34,7 +35,6 @@ func handleOne(w http.ResponseWriter, body []byte, hashKey string, db storage.St
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return false, err
 	}
-	db.SaveIfSyncMode()
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	rest, _ := json.Marshal(metric)
@@ -56,7 +56,6 @@ func handleBatch(w http.ResponseWriter, body []byte, hashKey string, db storage.
 		}
 		metrics[i] = metric
 	}
-	db.SaveIfSyncMode()
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	rest, _ := json.Marshal(metrics)
@@ -74,7 +73,7 @@ func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc 
 		if err != nil {
 			return
 		}
-		if ok != true {
+		if !ok {
 			handleBatch(w, body, hashKey, db)
 		}
 	}
