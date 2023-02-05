@@ -32,7 +32,7 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		resp, _ := json.Marshal(metrics)
-		log.Printf(string(resp))
+		log.Print(string(resp))
 		w.Write(resp)
 	}
 }
