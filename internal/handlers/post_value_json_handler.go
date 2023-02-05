@@ -31,7 +31,7 @@ func SetValueJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerF
 		}
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		rest, _ := json.Marshal(metric)
-		w.Write(rest)
+		resp, _ := json.Marshal(metric)
+		w.Write(resp)
 	}
 }
