@@ -96,6 +96,8 @@ func TestMetricClient_SendBatchJSONReport(t *testing.T) {
 
 		var metrics []utils.JSONMetric
 		err = json.Unmarshal(body, &metrics)
+		assert.Nil(t, err)
+
 		assert.Equal(t, 29, len(metrics))
 		w.WriteHeader(http.StatusOK)
 	}))

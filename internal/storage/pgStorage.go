@@ -62,9 +62,7 @@ func (p *PgStorage) Save() {
 }
 
 func (p *PgStorage) SaveIfSyncMode() {
-	if p.Config.StoreInterval == 0 {
-		p.Save()
-	}
+	p.Save()
 }
 
 func (p *PgStorage) createTable() error {
