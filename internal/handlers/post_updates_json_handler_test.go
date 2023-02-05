@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
@@ -56,6 +57,10 @@ func TestSaveBatchJSONMetricHandler(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.Equal(t, tt.want.message, string(resBody))
+
+			var metrics []utils.JSONMetric
+			err = json.Unmarshal(resBody, &metrics)
+			assert.Nil(t, err)
 		})
 	}
 }

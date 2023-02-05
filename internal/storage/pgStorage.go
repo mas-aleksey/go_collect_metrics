@@ -55,9 +55,9 @@ func (p *PgStorage) Ping() bool {
 func (p *PgStorage) Save() {
 	err := p.flushBuffer()
 	if err != nil {
-		fmt.Printf("db save error %s\n", err)
+		log.Printf("db save error %s\n", err)
 	} else {
-		fmt.Println("db save success")
+		log.Println("db save success")
 	}
 }
 
@@ -80,7 +80,7 @@ func (p *PgStorage) createTable() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("value of returnval %s", returnVal)
+	log.Printf("value of returnval %s", returnVal)
 	return nil
 }
 
