@@ -32,7 +32,7 @@ func TestSaveBatchJSONMetricHandler(t *testing.T) {
 			db:       testStorage,
 			want: want{
 				statusCode: 200,
-				message:    `[{"id":"PoolCounter","type":"counter","delta":200,"hash":"e1265e8f3d1ecc83a870f5d5ee7a06c5b85393eed91d85e949dbf5bf4c44c765"}]`,
+				message:    `{"id":"PoolCounter","type":"counter","delta":200,"hash":"e1265e8f3d1ecc83a870f5d5ee7a06c5b85393eed91d85e949dbf5bf4c44c765"}`,
 			},
 		},
 	}
@@ -58,7 +58,7 @@ func TestSaveBatchJSONMetricHandler(t *testing.T) {
 
 			assert.Equal(t, tt.want.message, string(resBody))
 
-			var metrics []utils.JSONMetric
+			var metrics utils.JSONMetric
 			err = json.Unmarshal(resBody, &metrics)
 			assert.Nil(t, err)
 		})

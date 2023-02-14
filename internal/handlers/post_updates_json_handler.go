@@ -15,6 +15,7 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		log.Printf("updates request: %s\n", string(body))
 		metrics, err := utils.LoadButchJSONMetric(body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -32,7 +33,7 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		resp, _ := json.Marshal(metrics[0])
-		log.Print(string(resp))
+		log.Printf("updates response: %s\n", string(resp))
 		w.Write(resp)
 	}
 }
