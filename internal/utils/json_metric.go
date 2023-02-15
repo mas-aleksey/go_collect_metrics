@@ -52,7 +52,7 @@ func LoadButchJSONMetric(body []byte) ([]JSONMetric, error) {
 func (m JSONMetric) String() string {
 	switch m.MType {
 	case "gauge":
-		return fmt.Sprintf("%s:gauge:%f", m.ID, *m.Value)
+		return fmt.Sprintf("%s:gauge:%g", m.ID, *m.Value)
 	case "counter":
 		return fmt.Sprintf("%s:counter:%d", m.ID, *m.Delta)
 	default:

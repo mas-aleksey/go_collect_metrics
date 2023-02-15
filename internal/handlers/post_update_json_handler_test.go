@@ -103,7 +103,7 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			db:       storage.NewStorage(&utils.StorageConfig{}),
 			want: want{
 				statusCode: 200,
-				message:    `{"id":"Alloc","type":"gauge","value":123.456,"hash":"9364e01ae0e8cf907ef330aa4a9691ad1e68aa51f05f4e2e73f23b406d0ce36a"}`,
+				message:    `{"id":"Alloc","type":"gauge","value":123.456,"hash":"3c368f8be3d61c76ec487060036f8e6cddd48d4e0861353919f7beec57aa8447"}`,
 			},
 		},
 		{

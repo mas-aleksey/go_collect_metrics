@@ -140,8 +140,8 @@ func TestCompressedSetValueJSONMetricHandler(t *testing.T) {
 		{
 			name:     "with hash key",
 			hashKey:  "some_key",
-			waitLen:  "124",
-			waitBody: `{"id":"Alloc","type":"gauge","value":123.456,"hash":"13cfebd3139e6cfd5a352851d9cd909bce07429a16a87d1aaf49f6869549d899"}`,
+			waitLen:  "125",
+			waitBody: `{"id":"Alloc","type":"gauge","value":123.456,"hash":"0dc3f697647c164dda7cb9fffc26aa833d4cb1fbec64a04f783cc57858d986d0"}`,
 		},
 	}
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
