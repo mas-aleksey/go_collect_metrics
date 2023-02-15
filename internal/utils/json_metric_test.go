@@ -19,7 +19,7 @@ func TestNewGaugeJSONMetric(t *testing.T) {
 	assert.Equal(t, "gauge", metric.MType)
 	assert.Equal(t, "name", metric.ID)
 	assert.Equal(t, 123.4, *metric.Value)
-	assert.Equal(t, "9ab735a64c77b98a9448d0eb2ae61c86d5251657357090a72b7e9b5cc8867bd5", *metric.Hash)
+	assert.Equal(t, "e1106794864f57461d121d23149ed87659726933abaa3f8019d82f2fa022052c", *metric.Hash)
 	assert.Nil(t, metric.Delta)
 }
 

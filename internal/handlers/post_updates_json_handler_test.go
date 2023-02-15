@@ -24,7 +24,7 @@ var DATA = `[
         "id": "SomeParam",
         "type": "gauge",
         "value": 10.1,
-        "hash": "84e655414975c8579f90c55b619af150e7fa441b2b80df4441fd601692dc6d12"
+        "hash": "4b37bfcaa5c419ce160ed8a1247c66a109b086336ac4d7d9df659a86c764a93b"
     },
     {
         "id": "PollCount",
@@ -36,7 +36,7 @@ var DATA = `[
         "id": "SomeParam",
         "type": "gauge",
         "value": 11.1,
-        "hash": "5e758502c4253aa47bbb797bab8ebd97a9b8785fe78d235bf742801b20e284e5"
+        "hash": "335bd95edd095efeb1d61bda8bc51f613690b8a6908866a2169a751bcf960933"
     }
 ]`
 
@@ -71,7 +71,7 @@ func TestSaveBatchJSONMetricHandler(t *testing.T) {
 			db:       storage.NewStorage(&utils.StorageConfig{}),
 			want: want{
 				statusCode: 200,
-				message:    `[{"id":"PollCount","type":"counter","delta":10,"hash":"5848f030886e828a0481a33dd7386ee4c617c17b4f315645b83dd4b129514639"},{"id":"SomeParam","type":"gauge","value":10.1,"hash":"84e655414975c8579f90c55b619af150e7fa441b2b80df4441fd601692dc6d12"},{"id":"PollCount","type":"counter","delta":20,"hash":"a259b544859dcd20f29fa2d140b6e22e051a200eac13cb37849a91487dcf9821"},{"id":"SomeParam","type":"gauge","value":11.1,"hash":"5e758502c4253aa47bbb797bab8ebd97a9b8785fe78d235bf742801b20e284e5"}]`,
+				message:    `[{"id":"PollCount","type":"counter","delta":10,"hash":"5848f030886e828a0481a33dd7386ee4c617c17b4f315645b83dd4b129514639"},{"id":"SomeParam","type":"gauge","value":10.1,"hash":"4b37bfcaa5c419ce160ed8a1247c66a109b086336ac4d7d9df659a86c764a93b"},{"id":"PollCount","type":"counter","delta":20,"hash":"a259b544859dcd20f29fa2d140b6e22e051a200eac13cb37849a91487dcf9821"},{"id":"SomeParam","type":"gauge","value":11.1,"hash":"335bd95edd095efeb1d61bda8bc51f613690b8a6908866a2169a751bcf960933"}]`,
 			},
 		},
 	}
