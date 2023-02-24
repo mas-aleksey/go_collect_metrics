@@ -14,7 +14,7 @@ func SaveMetricHandler(db storage.Storage) http.HandlerFunc {
 		mValue := chi.URLParam(r, "mValue")
 		metric, err := utils.NewJSONMetric(mType, mName, mValue)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusNotImplemented)
 			return
 		}
 		_, err = db.UpdateJSONMetric(metric)
