@@ -17,8 +17,10 @@ func TestGetValueMetricHandler(t *testing.T) {
 		message    string
 	}
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
-	testStorage.GetBuffer().GaugeMetrics["Alloc"] = 111.222
-	testStorage.GetBuffer().CounterMetrics["PollCount"] = 333
+	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+		utils.NewGaugeJSONMetric("Alloc", 111.222),
+		utils.NewCounterJSONMetric("PollCount", 333),
+	})
 
 	tests := []struct {
 		name    string
@@ -45,16 +47,6 @@ func TestGetValueMetricHandler(t *testing.T) {
 			want: want{
 				statusCode: 404,
 				message:    "404 page not found\n",
-			},
-		},
-		{
-			name:    "check 400 invalid metric type",
-			method:  http.MethodGet,
-			request: "/value/type/name",
-			db:      nil,
-			want: want{
-				statusCode: 400,
-				message:    "invalid metric type\n",
 			},
 		},
 		{

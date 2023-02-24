@@ -23,16 +23,19 @@ func TestMetricClient_postMetric(t *testing.T) {
 	tests := []struct {
 		name     string
 		metric   utils.JSONMetric
+		hashKey  string
 		wantBody string
 	}{
 		{
 			name:     "empty counter hash",
-			metric:   utils.NewCounterJSONMetric("name", 10, ""),
+			metric:   utils.NewCounterJSONMetric("name", 10),
+			hashKey:  "",
 			wantBody: "{\"id\":\"name\",\"type\":\"counter\",\"delta\":10}",
 		},
 		{
 			name:     "fill counter hash",
-			metric:   utils.NewCounterJSONMetric("name", 10, "123"),
+			metric:   utils.NewCounterJSONMetric("name", 10),
+			hashKey:  "123",
 			wantBody: "{\"id\":\"name\",\"type\":\"counter\",\"delta\":10,\"hash\":\"775bc6d6bc40cb6535f865f85936c49453d224c5dc6047215247d17c28b6c8a1\"}",
 		},
 	}
@@ -51,6 +54,7 @@ func TestMetricClient_postMetric(t *testing.T) {
 			}))
 			defer svr.Close()
 			mc := NewMetricClient(svr.URL, 1*time.Second)
+			tt.metric.Hash = utils.CalcHash(tt.metric.String(), tt.hashKey)
 			body, err := json.Marshal(tt.metric)
 			assert.Nil(t, err)
 			err = mc.postBody(body, "update/", false)

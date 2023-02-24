@@ -6,19 +6,23 @@ import (
 )
 
 func TestNewCounterJSONMetric(t *testing.T) {
-	metric := NewCounterJSONMetric("name", 123, "foo")
+	metric := NewCounterJSONMetric("name", 123)
 	assert.Equal(t, "counter", metric.MType)
 	assert.Equal(t, "name", metric.ID)
 	assert.Equal(t, int64(123), *metric.Delta)
+
+	metric.Hash = CalcHash(metric.String(), "foo")
 	assert.Equal(t, "fe55643dfd050289512090577d279326e6e27f23f82b6b2e61232e965b8e6d5a", *metric.Hash)
 	assert.Nil(t, metric.Value)
 }
 
 func TestNewGaugeJSONMetric(t *testing.T) {
-	metric := NewGaugeJSONMetric("name", 123.4, "bar")
+	metric := NewGaugeJSONMetric("name", 123.4)
 	assert.Equal(t, "gauge", metric.MType)
 	assert.Equal(t, "name", metric.ID)
 	assert.Equal(t, 123.4, *metric.Value)
+
+	metric.Hash = CalcHash(metric.String(), "bar")
 	assert.Equal(t, "e1106794864f57461d121d23149ed87659726933abaa3f8019d82f2fa022052c", *metric.Hash)
 	assert.Nil(t, metric.Delta)
 }

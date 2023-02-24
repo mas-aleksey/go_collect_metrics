@@ -14,7 +14,9 @@ import (
 
 func TestSaveJsonMetricHandler(t *testing.T) {
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
-	testStorage.GetBuffer().CounterMetrics["PoolCounter"] = 77
+	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+		utils.NewCounterJSONMetric("PoolCounter", 77),
+	})
 	type want struct {
 		statusCode int
 		message    string

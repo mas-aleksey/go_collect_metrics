@@ -10,7 +10,6 @@ import (
 )
 
 type PgStorage struct {
-	Buffer *Buffer
 	Conn   *pgx.Conn
 	Config *utils.StorageConfig
 }
@@ -25,10 +24,6 @@ func (p *PgStorage) Init() error {
 	if err != nil {
 		return fmt.Errorf("unable to crate table: %v", err)
 	}
-	err = p.loadInBuffer()
-	if err != nil {
-		return fmt.Errorf("unable to load data from db: %v", err)
-	}
 	return nil
 }
 
@@ -39,30 +34,96 @@ func (p *PgStorage) Close() {
 	}
 }
 
-func (p *PgStorage) GetConfig() *utils.StorageConfig {
-	return p.Config
-}
-
-func (p *PgStorage) GetBuffer() *Buffer {
-	return p.Buffer
-}
-
 func (p *PgStorage) Ping() bool {
 	err := p.Conn.Ping(context.Background())
 	return err == nil
 }
 
-func (p *PgStorage) Save() {
-	err := p.flushBuffer()
-	if err != nil {
-		log.Printf("db save error %s\n", err)
-	} else {
-		log.Println("db save success")
+func (p *PgStorage) UpdateJSONMetric(metricIn utils.JSONMetric) (utils.JSONMetric, error) {
+	metricOut := utils.JSONMetric{}
+	insertArg := ""
+
+	switch metricIn.MType {
+	case "gauge":
+		insertArg = fmt.Sprintf("('%s', 'gauge', %v, null)", metricIn.ID, *metricIn.Value)
+	case "counter":
+		insertArg = fmt.Sprintf("('%s', 'counter', null, %v)", metricIn.ID, *metricIn.Delta)
 	}
+	stmt := fmt.Sprintf(
+		"INSERT INTO metric(name, type, gauge_value, counter_value) VALUES %s %s", insertArg,
+		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = metric.counter_value + excluded.counter_value RETURNING *;",
+	)
+	row := p.Conn.QueryRow(context.Background(), stmt)
+	err := row.Scan(&metricOut.ID, &metricOut.MType, &metricOut.Value, &metricOut.Delta)
+	if err != nil {
+		return metricOut, err
+	}
+	return metricOut, nil
 }
 
-func (p *PgStorage) SaveIfSyncMode() {
-	p.Save()
+func (p *PgStorage) UpdateJSONMetrics(metricsIn []utils.JSONMetric) ([]utils.JSONMetric, error) {
+	valueStrings := make([]string, 0)
+	metricsOut := make([]utils.JSONMetric, 0)
+
+	for _, metric := range metricsIn {
+		insertArg := ""
+		switch metric.MType {
+		case "gauge":
+			insertArg = fmt.Sprintf("('%s', 'gauge', %v, null)", metric.ID, *metric.Value)
+		case "counter":
+			insertArg = fmt.Sprintf("('%s', 'counter', null, %v)", metric.ID, *metric.Delta)
+		}
+		valueStrings = append(valueStrings, insertArg)
+	}
+	stmt := fmt.Sprintf("INSERT INTO metric(name, type, gauge_value, counter_value) VALUES %s %s",
+		strings.Join(valueStrings, ","),
+		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = metric.counter_value + excluded.counter_value RETURNING *;",
+	)
+	rows, err := p.Conn.Query(context.Background(), stmt)
+	if err != nil {
+		return metricsOut, err
+	}
+	for rows.Next() {
+		metric := utils.JSONMetric{}
+		err = rows.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
+		if err != nil {
+			return metricsOut, err
+		}
+		metricsOut = append(metricsOut, metric)
+	}
+	return metricsOut, nil
+}
+
+func (p *PgStorage) GetJSONMetric(mName, mType string) (utils.JSONMetric, error) {
+	metric := utils.JSONMetric{}
+	query := fmt.Sprintf("SELECT name, type, gauge_value, counter_value FROM metric WHERE name=%s and type=%s;", mName, mType)
+	rows, err := p.Conn.Query(context.Background(), query)
+	if err != nil {
+		return metric, err
+	}
+	err = rows.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
+	if err != nil {
+		return metric, err
+	}
+	return metric, nil
+}
+
+func (p *PgStorage) GetAllMetrics() ([]utils.JSONMetric, error) {
+	metrics := make([]utils.JSONMetric, 0)
+	query := "SELECT name, type, gauge_value, counter_value FROM metric;"
+	rows, err := p.Conn.Query(context.Background(), query)
+	if err != nil {
+		return metrics, err
+	}
+	for rows.Next() {
+		metric := utils.JSONMetric{}
+		err = rows.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
+		if err != nil {
+			return metrics, err
+		}
+		metrics = append(metrics, metric)
+	}
+	return metrics, nil
 }
 
 func (p *PgStorage) createTable() error {
@@ -80,48 +141,6 @@ func (p *PgStorage) createTable() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("value of returnval %s", returnVal)
-	return nil
-}
-
-func (p *PgStorage) loadInBuffer() error {
-	query := "SELECT name, type, gauge_value, counter_value FROM metric"
-	rows, err := p.Conn.Query(context.Background(), query)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		metric := utils.JSONMetric{}
-		err = rows.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
-		if err != nil {
-			log.Fatal(err)
-		}
-		p.Buffer.PutJSONMetric(metric)
-	}
-	return nil
-}
-
-func (p *PgStorage) flushBuffer() error {
-	valueStrings := make([]string, 0)
-
-	p.Buffer.Mutex.RLock()
-	defer p.Buffer.Mutex.RUnlock()
-	for mName, mValue := range p.Buffer.GaugeMetrics {
-		insertArg := fmt.Sprintf("('%s', 'gauge', %v, null)", mName, mValue)
-		valueStrings = append(valueStrings, insertArg)
-	}
-	for mName, mValue := range p.Buffer.CounterMetrics {
-		insertArg := fmt.Sprintf("('%s', 'counter', null, %v)", mName, mValue)
-		valueStrings = append(valueStrings, insertArg)
-	}
-	stmt := fmt.Sprintf("INSERT INTO metric(name, type, gauge_value, counter_value) VALUES %s %s",
-		strings.Join(valueStrings, ","),
-		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = excluded.counter_value;",
-	)
-	res, err := p.Conn.Exec(context.Background(), stmt)
-	if err != nil {
-		return err
-	}
-	log.Printf("value of returnval %s", res)
+	log.Printf("create table: %s", returnVal)
 	return nil
 }

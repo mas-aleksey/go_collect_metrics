@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SetValueJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
+func GetJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ReadBody(r)
 		if err != nil {
@@ -20,15 +20,15 @@ func SetValueJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerF
 			return
 		}
 		if !metric.IsValidType() {
-			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
+			http.Error(w, "Invalid metric type", http.StatusBadRequest)
 			return
 		}
-		ok := db.GetBuffer().UpdateJSONMetricValue(&metric)
-		metric.Hash = utils.CalcHash(metric.String(), hashKey)
-		if !ok {
+		metric, err = db.GetJSONMetric(metric.ID, metric.MType)
+		if err != nil {
 			http.Error(w, "Metric not found", http.StatusNotFound)
 			return
 		}
+		metric.Hash = utils.CalcHash(metric.String(), hashKey)
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		resp, _ := json.Marshal(metric)

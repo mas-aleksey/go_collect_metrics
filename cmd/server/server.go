@@ -32,18 +32,6 @@ func init() {
 	databaseDSN = flag.String("d", "", "database connection string")
 }
 
-func saveStorage(db storage.Storage) {
-	if db.GetConfig().StoreInterval == 0 {
-		return
-	}
-	ticker := time.NewTicker(db.GetConfig().StoreInterval)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		db.Save()
-	}
-}
-
 func main() {
 	flag.Parse()
 	serverConfig := utils.MakeServerConfig(*address, *hashKey)
@@ -71,7 +59,6 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	go saveStorage(db)
 	log.Print("Server Started")
 
 	s := <-done

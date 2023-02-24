@@ -17,9 +17,11 @@ func SaveMetricHandler(db storage.Storage) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		db.GetBuffer().PutJSONMetric(metric)
-		db.SaveIfSyncMode()
+		_, err = db.UpdateJSONMetric(metric)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
-
 	}
 }

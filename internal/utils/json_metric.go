@@ -14,24 +14,20 @@ type JSONMetric struct {
 	Hash  *string  `json:"hash,omitempty"`  // значение хеш-функции
 }
 
-func NewCounterJSONMetric(mName string, delta int64, hashKey string) JSONMetric {
-	m := JSONMetric{
+func NewCounterJSONMetric(mName string, delta int64) JSONMetric {
+	return JSONMetric{
 		ID:    mName,
 		MType: "counter",
 		Delta: &delta,
 	}
-	m.Hash = CalcHash(m.String(), hashKey)
-	return m
 }
 
-func NewGaugeJSONMetric(mName string, value float64, hashKey string) JSONMetric {
-	m := JSONMetric{
+func NewGaugeJSONMetric(mName string, value float64) JSONMetric {
+	return JSONMetric{
 		ID:    mName,
 		MType: "gauge",
 		Value: &value,
 	}
-	m.Hash = CalcHash(m.String(), hashKey)
-	return m
 }
 
 func NewJSONMetric(metricType, metricName, metricValue string) (JSONMetric, error) {
@@ -42,13 +38,13 @@ func NewJSONMetric(metricType, metricName, metricValue string) (JSONMetric, erro
 		if err != nil {
 			return m, fmt.Errorf("invalid gauge metric value")
 		}
-		return NewGaugeJSONMetric(metricName, val, ""), nil
+		return NewGaugeJSONMetric(metricName, val), nil
 	case "counter":
 		val, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
 			return m, fmt.Errorf("invalid counter metric value")
 		}
-		return NewCounterJSONMetric(metricName, val, ""), nil
+		return NewCounterJSONMetric(metricName, val), nil
 	default:
 		return m, fmt.Errorf("invalid metric type")
 	}
@@ -121,4 +117,17 @@ func (m JSONMetric) IsValidHash(hashKey string) bool {
 	}
 	actualHash := CalcHash(m.String(), hashKey)
 	return *actualHash == *m.Hash
+}
+
+func (m JSONMetric) ValidatesAll(hashKey string) error {
+	if !m.IsValidHash(hashKey) {
+		return fmt.Errorf("invalid metric hash")
+	}
+	if !m.IsValidType() {
+		return fmt.Errorf("invalid metric type")
+	}
+	if !m.IsValidValue() {
+		return fmt.Errorf("invalid metric value")
+	}
+	return nil
 }

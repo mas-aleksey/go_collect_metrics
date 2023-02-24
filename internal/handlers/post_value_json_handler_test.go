@@ -19,8 +19,10 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 		message    string
 	}
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
-	testStorage.GetBuffer().GaugeMetrics["Alloc"] = 123.456
-	testStorage.GetBuffer().CounterMetrics["PoolCounter"] = 50
+	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+		utils.NewGaugeJSONMetric("Alloc", 123.456),
+		utils.NewCounterJSONMetric("PoolCounter", 50),
+	})
 
 	tests := []struct {
 		name     string
@@ -53,13 +55,13 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:     "check 501 invalid metric type",
+			name:     "check 400 invalid metric type",
 			method:   http.MethodPost,
 			jsonData: `{"ID":"Alloc","type":"foo"}`,
 			hashKey:  "",
 			db:       nil,
 			want: want{
-				statusCode: 501,
+				statusCode: 400,
 				message:    "Invalid metric type\n",
 			},
 		},
@@ -145,8 +147,10 @@ func TestCompressedSetValueJSONMetricHandler(t *testing.T) {
 		},
 	}
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
-	testStorage.GetBuffer().GaugeMetrics["Alloc"] = 123.456
-	testStorage.GetBuffer().CounterMetrics["PoolCounter"] = 50
+	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+		utils.NewGaugeJSONMetric("Alloc", 123.456),
+		utils.NewCounterJSONMetric("PollCount", 50),
+	})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

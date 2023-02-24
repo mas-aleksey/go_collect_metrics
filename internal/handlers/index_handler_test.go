@@ -67,9 +67,11 @@ func TestGetIndexMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testMemStorage := storage.NewStorage(&utils.StorageConfig{})
-	testMemStorage.GetBuffer().GaugeMetrics["Alloc"] = 111.222
-	testMemStorage.GetBuffer().CounterMetrics["PollCount"] = 333
+	testStorage := storage.NewStorage(&utils.StorageConfig{})
+	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+		utils.NewGaugeJSONMetric("Alloc", 111.222),
+		utils.NewCounterJSONMetric("PollCount", 333),
+	})
 
 	tests := []struct {
 		name string
@@ -86,7 +88,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 		},
 		{
 			name: "check 200 fill some metrics",
-			db:   testMemStorage,
+			db:   testStorage,
 			want: want{
 				statusCode: 200,
 				message:    fillPage,
@@ -118,11 +120,13 @@ func TestGetIndexMetricHandler(t *testing.T) {
 
 func TestGetCompressedPage(t *testing.T) {
 
-	testMemStorage := storage.NewStorage(&utils.StorageConfig{})
-	testMemStorage.GetBuffer().GaugeMetrics["Alloc"] = 111.222
-	testMemStorage.GetBuffer().CounterMetrics["PollCount"] = 333
+	testStorage := storage.NewStorage(&utils.StorageConfig{})
+	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+		utils.NewGaugeJSONMetric("Alloc", 111.222),
+		utils.NewCounterJSONMetric("PollCount", 333),
+	})
 
-	r := GetRouter(testMemStorage, utils.ServerConfig{})
+	r := GetRouter(testStorage, utils.ServerConfig{})
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 

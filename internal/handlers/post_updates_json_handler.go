@@ -18,20 +18,26 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 		}
 		log.Printf("updates request: %s\n", string(body))
 		log.Printf("hashKey: %s\n", hashKey)
+
 		metrics, err := utils.LoadButchJSONMetric(body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		for i, metric := range metrics {
-			err = processMetric(&metric, hashKey, db)
-			if err != nil {
+		for _, metric := range metrics {
+			if err := metric.ValidatesAll(hashKey); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			metrics[i] = metric
 		}
-		db.SaveIfSyncMode()
+		metrics, err = db.UpdateJSONMetrics(metrics)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		for i, metric := range metrics {
+			metrics[i].Hash = utils.CalcHash(metric.String(), hashKey)
+		}
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		resp, _ := json.Marshal(metrics)

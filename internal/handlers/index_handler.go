@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/tiraill/go_collect_metrics/internal/storage"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"html/template"
 	"net/http"
 )
@@ -45,17 +44,20 @@ type TemplateData struct {
 func IndexHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data := TemplateData{Metrics: make([]MetricData, 0)}
-		for k, v := range db.GetBuffer().GaugeMetrics {
-			data.Metrics = append(data.Metrics, MetricData{Name: k, Value: utils.ToStr(v)})
+		metrics, err := db.GetAllMetrics()
+		if err != nil {
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
 		}
-		for k, v := range db.GetBuffer().CounterMetrics {
-			data.Metrics = append(data.Metrics, MetricData{Name: k, Value: utils.ToStr(v)})
+		for _, metric := range metrics {
+			data.Metrics = append(data.Metrics, MetricData{Name: metric.ID, Value: metric.ValueString()})
 		}
 		w.Header().Set("content-type", "text/html")
 		fpT, _ := template.New("metrics").Parse(pageTemp)
-		err := fpT.Execute(w, data)
+		err = fpT.Execute(w, data)
 		if err != nil {
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
 		}
 	}
 }

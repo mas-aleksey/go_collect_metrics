@@ -7,23 +7,23 @@ import (
 type Storage interface {
 	Init() error
 	Close()
-	GetConfig() *utils.StorageConfig
-	GetBuffer() *Buffer
 	Ping() bool
-	Save()
-	SaveIfSyncMode()
+	UpdateJSONMetric(utils.JSONMetric) (utils.JSONMetric, error)
+	UpdateJSONMetrics([]utils.JSONMetric) ([]utils.JSONMetric, error)
+	GetJSONMetric(string, string) (utils.JSONMetric, error)
+	GetAllMetrics() ([]utils.JSONMetric, error)
 }
 
 func NewStorage(config *utils.StorageConfig) Storage {
 	if config.DatabaseDSN != "" {
 		return &PgStorage{
-			Buffer: NewBuffer(),
 			Config: config,
 		}
 	} else {
 		return &MemStorage{
-			Buffer: NewBuffer(),
-			Config: config,
+			GaugeMetrics:   make(map[string]float64),
+			CounterMetrics: make(map[string]int64),
+			Config:         config,
 		}
 	}
 }
