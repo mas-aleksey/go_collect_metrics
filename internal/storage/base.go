@@ -15,20 +15,15 @@ type Storage interface {
 }
 
 func NewStorage(config *utils.StorageConfig) Storage {
-	config.DatabaseDSN = "postgresql://ml_platform_orchestrator_admin:pwd@localhost:5467/yandex"
 	if config.DatabaseDSN != "" {
-		db := &PgStorage{
+		return &PgStorage{
 			Config: config,
 		}
-		db.Init()
-		return db
 	} else {
-		db := &MemStorage{
+		return &MemStorage{
 			GaugeMetrics:   make(map[string]float64),
 			CounterMetrics: make(map[string]int64),
 			Config:         config,
 		}
-		db.Init()
-		return db
 	}
 }
