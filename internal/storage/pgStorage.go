@@ -51,7 +51,7 @@ func (p *PgStorage) UpdateJSONMetric(metricIn utils.JSONMetric) (utils.JSONMetri
 	}
 	stmt := fmt.Sprintf(
 		"INSERT INTO metric(name, type, gauge_value, counter_value) VALUES %s %s", insertArg,
-		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = metric.counter_value + excluded.counter_value RETURNING *;",
+		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = metric.counter_value + excluded.counter_value RETURNING name, type, gauge_value, counter_value;",
 	)
 	row := p.Conn.QueryRow(context.Background(), stmt)
 	err := row.Scan(&metricOut.ID, &metricOut.MType, &metricOut.Value, &metricOut.Delta)
@@ -77,7 +77,7 @@ func (p *PgStorage) UpdateJSONMetrics(metricsIn []utils.JSONMetric) ([]utils.JSO
 	}
 	stmt := fmt.Sprintf("INSERT INTO metric(name, type, gauge_value, counter_value) VALUES %s %s",
 		strings.Join(valueStrings, ","),
-		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = metric.counter_value + excluded.counter_value RETURNING *;",
+		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = metric.counter_value + excluded.counter_value RETURNING name, type, gauge_value, counter_value;",
 	)
 	rows, err := p.Conn.Query(context.Background(), stmt)
 	if err != nil {
@@ -96,12 +96,9 @@ func (p *PgStorage) UpdateJSONMetrics(metricsIn []utils.JSONMetric) ([]utils.JSO
 
 func (p *PgStorage) GetJSONMetric(mName, mType string) (utils.JSONMetric, error) {
 	metric := utils.JSONMetric{}
-	query := fmt.Sprintf("SELECT name, type, gauge_value, counter_value FROM metric WHERE name=%s and type=%s;", mName, mType)
-	rows, err := p.Conn.Query(context.Background(), query)
-	if err != nil {
-		return metric, err
-	}
-	err = rows.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
+	query := fmt.Sprintf("SELECT name, type, gauge_value, counter_value FROM metric WHERE name='%s' and type='%s';", mName, mType)
+	row := p.Conn.QueryRow(context.Background(), query)
+	err := row.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
 	if err != nil {
 		return metric, err
 	}
