@@ -7,7 +7,7 @@ import (
 var ReportCount = 29
 
 type Report struct {
-	Metrics []Metric
+	Metrics []JSONMetric
 }
 
 type JSONReport struct {

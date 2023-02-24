@@ -12,17 +12,12 @@ func SaveMetricHandler(db storage.Storage) http.HandlerFunc {
 		mType := chi.URLParam(r, "mType")
 		mName := chi.URLParam(r, "mName")
 		mValue := chi.URLParam(r, "mValue")
-		metric := utils.NewMetric(mType, mName, mValue)
-
-		if !metric.IsValidType() {
-			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
+		metric, err := utils.NewJSONMetric(mType, mName, mValue)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if !metric.IsValidValue() {
-			http.Error(w, "Invalid metric value", http.StatusBadRequest)
-			return
-		}
-		db.GetBuffer().PutMetric(metric)
+		db.GetBuffer().PutJSONMetric(metric)
 		db.SaveIfSyncMode()
 		w.WriteHeader(http.StatusOK)
 

@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 type JSONMetric struct {
@@ -16,7 +17,7 @@ type JSONMetric struct {
 func NewCounterJSONMetric(mName string, delta int64, hashKey string) JSONMetric {
 	m := JSONMetric{
 		ID:    mName,
-		MType: string(CounterMetricType),
+		MType: "counter",
 		Delta: &delta,
 	}
 	m.Hash = CalcHash(m.String(), hashKey)
@@ -26,11 +27,31 @@ func NewCounterJSONMetric(mName string, delta int64, hashKey string) JSONMetric 
 func NewGaugeJSONMetric(mName string, value float64, hashKey string) JSONMetric {
 	m := JSONMetric{
 		ID:    mName,
-		MType: string(GaugeMetricType),
+		MType: "gauge",
 		Value: &value,
 	}
 	m.Hash = CalcHash(m.String(), hashKey)
 	return m
+}
+
+func NewJSONMetric(metricType, metricName, metricValue string) (JSONMetric, error) {
+	m := JSONMetric{}
+	switch metricType {
+	case "gauge":
+		val, err := strconv.ParseFloat(metricValue, 64)
+		if err != nil {
+			return m, fmt.Errorf("invalid gauge metric value")
+		}
+		return NewGaugeJSONMetric(metricName, val, ""), nil
+	case "counter":
+		val, err := strconv.ParseInt(metricValue, 10, 64)
+		if err != nil {
+			return m, fmt.Errorf("invalid counter metric value")
+		}
+		return NewCounterJSONMetric(metricName, val, ""), nil
+	default:
+		return m, fmt.Errorf("invalid metric type")
+	}
 }
 
 func LoadJSONMetric(body []byte) (JSONMetric, error) {
@@ -55,6 +76,17 @@ func (m JSONMetric) String() string {
 		return fmt.Sprintf("%s:gauge:%f", m.ID, *m.Value)
 	case "counter":
 		return fmt.Sprintf("%s:counter:%d", m.ID, *m.Delta)
+	default:
+		return ""
+	}
+}
+
+func (m JSONMetric) ValueString() string {
+	switch m.MType {
+	case "gauge":
+		return fmt.Sprintf("%g", *m.Value)
+	case "counter":
+		return fmt.Sprintf("%d", *m.Delta)
 	default:
 		return ""
 	}

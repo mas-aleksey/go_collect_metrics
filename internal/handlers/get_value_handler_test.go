@@ -48,13 +48,13 @@ func TestGetValueMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:    "check 501 invalid metric type",
+			name:    "check 400 invalid metric type",
 			method:  http.MethodGet,
 			request: "/value/type/name",
 			db:      nil,
 			want: want{
-				statusCode: 501,
-				message:    "Invalid metric type\n",
+				statusCode: 400,
+				message:    "invalid metric type\n",
 			},
 		},
 		{

@@ -2,7 +2,6 @@ package storage
 
 import (
 	"github.com/tiraill/go_collect_metrics/internal/utils"
-	"strconv"
 	"sync"
 )
 
@@ -19,20 +18,6 @@ func NewBuffer() *Buffer {
 	}
 }
 
-func (b *Buffer) PutMetric(metric utils.Metric) {
-	b.Mutex.Lock()
-	defer b.Mutex.Unlock()
-
-	switch metric.Type {
-	case utils.GaugeMetricType:
-		val, _ := strconv.ParseFloat(metric.Value, 64)
-		b.GaugeMetrics[metric.Name] = val
-	case utils.CounterMetricType:
-		val, _ := strconv.ParseInt(metric.Value, 10, 64)
-		b.CounterMetrics[metric.Name] += val
-	}
-}
-
 func (b *Buffer) PutJSONMetric(metrics utils.JSONMetric) {
 	b.Mutex.Lock()
 	defer b.Mutex.Unlock()
@@ -42,24 +27,6 @@ func (b *Buffer) PutJSONMetric(metrics utils.JSONMetric) {
 		b.GaugeMetrics[metrics.ID] = *metrics.Value
 	case "counter":
 		b.CounterMetrics[metrics.ID] += *metrics.Delta
-	}
-}
-
-func (b *Buffer) UpdateMetricValue(metric *utils.Metric) bool {
-	b.Mutex.RLock()
-	defer b.Mutex.RUnlock()
-
-	switch metric.Type {
-	case utils.GaugeMetricType:
-		val, ok := b.GaugeMetrics[metric.Name]
-		metric.Value = utils.ToStr(val)
-		return ok
-	case utils.CounterMetricType:
-		val, ok := b.CounterMetrics[metric.Name]
-		metric.Value = utils.ToStr(val)
-		return ok
-	default:
-		return false
 	}
 }
 

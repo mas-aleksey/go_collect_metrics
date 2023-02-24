@@ -10,6 +10,7 @@ import (
 
 func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		//r.Context()
 		body, err := ReadBody(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

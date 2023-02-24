@@ -11,19 +11,18 @@ func SetValueMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		mType := chi.URLParam(r, "mType")
 		mName := chi.URLParam(r, "mName")
-		metric := utils.NewMetric(mType, mName, "0")
-
-		if !metric.IsValidType() {
-			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
+		metric, err := utils.NewJSONMetric(mType, mName, "0")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		ok := db.GetBuffer().UpdateMetricValue(&metric)
+		ok := db.GetBuffer().UpdateJSONMetricValue(&metric)
 		if !ok {
 			http.Error(w, "Metric not found", http.StatusNotFound)
 			return
 		}
 		w.Header().Set("content-type", "text/plain")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(metric.Value))
+		w.Write([]byte(metric.ValueString()))
 	}
 }
