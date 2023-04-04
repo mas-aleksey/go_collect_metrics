@@ -3,8 +3,13 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"strconv"
 )
+
+var ErrMetricHash = errors.New("invalid metric hash")
+var ErrMetricType = errors.New("invalid metric type")
+var ErrMetricValue = errors.New("invalid metric value")
 
 type JSONMetric struct {
 	ID    string   `json:"id"`              // имя метрики
@@ -36,17 +41,17 @@ func NewJSONMetric(metricType, metricName, metricValue string) (JSONMetric, erro
 	case "gauge":
 		val, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
-			return m, fmt.Errorf("invalid gauge metric value")
+			return m, ErrMetricValue
 		}
 		return NewGaugeJSONMetric(metricName, val), nil
 	case "counter":
 		val, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
-			return m, fmt.Errorf("invalid counter metric value")
+			return m, ErrMetricValue
 		}
 		return NewCounterJSONMetric(metricName, val), nil
 	default:
-		return m, fmt.Errorf("invalid metric type")
+		return m, ErrMetricType
 	}
 }
 
@@ -121,13 +126,13 @@ func (m JSONMetric) IsValidHash(hashKey string) bool {
 
 func (m JSONMetric) ValidatesAll(hashKey string) error {
 	if !m.IsValidHash(hashKey) {
-		return fmt.Errorf("invalid metric hash")
+		return ErrMetricHash
 	}
 	if !m.IsValidType() {
-		return fmt.Errorf("invalid metric type")
+		return ErrMetricType
 	}
 	if !m.IsValidValue() {
-		return fmt.Errorf("invalid metric value")
+		return ErrMetricValue
 	}
 	return nil
 }

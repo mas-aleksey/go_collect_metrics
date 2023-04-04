@@ -44,12 +44,12 @@ func TestSaveMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:    "check 400 invalid metric type",
+			name:    "check 501 invalid metric type",
 			method:  http.MethodPost,
 			request: "/update/type/name/value",
 			db:      nil,
 			want: want{
-				statusCode: 400,
+				statusCode: 501,
 				message:    "invalid metric type\n",
 			},
 		},
@@ -60,7 +60,7 @@ func TestSaveMetricHandler(t *testing.T) {
 			db:      nil,
 			want: want{
 				statusCode: 400,
-				message:    "invalid gauge metric value\n",
+				message:    "invalid metric value\n",
 			},
 		},
 		{
@@ -70,7 +70,7 @@ func TestSaveMetricHandler(t *testing.T) {
 			db:      nil,
 			want: want{
 				statusCode: 400,
-				message:    "invalid counter metric value\n",
+				message:    "invalid metric value\n",
 			},
 		},
 		{

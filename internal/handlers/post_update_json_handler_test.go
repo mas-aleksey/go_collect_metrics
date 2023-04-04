@@ -49,12 +49,12 @@ func TestSaveJsonMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name:     "check 400 invalid metric type",
+			name:     "check 501 invalid metric type",
 			method:   http.MethodPost,
 			jsonData: `{"ID":"Alloc","type":"foo","Value":123}`,
 			db:       nil,
 			want: want{
-				statusCode: 400,
+				statusCode: 501,
 				message:    "invalid metric type\n",
 			},
 		},

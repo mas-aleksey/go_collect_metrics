@@ -26,7 +26,16 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 		}
 		for _, metric := range metrics {
 			if err := metric.ValidatesAll(hashKey); err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				switch err {
+				case utils.ErrMetricHash:
+					http.Error(w, err.Error(), http.StatusBadRequest)
+				case utils.ErrMetricType:
+					http.Error(w, err.Error(), http.StatusNotImplemented)
+				case utils.ErrMetricValue:
+					http.Error(w, err.Error(), http.StatusBadRequest)
+				default:
+					http.Error(w, err.Error(), http.StatusBadRequest)
+				}
 				return
 			}
 		}
