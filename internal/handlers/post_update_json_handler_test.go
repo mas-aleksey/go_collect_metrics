@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
@@ -14,7 +15,7 @@ import (
 
 func TestSaveJsonMetricHandler(t *testing.T) {
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
-	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+	_, _ = testStorage.UpdateJSONMetrics(context.Background(), []utils.JSONMetric{
 		utils.NewCounterJSONMetric("PoolCounter", 77),
 	})
 	type want struct {

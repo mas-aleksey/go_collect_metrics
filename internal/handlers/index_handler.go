@@ -43,8 +43,9 @@ type TemplateData struct {
 
 func IndexHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		data := TemplateData{Metrics: make([]MetricData, 0)}
-		metrics, err := db.GetAllMetrics()
+		metrics, err := db.GetAllMetrics(ctx)
 		if err != nil {
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)
 			return

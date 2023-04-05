@@ -9,6 +9,7 @@ import (
 
 func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		body, err := ReadBody(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -32,7 +33,7 @@ func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc 
 			}
 			return
 		}
-		metric, err = db.UpdateJSONMetric(metric)
+		metric, err = db.UpdateJSONMetric(ctx, metric)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

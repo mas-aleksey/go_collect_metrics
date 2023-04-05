@@ -10,7 +10,7 @@ import (
 
 func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		//r.Context()
+		ctx := r.Context()
 		body, err := ReadBody(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -39,7 +39,7 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 				return
 			}
 		}
-		metrics, err = db.UpdateJSONMetrics(metrics)
+		metrics, err = db.UpdateJSONMetrics(ctx, metrics)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

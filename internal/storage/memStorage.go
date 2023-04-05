@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
@@ -25,7 +26,7 @@ func flushBackground(m *MemStorage, interval time.Duration) {
 	}
 }
 
-func (m *MemStorage) Init() error {
+func (m *MemStorage) Init(ctx context.Context) error {
 	if m.Config.StoreInterval != 0 {
 		go flushBackground(m, m.Config.StoreInterval)
 	}
@@ -49,15 +50,15 @@ func (m *MemStorage) Init() error {
 	return nil
 }
 
-func (m *MemStorage) Close() {
+func (m *MemStorage) Close(ctx context.Context) {
 	m.saveToFile()
 }
 
-func (m *MemStorage) Ping() bool {
+func (m *MemStorage) Ping(ctx context.Context) bool {
 	return true
 }
 
-func (m *MemStorage) UpdateJSONMetric(metricIn utils.JSONMetric) (utils.JSONMetric, error) {
+func (m *MemStorage) UpdateJSONMetric(ctx context.Context, metricIn utils.JSONMetric) (utils.JSONMetric, error) {
 	metricOut := m.updateJSONMetric(metricIn)
 	if m.Config.StoreInterval == 0 {
 		m.saveToFile()
@@ -86,7 +87,7 @@ func (m *MemStorage) updateJSONMetric(metricIn utils.JSONMetric) utils.JSONMetri
 	return metricOut
 }
 
-func (m *MemStorage) UpdateJSONMetrics(metricsIn []utils.JSONMetric) ([]utils.JSONMetric, error) {
+func (m *MemStorage) UpdateJSONMetrics(ctx context.Context, metricsIn []utils.JSONMetric) ([]utils.JSONMetric, error) {
 	metricsOut := make([]utils.JSONMetric, 0)
 	for _, metricIn := range metricsIn {
 		metricOut := m.updateJSONMetric(metricIn)
@@ -98,7 +99,7 @@ func (m *MemStorage) UpdateJSONMetrics(metricsIn []utils.JSONMetric) ([]utils.JS
 	return metricsOut, nil
 }
 
-func (m *MemStorage) GetJSONMetric(mName, mType string) (utils.JSONMetric, error) {
+func (m *MemStorage) GetJSONMetric(ctx context.Context, mName, mType string) (utils.JSONMetric, error) {
 	metric := utils.JSONMetric{
 		ID:    mName,
 		MType: mType,
@@ -125,7 +126,7 @@ func (m *MemStorage) GetJSONMetric(mName, mType string) (utils.JSONMetric, error
 	return metric, nil
 }
 
-func (m *MemStorage) GetAllMetrics() ([]utils.JSONMetric, error) {
+func (m *MemStorage) GetAllMetrics(ctx context.Context) ([]utils.JSONMetric, error) {
 	metrics := make([]utils.JSONMetric, 0)
 	for name, val := range m.GaugeMetrics {
 		metrics = append(metrics, utils.NewGaugeJSONMetric(name, val))

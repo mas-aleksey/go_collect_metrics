@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -42,7 +43,7 @@ var DATA = `[
 
 func TestSaveBatchJSONMetricHandler(t *testing.T) {
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
-	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+	_, _ = testStorage.UpdateJSONMetrics(context.Background(), []utils.JSONMetric{
 		utils.NewCounterJSONMetric("PoolCounter", 77),
 	})
 	type want struct {

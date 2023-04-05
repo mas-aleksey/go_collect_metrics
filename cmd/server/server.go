@@ -36,9 +36,10 @@ func main() {
 	flag.Parse()
 	serverConfig := utils.MakeServerConfig(*address, *hashKey)
 	storageConfig := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
+	ctx := context.Background()
 
 	db := storage.NewStorage(&storageConfig)
-	err := db.Init()
+	err := db.Init(ctx)
 	if err != nil {
 		log.Printf("Error init db: %s", err)
 	} else {
@@ -66,7 +67,7 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer func() {
-		db.Close()
+		db.Close(ctx)
 		cancel()
 	}()
 

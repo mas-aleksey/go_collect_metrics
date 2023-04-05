@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"compress/gzip"
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
@@ -68,7 +69,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 		message    string
 	}
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
-	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+	_, _ = testStorage.UpdateJSONMetrics(context.Background(), []utils.JSONMetric{
 		utils.NewGaugeJSONMetric("Alloc", 111.222),
 		utils.NewCounterJSONMetric("PollCount", 333),
 	})
@@ -121,7 +122,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 func TestGetCompressedPage(t *testing.T) {
 
 	testStorage := storage.NewStorage(&utils.StorageConfig{})
-	_, _ = testStorage.UpdateJSONMetrics([]utils.JSONMetric{
+	_, _ = testStorage.UpdateJSONMetrics(context.Background(), []utils.JSONMetric{
 		utils.NewGaugeJSONMetric("Alloc", 111.222),
 		utils.NewCounterJSONMetric("PollCount", 333),
 	})

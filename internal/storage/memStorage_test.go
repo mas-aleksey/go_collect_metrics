@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"testing"
@@ -49,7 +50,7 @@ func TestMemStorage_SaveMetric(t *testing.T) {
 				Config:         &utils.StorageConfig{StoreInterval: 1},
 			}
 			for _, metric := range tt.metrics {
-				_, err := memStorage.UpdateJSONMetric(metric)
+				_, err := memStorage.UpdateJSONMetric(context.Background(), metric)
 				assert.Nil(t, err)
 			}
 			assert.Equal(t, memStorage.GaugeMetrics, tt.want.gaugeMetrics)
@@ -100,7 +101,7 @@ func TestMemStorage_SaveJsonMetric(t *testing.T) {
 				Config:         &utils.StorageConfig{StoreInterval: 1},
 			}
 			for _, metric := range tt.metrics {
-				_, err := memStorage.UpdateJSONMetric(metric)
+				_, err := memStorage.UpdateJSONMetric(context.Background(), metric)
 				assert.Nil(t, err)
 			}
 			assert.Equal(t, memStorage.GaugeMetrics, tt.want.gaugeMetrics)
@@ -115,9 +116,9 @@ func TestMemStorage_GetJSONMetric(t *testing.T) {
 		CounterMetrics: map[string]int64{"name": 123},
 		Config:         &utils.StorageConfig{StoreInterval: 1},
 	}
-	gaugeMetric, err := m.GetJSONMetric("name", "gauge")
+	gaugeMetric, err := m.GetJSONMetric(context.Background(), "name", "gauge")
 	assert.Nil(t, err)
-	counterMetric, err := m.GetJSONMetric("name", "counter")
+	counterMetric, err := m.GetJSONMetric(context.Background(), "name", "counter")
 	assert.Nil(t, err)
 	assert.Equal(t, 123.4, *gaugeMetric.Value)
 	assert.Equal(t, int64(123), *counterMetric.Delta)

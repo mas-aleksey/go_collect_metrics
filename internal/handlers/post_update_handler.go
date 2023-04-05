@@ -9,6 +9,7 @@ import (
 
 func SaveMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		mType := chi.URLParam(r, "mType")
 		mName := chi.URLParam(r, "mName")
 		mValue := chi.URLParam(r, "mValue")
@@ -24,7 +25,7 @@ func SaveMetricHandler(db storage.Storage) http.HandlerFunc {
 			}
 			return
 		}
-		_, err = db.UpdateJSONMetric(metric)
+		_, err = db.UpdateJSONMetric(ctx, metric)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

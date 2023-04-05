@@ -1,17 +1,18 @@
 package storage
 
 import (
+	"context"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 type Storage interface {
-	Init() error
-	Close()
-	Ping() bool
-	UpdateJSONMetric(utils.JSONMetric) (utils.JSONMetric, error)
-	UpdateJSONMetrics([]utils.JSONMetric) ([]utils.JSONMetric, error)
-	GetJSONMetric(string, string) (utils.JSONMetric, error)
-	GetAllMetrics() ([]utils.JSONMetric, error)
+	Init(context.Context) error
+	Close(context.Context)
+	Ping(context.Context) bool
+	UpdateJSONMetric(context.Context, utils.JSONMetric) (utils.JSONMetric, error)
+	UpdateJSONMetrics(context.Context, []utils.JSONMetric) ([]utils.JSONMetric, error)
+	GetJSONMetric(context.Context, string, string) (utils.JSONMetric, error)
+	GetAllMetrics(context.Context) ([]utils.JSONMetric, error)
 }
 
 func NewStorage(config *utils.StorageConfig) Storage {

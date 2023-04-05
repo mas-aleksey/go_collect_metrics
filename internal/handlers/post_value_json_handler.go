@@ -9,6 +9,7 @@ import (
 
 func GetJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		body, err := ReadBody(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -23,7 +24,7 @@ func GetJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 			http.Error(w, "Invalid metric type", http.StatusBadRequest)
 			return
 		}
-		metric, err = db.GetJSONMetric(metric.ID, metric.MType)
+		metric, err = db.GetJSONMetric(ctx, metric.ID, metric.MType)
 		if err != nil {
 			http.Error(w, "Metric not found", http.StatusNotFound)
 			return
