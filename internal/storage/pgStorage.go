@@ -6,7 +6,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
-	"strings"
 )
 
 type PgStorage struct {
@@ -41,19 +40,12 @@ func (p *PgStorage) Ping(ctx context.Context) bool {
 
 func (p *PgStorage) UpdateJSONMetric(ctx context.Context, metricIn utils.JSONMetric) (utils.JSONMetric, error) {
 	metricOut := utils.JSONMetric{}
-	insertArg := ""
-
-	switch metricIn.MType {
-	case "gauge":
-		insertArg = fmt.Sprintf("('%s', 'gauge', %v, null)", metricIn.ID, *metricIn.Value)
-	case "counter":
-		insertArg = fmt.Sprintf("('%s', 'counter', null, %v)", metricIn.ID, *metricIn.Delta)
-	}
-	stmt := fmt.Sprintf(
-		"INSERT INTO metric(name, type, gauge_value, counter_value) VALUES %s %s", insertArg,
-		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = metric.counter_value + excluded.counter_value RETURNING name, type, gauge_value, counter_value;",
-	)
-	row := p.Conn.QueryRow(ctx, stmt)
+	stmt := `INSERT INTO metric(name, type, gauge_value, counter_value) VALUES ('$1', '$2', $3, $4) 
+		ON CONFLICT (name, type) DO UPDATE SET 
+		    gauge_value = excluded.gauge_value, 
+		    counter_value = metric.counter_value + excluded.counter_value 
+		RETURNING name, type, gauge_value, counter_value;`
+	row := p.Conn.QueryRow(ctx, stmt, metricIn.ID, metricIn.MType, *metricIn.Value, *metricIn.Delta)
 	err := row.Scan(&metricOut.ID, &metricOut.MType, &metricOut.Value, &metricOut.Delta)
 	if err != nil {
 		return metricOut, err
@@ -62,24 +54,18 @@ func (p *PgStorage) UpdateJSONMetric(ctx context.Context, metricIn utils.JSONMet
 }
 
 func (p *PgStorage) UpdateJSONMetrics(ctx context.Context, metricsIn []utils.JSONMetric) ([]utils.JSONMetric, error) {
-	valueStrings := make([]string, 0)
 	metricsOut := make([]utils.JSONMetric, 0)
-
+	stmt := `INSERT INTO metric(name, type, gauge_value, counter_value) VALUES ('$1', '$2', $3, $4) 
+		ON CONFLICT (name, type) DO UPDATE SET 
+		    gauge_value = excluded.gauge_value, 
+		    counter_value = metric.counter_value + excluded.counter_value 
+		RETURNING name, type, gauge_value, counter_value;`
+	batch := &pgx.Batch{}
 	for _, metric := range metricsIn {
-		insertArg := ""
-		switch metric.MType {
-		case "gauge":
-			insertArg = fmt.Sprintf("('%s', 'gauge', %v, null)", metric.ID, *metric.Value)
-		case "counter":
-			insertArg = fmt.Sprintf("('%s', 'counter', null, %v)", metric.ID, *metric.Delta)
-		}
-		valueStrings = append(valueStrings, insertArg)
+		batch.Queue(stmt, metric.ID, metric.MType, *metric.Value, *metric.Delta)
 	}
-	stmt := fmt.Sprintf("INSERT INTO metric(name, type, gauge_value, counter_value) VALUES %s %s",
-		strings.Join(valueStrings, ","),
-		"ON CONFLICT (name, type) DO UPDATE SET gauge_value = excluded.gauge_value, counter_value = metric.counter_value + excluded.counter_value RETURNING name, type, gauge_value, counter_value;",
-	)
-	rows, err := p.Conn.Query(ctx, stmt)
+	br := p.Conn.SendBatch(ctx, batch)
+	rows, err := br.Query()
 	if err != nil {
 		return metricsOut, err
 	}
