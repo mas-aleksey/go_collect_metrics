@@ -8,14 +8,14 @@ import (
 	"log"
 )
 
-var counterStmt = `INSERT INTO metric(name, type, gauge_value, counter_value) VALUES ('$1', 'counter', null, $2) 
+var counterStmt = `INSERT INTO metric(name, type, gauge_value, counter_value) VALUES ($1, 'counter', null, $2) 
 		ON CONFLICT (name, type) DO UPDATE SET 
 		    counter_value = metric.counter_value + excluded.counter_value 
 		RETURNING name, type, gauge_value, counter_value;`
 
-var gaugeStmt = `INSERT INTO metric(name, type, gauge_value, counter_value) VALUES ('$1', 'gauge', $2, null) 
+var gaugeStmt = `INSERT INTO metric(name, type, gauge_value, counter_value) VALUES ($1, 'gauge', $2, null) 
 		ON CONFLICT (name, type) DO UPDATE SET 
-		    gauge_value = excluded.gauge_value, 
+		    gauge_value = excluded.gauge_value
 		RETURNING name, type, gauge_value, counter_value;`
 
 type PgStorage struct {
@@ -66,27 +66,23 @@ func (p *PgStorage) UpdateJSONMetric(ctx context.Context, metricIn utils.JSONMet
 
 func (p *PgStorage) UpdateJSONMetrics(ctx context.Context, metricsIn []utils.JSONMetric) ([]utils.JSONMetric, error) {
 	metricsOut := make([]utils.JSONMetric, 0)
-	batch := &pgx.Batch{}
-	for _, metric := range metricsIn {
-		switch metric.MType {
-		case "counter":
-			batch.Queue(counterStmt, metric.ID, *metric.Delta)
-		case "gauge":
-			batch.Queue(gaugeStmt, metric.ID, *metric.Value)
-		}
-	}
-	br := p.Conn.SendBatch(ctx, batch)
-	rows, err := br.Query()
+	tx, err := p.Conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return metricsOut, err
 	}
-	for rows.Next() {
-		metric := utils.JSONMetric{}
-		err = rows.Scan(&metric.ID, &metric.MType, &metric.Value, &metric.Delta)
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
+		}
+	}()
+	for _, metric := range metricsIn {
+		out, err := p.UpdateJSONMetric(ctx, metric)
 		if err != nil {
 			return metricsOut, err
 		}
-		metricsOut = append(metricsOut, metric)
+		metricsOut = append(metricsOut, out)
 	}
 	return metricsOut, nil
 }
