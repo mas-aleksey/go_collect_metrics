@@ -3,27 +3,21 @@ package handlers
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"net/http"
 )
 
-func SetValueMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func GetValueMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		mType := chi.URLParam(r, "mType")
 		mName := chi.URLParam(r, "mName")
-		metric := utils.NewMetric(mType, mName, "0")
-
-		if !metric.IsValidType() {
-			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
-			return
-		}
-		ok := storage.SetMetricValue(&metric)
-		if !ok {
+		metric, err := db.GetJSONMetric(ctx, mName, mType)
+		if err != nil {
 			http.Error(w, "Metric not found", http.StatusNotFound)
 			return
 		}
 		w.Header().Set("content-type", "text/plain")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(metric.Value))
+		w.Write([]byte(metric.ValueString()))
 	}
 }

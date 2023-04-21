@@ -1,93 +1,35 @@
 package storage
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
 	"os"
-	"strconv"
 	"sync"
+	"time"
 )
 
 type MemStorage struct {
-	GaugeMetrics   map[string]float64     `json:"GaugeMetrics"`
-	CounterMetrics map[string]int64       `json:"CounterMetrics"`
-	Mutex          sync.RWMutex           `json:"-"`
-	Config         utils.MemStorageConfig `json:"-"`
+	GaugeMetrics   map[string]float64   `json:"GaugeMetrics"`
+	CounterMetrics map[string]int64     `json:"CounterMetrics"`
+	Mutex          sync.RWMutex         `json:"-"`
+	Config         *utils.StorageConfig `json:"-"`
 }
 
-func NewMemStorage(config utils.MemStorageConfig) *MemStorage {
-	return &MemStorage{
-		GaugeMetrics:   make(map[string]float64),
-		CounterMetrics: make(map[string]int64),
-		Config:         config,
+func flushBackground(m *MemStorage, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for range ticker.C {
+		m.saveToFile()
 	}
 }
 
-func (m *MemStorage) SaveMetric(metric utils.Metric) {
-	m.Mutex.Lock()
-	defer m.Mutex.Unlock()
-
-	switch metric.Type {
-	case utils.GaugeMetricType:
-		val, _ := strconv.ParseFloat(metric.Value, 64)
-		m.GaugeMetrics[metric.Name] = val
-	case utils.CounterMetricType:
-		val, _ := strconv.ParseInt(metric.Value, 10, 64)
-		m.CounterMetrics[metric.Name] += val
+func (m *MemStorage) Init(ctx context.Context) error {
+	if m.Config.StoreInterval != 0 {
+		go flushBackground(m, m.Config.StoreInterval)
 	}
-}
-
-func (m *MemStorage) SaveJSONMetric(metrics utils.JSONMetric) {
-	m.Mutex.Lock()
-	defer m.Mutex.Unlock()
-
-	switch metrics.MType {
-	case "gauge":
-		m.GaugeMetrics[metrics.ID] = *metrics.Value
-	case "counter":
-		m.CounterMetrics[metrics.ID] += *metrics.Delta
-	}
-}
-
-func (m *MemStorage) SetMetricValue(metric *utils.Metric) bool {
-	m.Mutex.RLock()
-	defer m.Mutex.RUnlock()
-
-	switch metric.Type {
-	case utils.GaugeMetricType:
-		val, ok := m.GaugeMetrics[metric.Name]
-		metric.Value = utils.ToStr(val)
-		return ok
-	case utils.CounterMetricType:
-		val, ok := m.CounterMetrics[metric.Name]
-		metric.Value = utils.ToStr(val)
-		return ok
-	default:
-		return false
-	}
-}
-
-func (m *MemStorage) SetJSONMetricValue(metric *utils.JSONMetric) bool {
-	m.Mutex.RLock()
-	defer m.Mutex.RUnlock()
-
-	switch metric.MType {
-	case "gauge":
-		val, ok := m.GaugeMetrics[metric.ID]
-		metric.Value = &val
-		return ok
-	case "counter":
-		val, ok := m.CounterMetrics[metric.ID]
-		metric.Delta = &val
-		return ok
-	default:
-		return false
-	}
-}
-
-func (m *MemStorage) LoadFromFile() error {
 	if !m.Config.Restore {
 		return fmt.Errorf("no need restore")
 	}
@@ -108,24 +50,96 @@ func (m *MemStorage) LoadFromFile() error {
 	return nil
 }
 
-func (m *MemStorage) SaveToFileIfSyncMode() {
+func (m *MemStorage) Close(ctx context.Context) {
+	m.saveToFile()
+}
+
+func (m *MemStorage) Ping(ctx context.Context) bool {
+	return true
+}
+
+func (m *MemStorage) UpdateJSONMetric(ctx context.Context, metricIn utils.JSONMetric) (utils.JSONMetric, error) {
+	metricOut := m.updateJSONMetric(metricIn)
 	if m.Config.StoreInterval == 0 {
-		m.SaveToFileWithLog()
+		m.saveToFile()
 	}
+	return metricOut, nil
 }
 
-func (m *MemStorage) SaveToFileWithLog() {
-	err := m.SaveToFile()
-	if err != nil {
-		log.Print("Failed save to file", err)
-	} else {
-		log.Print("Save storage to file")
+func (m *MemStorage) updateJSONMetric(metricIn utils.JSONMetric) utils.JSONMetric {
+	metricOut := utils.JSONMetric{
+		ID:    metricIn.ID,
+		MType: metricIn.MType,
 	}
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+
+	switch metricIn.MType {
+	case "gauge":
+		val := *metricIn.Value
+		m.GaugeMetrics[metricIn.ID] = val
+		metricOut.Value = &val
+	case "counter":
+		val := *metricIn.Delta + m.CounterMetrics[metricIn.ID]
+		m.CounterMetrics[metricIn.ID] = val
+		metricOut.Delta = &val
+	}
+	return metricOut
 }
 
-func (m *MemStorage) SaveToFile() error {
+func (m *MemStorage) UpdateJSONMetrics(ctx context.Context, metricsIn []utils.JSONMetric) ([]utils.JSONMetric, error) {
+	metricsOut := make([]utils.JSONMetric, 0)
+	for _, metricIn := range metricsIn {
+		metricOut := m.updateJSONMetric(metricIn)
+		metricsOut = append(metricsOut, metricOut)
+	}
+	if m.Config.StoreInterval == 0 {
+		m.saveToFile()
+	}
+	return metricsOut, nil
+}
+
+func (m *MemStorage) GetJSONMetric(ctx context.Context, mName, mType string) (utils.JSONMetric, error) {
+	metric := utils.JSONMetric{
+		ID:    mName,
+		MType: mType,
+	}
+	m.Mutex.RLock()
+	defer m.Mutex.RUnlock()
+
+	switch mType {
+	case "gauge":
+		val, ok := m.GaugeMetrics[metric.ID]
+		if !ok {
+			return metric, fmt.Errorf("gauge metric no found")
+		}
+		metric.Value = &val
+	case "counter":
+		val, ok := m.CounterMetrics[metric.ID]
+		if !ok {
+			return metric, fmt.Errorf("counter metric no found")
+		}
+		metric.Delta = &val
+	default:
+		return metric, fmt.Errorf("invalid metric type")
+	}
+	return metric, nil
+}
+
+func (m *MemStorage) GetAllMetrics(ctx context.Context) ([]utils.JSONMetric, error) {
+	metrics := make([]utils.JSONMetric, 0)
+	for name, val := range m.GaugeMetrics {
+		metrics = append(metrics, utils.NewGaugeJSONMetric(name, val))
+	}
+	for name, val := range m.CounterMetrics {
+		metrics = append(metrics, utils.NewCounterJSONMetric(name, val))
+	}
+	return metrics, nil
+}
+
+func (m *MemStorage) saveToFile() {
 	if m.Config.StoreFile == "" {
-		return fmt.Errorf("filename is empty")
+		log.Print("Failed save to file: filename is empty")
 	}
 	m.Mutex.RLock()
 	defer m.Mutex.RUnlock()
@@ -133,19 +147,19 @@ func (m *MemStorage) SaveToFile() error {
 	file, err := os.Create(m.Config.StoreFile)
 
 	if err != nil {
-		return err
+		log.Print("Failed save to file", err)
 	}
 	data, err := json.Marshal(m)
 	if err != nil {
-		return err
+		log.Print("Failed save to file", err)
 	}
 	_, err = file.Write(data)
 	if err != nil {
-		return err
+		log.Print("Failed save to file", err)
 	}
 	err = file.Close()
 	if err != nil {
-		return err
+		log.Print("Failed save to file", err)
 	}
-	return nil
+	log.Print("Save storage to file")
 }

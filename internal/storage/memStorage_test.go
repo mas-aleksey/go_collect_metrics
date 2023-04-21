@@ -1,34 +1,40 @@
 package storage
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"testing"
 )
 
 func TestMemStorage_SaveMetric(t *testing.T) {
+
+	makeMetric := func(metricType, metricName, metricValue string) utils.JSONMetric {
+		m, _ := utils.NewJSONMetric(metricType, metricName, metricValue)
+		return m
+	}
 	type want struct {
 		gaugeMetrics   map[string]float64
 		counterMetrics map[string]int64
 	}
 	tests := []struct {
 		name    string
-		metrics []utils.Metric
+		metrics []utils.JSONMetric
 		want    want
 	}{
 		{
 			name: "save metrics",
-			metrics: []utils.Metric{
-				utils.NewMetric("gauge", "RandomValue", "111.111"),
-				utils.NewMetric("gauge", "RandomValue", "222.222"),
-				utils.NewMetric("gauge", "RandomValue", "333.333"),
-				utils.NewMetric("gauge", "Alloc", "123.456"),
-				utils.NewMetric("gauge", "Frees", "1"),
-				utils.NewMetric("gauge", "Frees", "0"),
-				utils.NewMetric("gauge", "Sys", "555"),
-				utils.NewMetric("counter", "PollCount", "1"),
-				utils.NewMetric("counter", "PollCount", "2"),
-				utils.NewMetric("counter", "PollCount", "3"),
+			metrics: []utils.JSONMetric{
+				makeMetric("gauge", "RandomValue", "111.111"),
+				makeMetric("gauge", "RandomValue", "222.222"),
+				makeMetric("gauge", "RandomValue", "333.333"),
+				makeMetric("gauge", "Alloc", "123.456"),
+				makeMetric("gauge", "Frees", "1"),
+				makeMetric("gauge", "Frees", "0"),
+				makeMetric("gauge", "Sys", "555"),
+				makeMetric("counter", "PollCount", "1"),
+				makeMetric("counter", "PollCount", "2"),
+				makeMetric("counter", "PollCount", "3"),
 			},
 			want: want{
 				gaugeMetrics:   map[string]float64{"RandomValue": 333.333, "Alloc": 123.456, "Frees": 0, "Sys": 555},
@@ -38,12 +44,17 @@ func TestMemStorage_SaveMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := NewMemStorage(utils.MemStorageConfig{})
-			for _, metric := range tt.metrics {
-				m.SaveMetric(metric)
+			memStorage := MemStorage{
+				GaugeMetrics:   make(map[string]float64),
+				CounterMetrics: make(map[string]int64),
+				Config:         &utils.StorageConfig{StoreInterval: 1},
 			}
-			assert.Equal(t, m.GaugeMetrics, tt.want.gaugeMetrics)
-			assert.Equal(t, m.CounterMetrics, tt.want.counterMetrics)
+			for _, metric := range tt.metrics {
+				_, err := memStorage.UpdateJSONMetric(context.Background(), metric)
+				assert.Nil(t, err)
+			}
+			assert.Equal(t, memStorage.GaugeMetrics, tt.want.gaugeMetrics)
+			assert.Equal(t, memStorage.CounterMetrics, tt.want.counterMetrics)
 		})
 	}
 }
@@ -84,50 +95,31 @@ func TestMemStorage_SaveJsonMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := NewMemStorage(utils.MemStorageConfig{})
-			for _, metric := range tt.metrics {
-				m.SaveJSONMetric(metric)
+			memStorage := MemStorage{
+				GaugeMetrics:   make(map[string]float64),
+				CounterMetrics: make(map[string]int64),
+				Config:         &utils.StorageConfig{StoreInterval: 1},
 			}
-			assert.Equal(t, m.GaugeMetrics, tt.want.gaugeMetrics)
-			assert.Equal(t, m.CounterMetrics, tt.want.counterMetrics)
+			for _, metric := range tt.metrics {
+				_, err := memStorage.UpdateJSONMetric(context.Background(), metric)
+				assert.Nil(t, err)
+			}
+			assert.Equal(t, memStorage.GaugeMetrics, tt.want.gaugeMetrics)
+			assert.Equal(t, memStorage.CounterMetrics, tt.want.counterMetrics)
 		})
 	}
 }
 
-func TestMemStorage_SetMetricValue(t *testing.T) {
+func TestMemStorage_GetJSONMetric(t *testing.T) {
 	m := MemStorage{
 		GaugeMetrics:   map[string]float64{"name": 123.4},
 		CounterMetrics: map[string]int64{"name": 123},
+		Config:         &utils.StorageConfig{StoreInterval: 1},
 	}
-	gaugeMetric := utils.Metric{
-		Type: utils.GaugeMetricType,
-		Name: "name",
-	}
-	counterMetric := utils.Metric{
-		Type: utils.CounterMetricType,
-		Name: "name",
-	}
-	m.SetMetricValue(&gaugeMetric)
-	m.SetMetricValue(&counterMetric)
-	assert.Equal(t, "123.400", gaugeMetric.Value)
-	assert.Equal(t, "123", counterMetric.Value)
-}
-
-func TestMemStorage_SetJSONMetricValue(t *testing.T) {
-	m := MemStorage{
-		GaugeMetrics:   map[string]float64{"name": 123.4},
-		CounterMetrics: map[string]int64{"name": 123},
-	}
-	gaugeMetric := utils.JSONMetric{
-		ID:    "name",
-		MType: "gauge",
-	}
-	counterMetric := utils.JSONMetric{
-		ID:    "name",
-		MType: "counter",
-	}
-	m.SetJSONMetricValue(&counterMetric)
-	m.SetJSONMetricValue(&gaugeMetric)
-	assert.Equal(t, int64(123), *counterMetric.Delta)
+	gaugeMetric, err := m.GetJSONMetric(context.Background(), "name", "gauge")
+	assert.Nil(t, err)
+	counterMetric, err := m.GetJSONMetric(context.Background(), "name", "counter")
+	assert.Nil(t, err)
 	assert.Equal(t, 123.4, *gaugeMetric.Value)
+	assert.Equal(t, int64(123), *counterMetric.Delta)
 }

@@ -7,24 +7,29 @@ import (
 	"net/http"
 )
 
-func SaveMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func SaveMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		mType := chi.URLParam(r, "mType")
 		mName := chi.URLParam(r, "mName")
 		mValue := chi.URLParam(r, "mValue")
-		metric := utils.NewMetric(mType, mName, mValue)
-
-		if !metric.IsValidType() {
-			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
+		metric, err := utils.NewJSONMetric(mType, mName, mValue)
+		if err != nil {
+			switch err {
+			case utils.ErrMetricType:
+				http.Error(w, err.Error(), http.StatusNotImplemented)
+			case utils.ErrMetricValue:
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			default:
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			}
 			return
 		}
-		if !metric.IsValidValue() {
-			http.Error(w, "Invalid metric value", http.StatusBadRequest)
+		_, err = db.UpdateJSONMetric(ctx, metric)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		storage.SaveMetric(metric)
-		storage.SaveToFileIfSyncMode()
 		w.WriteHeader(http.StatusOK)
-
 	}
 }

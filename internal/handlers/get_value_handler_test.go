@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
@@ -16,82 +17,74 @@ func TestGetValueMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testMemStorage := storage.NewMemStorage(utils.MemStorageConfig{})
-	testMemStorage.GaugeMetrics["Alloc"] = 111.222
-	testMemStorage.CounterMetrics["PollCount"] = 333
+	testStorage := storage.NewStorage(&utils.StorageConfig{})
+	_, _ = testStorage.UpdateJSONMetrics(context.Background(), []utils.JSONMetric{
+		utils.NewGaugeJSONMetric("Alloc", 111.222),
+		utils.NewCounterJSONMetric("PollCount", 333),
+	})
 
 	tests := []struct {
-		name       string
-		method     string
-		request    string
-		memStorage *storage.MemStorage
-		want       want
+		name    string
+		method  string
+		request string
+		db      storage.Storage
+		want    want
 	}{
 		{
-			name:       "check 405 not allowed",
-			method:     http.MethodPost,
-			request:    "/value/type/name",
-			memStorage: nil,
+			name:    "check 405 not allowed",
+			method:  http.MethodPost,
+			request: "/value/type/name",
+			db:      nil,
 			want: want{
 				statusCode: 405,
 				message:    "",
 			},
 		},
 		{
-			name:       "check 404 wrong path",
-			method:     http.MethodGet,
-			request:    "/value/type/name/foo",
-			memStorage: nil,
+			name:    "check 404 wrong path",
+			method:  http.MethodGet,
+			request: "/value/type/name/foo",
+			db:      nil,
 			want: want{
 				statusCode: 404,
 				message:    "404 page not found\n",
 			},
 		},
 		{
-			name:       "check 501 invalid metric type",
-			method:     http.MethodGet,
-			request:    "/value/type/name",
-			memStorage: nil,
-			want: want{
-				statusCode: 501,
-				message:    "Invalid metric type\n",
-			},
-		},
-		{
-			name:       "check 404 gauge metric not found",
-			method:     http.MethodGet,
-			request:    "/value/gauge/fooName",
-			memStorage: testMemStorage,
+			name:    "check 404 gauge metric not found",
+			method:  http.MethodGet,
+			request: "/value/gauge/fooName",
+			db:      testStorage,
 			want: want{
 				statusCode: 404,
 				message:    "Metric not found\n",
 			},
 		},
 		{
-			name:       "check 404 counter metric not found",
-			method:     http.MethodGet,
-			request:    "/value/counter/fooName",
-			memStorage: testMemStorage,
+			name:    "check 404 counter metric not found",
+			method:  http.MethodGet,
+			request: "/value/counter/fooName",
+			db:      testStorage,
 			want: want{
 				statusCode: 404,
 				message:    "Metric not found\n",
 			},
 		},
 		{
-			name:       "check 200 gauge success",
-			method:     http.MethodGet,
-			request:    "/value/gauge/Alloc",
-			memStorage: testMemStorage,
+			name:    "check 200 gauge success",
+			method:  http.MethodGet,
+			request: "/value/gauge/Alloc",
+			db:      testStorage,
 			want: want{
 				statusCode: 200,
 				message:    "111.222",
 			},
 		},
 		{
-			name:       "check 200 counter success",
-			method:     http.MethodGet,
-			request:    "/value/counter/PollCount",
-			memStorage: testMemStorage,
+			name:    "check 200 counter success",
+			method:  http.MethodGet,
+			request: "/value/counter/PollCount",
+			db:      testStorage,
 			want: want{
 				statusCode: 200,
 				message:    "333",
@@ -100,7 +93,7 @@ func TestGetValueMetricHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := GetRouter(tt.memStorage)
+			r := GetRouter(tt.db, utils.ServerConfig{})
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 

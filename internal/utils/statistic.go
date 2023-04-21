@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"math/rand"
 	"runtime"
 	"sync"
@@ -29,7 +29,7 @@ func (s *Statistic) Collect() {
 	s.Counter++
 	s.RndValue = rand.Float64()
 	runtime.ReadMemStats(&s.Rtm)
-	fmt.Println("Collect statistic", s.Counter)
+	log.Println("Collect statistic", s.Counter)
 }
 
 func (s *Statistic) ResetCounter() {

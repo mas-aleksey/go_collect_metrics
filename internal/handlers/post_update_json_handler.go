@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
+func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		body, err := ReadBody(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -16,21 +17,28 @@ func SaveJSONMetricHandler(storage *storage.MemStorage) http.HandlerFunc {
 		}
 		metric, err := utils.LoadJSONMetric(body)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if !metric.IsValidType() {
-			http.Error(w, "Invalid metric type", http.StatusNotImplemented)
+		if err := metric.ValidatesAll(hashKey); err != nil {
+			switch err {
+			case utils.ErrMetricHash:
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			case utils.ErrMetricType:
+				http.Error(w, err.Error(), http.StatusNotImplemented)
+			case utils.ErrMetricValue:
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			default:
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			}
 			return
 		}
-		if !metric.IsValidValue() {
-			http.Error(w, "Invalid metric value", http.StatusBadRequest)
+		metric, err = db.UpdateJSONMetric(ctx, metric)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		storage.SaveJSONMetric(metric)
-		storage.SaveToFileIfSyncMode()
-		storage.SetJSONMetricValue(&metric)
-
+		metric.Hash = utils.CalcHash(metric.String(), hashKey)
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		rest, _ := json.Marshal(metric)

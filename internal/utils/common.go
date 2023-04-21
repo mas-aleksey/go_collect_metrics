@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 )
@@ -25,7 +28,7 @@ func ToStr(v interface{}) string {
 	case uint32:
 		return strconv.FormatUint(uint64(val), 10)
 	default:
-		fmt.Println("Unknown type", val, reflect.TypeOf(v))
+		log.Println("Unknown type", val, reflect.TypeOf(v))
 		return "0"
 	}
 }
@@ -41,7 +44,18 @@ func ToFloat64(v interface{}) float64 {
 	case uint32:
 		return float64(val)
 	default:
-		fmt.Println("Unknown type", val, reflect.TypeOf(v))
+		log.Println("Unknown type", val, reflect.TypeOf(v))
 		return float64(0)
 	}
+}
+
+func CalcHash(data, hashKey string) *string {
+	if hashKey == "" {
+		return nil
+	}
+	h := hmac.New(sha256.New, []byte(hashKey))
+	h.Write([]byte(data))
+	dst := fmt.Sprintf("%x", h.Sum(nil))
+	log.Println(data, dst)
+	return &dst
 }

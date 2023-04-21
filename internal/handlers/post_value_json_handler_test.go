@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
@@ -18,71 +19,90 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 		statusCode int
 		message    string
 	}
-	testStorage := storage.NewMemStorage(utils.MemStorageConfig{})
-	testStorage.GaugeMetrics["Alloc"] = 123.456
-	testStorage.CounterMetrics["PoolCounter"] = 50
+	testStorage := storage.NewStorage(&utils.StorageConfig{})
+	_, _ = testStorage.UpdateJSONMetrics(context.Background(), []utils.JSONMetric{
+		utils.NewGaugeJSONMetric("Alloc", 123.456),
+		utils.NewCounterJSONMetric("PoolCounter", 50),
+	})
 
 	tests := []struct {
-		name       string
-		method     string
-		jsonData   string
-		memStorage *storage.MemStorage
-		want       want
+		name     string
+		method   string
+		jsonData string
+		hashKey  string
+		db       storage.Storage
+		want     want
 	}{
 		{
-			name:       "check 405 not allowed",
-			method:     http.MethodGet,
-			jsonData:   `{}`,
-			memStorage: nil,
+			name:     "check 405 not allowed",
+			method:   http.MethodGet,
+			jsonData: `{}`,
+			hashKey:  "",
+			db:       nil,
 			want: want{
 				statusCode: 405,
 				message:    "",
 			},
 		},
 		{
-			name:       "check 422 invalid json body",
-			method:     http.MethodPost,
-			jsonData:   `{"message":Hello}`,
-			memStorage: nil,
+			name:     "check 422 invalid json body",
+			method:   http.MethodPost,
+			jsonData: `{"message":Hello}`,
+			hashKey:  "",
+			db:       nil,
 			want: want{
 				statusCode: 422,
 				message:    "invalid character 'H' looking for beginning of value\n",
 			},
 		},
 		{
-			name:       "check 501 invalid metric type",
-			method:     http.MethodPost,
-			jsonData:   `{"ID":"Alloc","type":"foo"}`,
-			memStorage: nil,
+			name:     "check 400 invalid metric type",
+			method:   http.MethodPost,
+			jsonData: `{"ID":"Alloc","type":"foo"}`,
+			hashKey:  "",
+			db:       nil,
 			want: want{
-				statusCode: 501,
+				statusCode: 400,
 				message:    "Invalid metric type\n",
 			},
 		},
 		{
-			name:       "check 200 gauge success",
-			method:     http.MethodPost,
-			jsonData:   `{"ID":"Alloc","type":"gauge"}`,
-			memStorage: testStorage,
+			name:     "check 200 gauge success",
+			method:   http.MethodPost,
+			jsonData: `{"ID":"Alloc","type":"gauge"}`,
+			hashKey:  "",
+			db:       testStorage,
 			want: want{
 				statusCode: 200,
 				message:    `{"id":"Alloc","type":"gauge","value":123.456}`,
 			},
 		},
 		{
-			name:       "check 200 counter success",
-			method:     http.MethodPost,
-			jsonData:   `{"ID":"PoolCounter","type":"counter"}`,
-			memStorage: testStorage,
+			name:     "check 200 counter success",
+			method:   http.MethodPost,
+			jsonData: `{"ID":"PoolCounter","type":"counter"}`,
+			hashKey:  "",
+			db:       testStorage,
 			want: want{
 				statusCode: 200,
 				message:    `{"id":"PoolCounter","type":"counter","delta":50}`,
 			},
 		},
+		{
+			name:     "check 200 counter success with hash",
+			method:   http.MethodPost,
+			jsonData: `{"ID":"PoolCounter","type":"counter"}`,
+			hashKey:  "some_key",
+			db:       testStorage,
+			want: want{
+				statusCode: 200,
+				message:    `{"id":"PoolCounter","type":"counter","delta":50,"hash":"5a58361db229f5a67734904e9feb3e46e0183195fad9a9463f26a303790d2c2e"}`,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := GetRouter(tt.memStorage)
+			r := GetRouter(tt.db, utils.ServerConfig{Address: "adr", HashKey: tt.hashKey})
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
@@ -108,47 +128,72 @@ func TestSetValueJSONMetricHandler(t *testing.T) {
 }
 
 func TestCompressedSetValueJSONMetricHandler(t *testing.T) {
-	testStorage := storage.NewMemStorage(utils.MemStorageConfig{})
-	testStorage.GaugeMetrics["Alloc"] = 123.456
-	testStorage.CounterMetrics["PoolCounter"] = 50
+	tests := []struct {
+		name     string
+		hashKey  string
+		waitLen  string
+		waitBody string
+	}{
+		{
+			name:     "without hash key",
+			hashKey:  "",
+			waitLen:  "73",
+			waitBody: `{"id":"Alloc","type":"gauge","value":123.456}`,
+		},
+		{
+			name:     "with hash key",
+			hashKey:  "some_key",
+			waitLen:  "124",
+			waitBody: `{"id":"Alloc","type":"gauge","value":123.456,"hash":"13cfebd3139e6cfd5a352851d9cd909bce07429a16a87d1aaf49f6869549d899"}`,
+		},
+	}
+	testStorage := storage.NewStorage(&utils.StorageConfig{})
+	_, _ = testStorage.UpdateJSONMetrics(context.Background(), []utils.JSONMetric{
+		utils.NewGaugeJSONMetric("Alloc", 123.456),
+		utils.NewCounterJSONMetric("PollCount", 50),
+	})
 
-	r := GetRouter(testStorage)
-	ts := httptest.NewServer(r)
-	defer ts.Close()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 
-	client := &http.Client{}
+			r := GetRouter(testStorage, utils.ServerConfig{Address: "adr", HashKey: tt.hashKey})
+			ts := httptest.NewServer(r)
+			defer ts.Close()
 
-	var body = []byte(`{"ID":"Alloc","type":"gauge"}`)
-	var b bytes.Buffer
-	w := gzip.NewWriter(&b)
-	_, err := w.Write(body)
-	require.NoError(t, err)
-	err = w.Close()
-	require.NoError(t, err)
+			client := &http.Client{}
 
-	request, err := http.NewRequest(http.MethodPost, ts.URL+"/value/", &b)
-	require.NoError(t, err)
+			var body = []byte(`{"ID":"Alloc","type":"gauge"}`)
+			var b bytes.Buffer
+			w := gzip.NewWriter(&b)
+			_, err := w.Write(body)
+			require.NoError(t, err)
+			err = w.Close()
+			require.NoError(t, err)
 
-	request.Header.Set("Accept-Encoding", "gzip")
-	request.Header.Set("Content-Encoding", "gzip")
-	request.Header.Set("Content-Type", "application/json")
-	result, err := client.Do(request)
-	require.NoError(t, err)
+			request, err := http.NewRequest(http.MethodPost, ts.URL+"/value/", &b)
+			require.NoError(t, err)
 
-	assert.Equal(t, 200, result.StatusCode)
-	assert.Equal(t, "gzip", result.Header.Get("Content-Encoding"))
-	assert.Equal(t, "73", result.Header.Get("Content-Length"))
+			request.Header.Set("Accept-Encoding", "gzip")
+			request.Header.Set("Content-Encoding", "gzip")
+			request.Header.Set("Content-Type", "application/json")
+			result, err := client.Do(request)
+			require.NoError(t, err)
 
-	gzipReader, err := gzip.NewReader(result.Body)
-	require.NoError(t, err)
+			assert.Equal(t, 200, result.StatusCode)
+			assert.Equal(t, "gzip", result.Header.Get("Content-Encoding"))
+			assert.Equal(t, tt.waitLen, result.Header.Get("Content-Length"))
 
-	resBody, err := io.ReadAll(gzipReader)
-	require.NoError(t, err)
+			gzipReader, err := gzip.NewReader(result.Body)
+			require.NoError(t, err)
 
-	err = result.Body.Close()
-	require.NoError(t, err)
-	err = gzipReader.Close()
-	require.NoError(t, err)
+			resBody, err := io.ReadAll(gzipReader)
+			require.NoError(t, err)
 
-	assert.Equal(t, `{"id":"Alloc","type":"gauge","value":123.456}`, string(resBody))
+			err = result.Body.Close()
+			require.NoError(t, err)
+			err = gzipReader.Close()
+			require.NoError(t, err)
+			assert.Equal(t, tt.waitBody, string(resBody))
+		})
+	}
 }
