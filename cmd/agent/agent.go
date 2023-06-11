@@ -58,7 +58,7 @@ func updateMemCpuStatistic(statistic *utils.Statistic, config utils.AgentConfig)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		statistic.CollectMemCpu()
+		statistic.CollectMemCPU()
 	}
 }
 

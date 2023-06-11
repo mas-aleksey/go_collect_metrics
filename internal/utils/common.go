@@ -58,6 +58,5 @@ func CalcHash(data, hashKey string) *string {
 	h := hmac.New(sha256.New, []byte(hashKey))
 	h.Write([]byte(data))
 	dst := fmt.Sprintf("%x", h.Sum(nil))
-	log.Println(data, dst)
 	return &dst
 }

@@ -17,7 +17,6 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 			return
 		}
 		log.Printf("updates request: %s\n", string(body))
-		log.Printf("hashKey: %s\n", hashKey)
 
 		metrics, err := utils.LoadButchJSONMetric(body)
 		if err != nil {
