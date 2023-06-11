@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
+	"log"
 	"net/http"
 )
 
@@ -33,6 +34,7 @@ func GetJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		resp, _ := json.Marshal(metric)
+		log.Printf("post values response: %s\n", string(resp))
 		w.Write(resp)
 	}
 }

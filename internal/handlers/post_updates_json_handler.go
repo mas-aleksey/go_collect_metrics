@@ -20,11 +20,13 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 
 		metrics, err := utils.LoadButchJSONMetric(body)
 		if err != nil {
+			log.Printf("error LoadButchJSONMetric: %s\n", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		for _, metric := range metrics {
 			if err := metric.ValidatesAll(hashKey); err != nil {
+				log.Printf("error Validate metric %s: %s", metric.ID, err)
 				switch err {
 				case utils.ErrMetricHash:
 					http.Error(w, err.Error(), http.StatusBadRequest)
@@ -40,6 +42,7 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 		}
 		metrics, err = db.UpdateJSONMetrics(ctx, metrics)
 		if err != nil {
+			log.Printf("error UpdateJSONMetrics: %s", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

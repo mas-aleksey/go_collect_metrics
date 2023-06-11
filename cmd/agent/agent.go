@@ -53,7 +53,7 @@ func updateStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
 	}
 }
 
-func updateMemCpuStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
+func updateMemCPUStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
 	ticker := time.NewTicker(config.PollInterval)
 	defer ticker.Stop()
 
@@ -67,7 +67,7 @@ func main() {
 	config := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey, *rateLimit)
 	stat := utils.NewStatistic()
 	go updateStatistic(stat, config)
-	go updateMemCpuStatistic(stat, config)
+	go updateMemCPUStatistic(stat, config)
 	go reportStatistic(stat, config)
 	select {}
 }
