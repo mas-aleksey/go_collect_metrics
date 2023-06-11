@@ -33,7 +33,7 @@ func NewJSONReport(statistic *Statistic, hashKey string) *JSONReport {
 	freeMemoryMetric.Hash = CalcHash(freeMemoryMetric.String(), hashKey)
 	metrics = append(metrics, freeMemoryMetric)
 
-	cpuUtilization1 := NewGaugeJSONMetric("CPUutilization1", ToFloat64(statistic.CPUCount))
+	cpuUtilization1 := NewGaugeJSONMetric("CPUutilization1", ToFloat64(statistic.CPUutilization1[0]))
 	cpuUtilization1.Hash = CalcHash(cpuUtilization1.String(), hashKey)
 	metrics = append(metrics, cpuUtilization1)
 
