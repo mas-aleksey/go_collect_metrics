@@ -24,7 +24,7 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	g, _ := errgroup.WithContext(ctx)
 
-	metricCh := make(chan *utils.JSONMetric, 33)
+	metricCh := make(chan utils.JSONMetric, 33)
 
 	for i := 0; i < mc.rateLimit; i++ {
 		g.Go(func() error {
@@ -33,7 +33,7 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 				case <-ctx.Done():
 					return nil
 				case metric := <-metricCh:
-					body, err := json.Marshal(*metric)
+					body, err := json.Marshal(metric)
 					if err != nil {
 						return err
 					} else {
@@ -48,8 +48,8 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	}
 	g.Go(func() error {
 		for _, metric := range report.Metrics {
-			m := &metric
-			metricCh <- m
+			//m := &metric
+			metricCh <- metric
 		}
 		close(metricCh)
 		cancel()
