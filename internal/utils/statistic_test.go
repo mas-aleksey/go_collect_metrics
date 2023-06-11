@@ -18,7 +18,8 @@ func TestStatistic_Collect(t *testing.T) {
 
 	assert.Equal(t, int64(0), statistic.Counter)
 	rnd1 := statistic.RndValue
-	statistic.Collect()
+	statistic.CollectRuntime()
+	statistic.CollectMemCpu()
 
 	rnd2 := statistic.RndValue
 	assert.Equal(t, int64(1), statistic.Counter)
@@ -27,8 +28,9 @@ func TestStatistic_Collect(t *testing.T) {
 
 func TestStatistic_ResetCounter(t *testing.T) {
 	statistic := NewStatistic()
-	statistic.Collect()
-	statistic.Collect()
+	statistic.CollectRuntime()
+	statistic.CollectRuntime()
+	statistic.CollectMemCpu()
 	assert.Equal(t, int64(2), statistic.Counter)
 	statistic.ResetCounter()
 	assert.Equal(t, int64(0), statistic.Counter)
@@ -36,7 +38,8 @@ func TestStatistic_ResetCounter(t *testing.T) {
 
 func TestStatistic_Copy(t *testing.T) {
 	statistic := NewStatistic()
-	statistic.Collect()
+	statistic.CollectRuntime()
+	statistic.CollectMemCpu()
 	statCopy := statistic.Copy()
 
 	assert.Equal(t, statCopy.Counter, statistic.Counter)

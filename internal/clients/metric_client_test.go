@@ -14,8 +14,8 @@ import (
 )
 
 func TestNewMetricClient(t *testing.T) {
-	expected := MetricClient{BaseClient: NewBaseClient("localhost:8080", 1*time.Second)}
-	result := NewMetricClient("localhost:8080", 1*time.Second)
+	expected := MetricClient{BaseClient: NewBaseClient("localhost:8080", 1*time.Second, 1)}
+	result := NewMetricClient("localhost:8080", 1*time.Second, 1)
 	assert.Equal(t, *result, expected)
 }
 
@@ -53,7 +53,7 @@ func TestMetricClient_postMetric(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 			}))
 			defer svr.Close()
-			mc := NewMetricClient(svr.URL, 1*time.Second)
+			mc := NewMetricClient(svr.URL, 1*time.Second, 1)
 			tt.metric.Hash = utils.CalcHash(tt.metric.String(), tt.hashKey)
 			body, err := json.Marshal(tt.metric)
 			assert.Nil(t, err)
@@ -76,7 +76,7 @@ func TestMetricClient_SendJSONReport(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL, 1*time.Second)
+	mc := NewMetricClient(svr.URL, 1*time.Second, 1)
 	err := mc.SendJSONReport(report)
 	assert.Nil(t, err)
 }
@@ -100,11 +100,11 @@ func TestMetricClient_SendBatchJSONReport(t *testing.T) {
 		err = json.Unmarshal(body, &metrics)
 		assert.Nil(t, err)
 
-		assert.Equal(t, 29, len(metrics))
+		assert.Equal(t, 32, len(metrics))
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL, 1*time.Second)
+	mc := NewMetricClient(svr.URL, 1*time.Second, 1)
 	err := mc.SendBatchJSONReport(report)
 	assert.Nil(t, err)
 }

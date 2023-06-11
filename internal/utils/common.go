@@ -35,6 +35,8 @@ func ToStr(v interface{}) string {
 
 func ToFloat64(v interface{}) float64 {
 	switch val := v.(type) {
+	case int:
+		return float64(val)
 	case uint64:
 		return float64(val)
 	case int64:

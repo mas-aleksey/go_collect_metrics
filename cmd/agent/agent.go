@@ -14,6 +14,7 @@ var (
 	pollInterval   *time.Duration
 	timeout        = 5 * time.Second
 	hashKey        *string
+	rateLimit      *int
 )
 
 func init() {
@@ -21,10 +22,11 @@ func init() {
 	reportInterval = flag.Duration("r", 10*time.Second, "report interval")
 	pollInterval = flag.Duration("p", 2*time.Second, "pool interval")
 	hashKey = flag.String("k", "", "hash key")
+	rateLimit = flag.Int("l", 10, "rate limit")
 }
 
 func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
-	metricClient := clients.NewMetricClient(config.Address, timeout)
+	metricClient := clients.NewMetricClient(config.Address, timeout, config.RateLimit)
 	ticker := time.NewTicker(config.ReportInterval)
 	defer ticker.Stop()
 
@@ -47,15 +49,25 @@ func updateStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		statistic.Collect()
+		statistic.CollectRuntime()
+	}
+}
+
+func updateMemCpuStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
+	ticker := time.NewTicker(config.PollInterval)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		statistic.CollectMemCpu()
 	}
 }
 
 func main() {
 	flag.Parse()
-	config := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey)
+	config := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey, *rateLimit)
 	stat := utils.NewStatistic()
 	go updateStatistic(stat, config)
+	go updateMemCpuStatistic(stat, config)
 	go reportStatistic(stat, config)
 	select {}
 }

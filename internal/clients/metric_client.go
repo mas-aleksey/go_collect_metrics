@@ -1,11 +1,12 @@
 package clients
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
+	"golang.org/x/sync/errgroup"
 	"net/http"
-	"sync"
 	"time"
 )
 
@@ -13,40 +14,50 @@ type MetricClient struct {
 	*BaseClient
 }
 
-func NewMetricClient(baseURL string, timeout time.Duration) *MetricClient {
+func NewMetricClient(baseURL string, timeout time.Duration, rateLimit int) *MetricClient {
 	return &MetricClient{
-		BaseClient: NewBaseClient(baseURL, timeout),
+		BaseClient: NewBaseClient(baseURL, timeout, rateLimit),
 	}
 }
 
 func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
-	var wg sync.WaitGroup
-	errChains := make(chan error, utils.ReportCount)
+	ctx, cancel := context.WithCancel(context.Background())
+	g, _ := errgroup.WithContext(ctx)
 
-	for _, metric := range report.Metrics {
-		wg.Add(1)
-		metric := metric
+	metricCh := make(chan *utils.JSONMetric, 33)
 
-		go func() {
-			defer wg.Done()
-			body, err := json.Marshal(metric)
-			if err != nil {
-				errChains <- err
-			} else {
-				err = mc.postBody(body, "update/", false)
-				if err != nil {
-					errChains <- err
+	for i := 0; i < mc.rateLimit; i++ {
+		g.Go(func() error {
+			for {
+				select {
+				case <-ctx.Done():
+					return nil
+				case metric := <-metricCh:
+					body, err := json.Marshal(*metric)
+					if err != nil {
+						return err
+					} else {
+						err = mc.postBody(body, "update/", false)
+						if err != nil {
+							return err
+						}
+					}
 				}
 			}
-		}()
+		})
 	}
-	wg.Wait()
-	close(errChains)
-
-	for err := range errChains {
-		if err != nil {
-			return err
+	g.Go(func() error {
+		for _, metric := range report.Metrics {
+			m := &metric
+			metricCh <- m
 		}
+		close(metricCh)
+		cancel()
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return err
 	}
 	return nil
 }
