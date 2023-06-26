@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -33,10 +34,12 @@ func NewJSONReport(statistic *Statistic, hashKey string) *JSONReport {
 	freeMemoryMetric.Hash = CalcHash(freeMemoryMetric.String(), hashKey)
 	metrics = append(metrics, freeMemoryMetric)
 
-	cpuUtilization1 := NewGaugeJSONMetric("CPUutilization1", ToFloat64(statistic.CPUutilization1[0]))
-	cpuUtilization1.Hash = CalcHash(cpuUtilization1.String(), hashKey)
-	metrics = append(metrics, cpuUtilization1)
-
+	for i, utilization := range statistic.CPUUtilization {
+		metricName := fmt.Sprintf("CPUutilization%d", i)
+		cpuUtilization1 := NewGaugeJSONMetric(metricName, ToFloat64(utilization))
+		cpuUtilization1.Hash = CalcHash(cpuUtilization1.String(), hashKey)
+		metrics = append(metrics, cpuUtilization1)
+	}
 	for _, metricName := range RuntimeMetricNames {
 		val := reflect.ValueOf(&statistic.Rtm).Elem().FieldByName(metricName).Interface()
 		metric := NewGaugeJSONMetric(metricName, ToFloat64(val))
