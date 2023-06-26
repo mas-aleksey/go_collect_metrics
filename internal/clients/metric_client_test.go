@@ -100,7 +100,7 @@ func TestMetricClient_SendBatchJSONReport(t *testing.T) {
 		err = json.Unmarshal(body, &metrics)
 		assert.Nil(t, err)
 
-		assert.Equal(t, 32, len(metrics))
+		assert.GreaterOrEqual(t, len(metrics), utils.ReportCount)
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()

@@ -24,7 +24,7 @@ func NewStatistic() *Statistic {
 		RndValue: rand.Float64(),
 	}
 	s.MemStat, _ = mem.VirtualMemory()
-	s.CPUUtilization, _ = cpu.Percent(0, false)
+	s.CPUUtilization, _ = cpu.Percent(0, true)
 	runtime.ReadMemStats(&s.Rtm)
 	return s
 }
@@ -42,7 +42,7 @@ func (s *Statistic) CollectMemCPU() {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 	s.MemStat, _ = mem.VirtualMemory()
-	s.CPUUtilization, _ = cpu.Percent(0, false)
+	s.CPUUtilization, _ = cpu.Percent(0, true)
 	log.Println("Collect mem cpu statistic")
 }
 

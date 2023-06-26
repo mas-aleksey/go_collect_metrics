@@ -35,7 +35,7 @@ func NewJSONReport(statistic *Statistic, hashKey string) *JSONReport {
 	metrics = append(metrics, freeMemoryMetric)
 
 	for i, utilization := range statistic.CPUUtilization {
-		metricName := fmt.Sprintf("CPUutilization%d", i)
+		metricName := fmt.Sprintf("CPUutilization%d", i+1)
 		cpuUtilization1 := NewGaugeJSONMetric(metricName, ToFloat64(utilization))
 		cpuUtilization1.Hash = CalcHash(cpuUtilization1.String(), hashKey)
 		metrics = append(metrics, cpuUtilization1)
