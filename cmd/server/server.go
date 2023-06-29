@@ -36,11 +36,14 @@ func init() {
 func main() {
 	flag.Parse()
 	serverConfig := utils.MakeServerConfig(*address, *hashKey)
-	storageConfig := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
+	storageConfig, err := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
+	if err != nil {
+		log.Fatal(err)
+	}
 	ctx := context.Background()
 
 	db := storage.NewStorage(&storageConfig)
-	err := db.Init(ctx)
+	err = db.Init(ctx)
 	if err != nil {
 		log.Printf("Error init db: %s", err)
 	} else {

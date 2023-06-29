@@ -64,7 +64,10 @@ func updateMemCPUStatistic(statistic *utils.Statistic, config utils.AgentConfig)
 
 func main() {
 	flag.Parse()
-	config := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey, *rateLimit)
+	config, err := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey, *rateLimit)
+	if err != nil {
+		log.Fatal(err)
+	}
 	stat := utils.NewStatistic()
 	go updateStatistic(stat, config)
 	go updateMemCPUStatistic(stat, config)
