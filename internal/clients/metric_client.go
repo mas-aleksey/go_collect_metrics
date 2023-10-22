@@ -88,7 +88,7 @@ func (mc MetricClient) postBody(body []byte, url string, compress bool) error {
 		Body:         body,
 		OkStatusCode: http.StatusOK,
 	}
-	_, err := mc.DoRequest(request)
+	_, err := mc.DoRequest(&request)
 	if err != nil {
 		return errors.Wrap(err, "unable to complete update metric request")
 	}

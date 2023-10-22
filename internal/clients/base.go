@@ -49,7 +49,7 @@ func (c *BaseClient) MakeURL(URL string) string {
 	return fmt.Sprint(baseURL, "/", path)
 }
 
-func (c *BaseClient) DoRequest(r Request) (Response, error) {
+func (c *BaseClient) DoRequest(r *Request) (Response, error) {
 	client := &http.Client{}
 	var requestBody bytes.Buffer
 

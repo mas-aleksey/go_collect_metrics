@@ -5,11 +5,7 @@ import (
 	"reflect"
 )
 
-var ReportCount = 32
-
-type Report struct {
-	Metrics []JSONMetric
-}
+var ReportCount = 47
 
 type JSONReport struct {
 	Metrics []JSONMetric
@@ -41,7 +37,7 @@ func NewJSONReport(statistic *Statistic, hashKey string) *JSONReport {
 		metrics = append(metrics, cpuUtilization1)
 	}
 	for _, metricName := range RuntimeMetricNames {
-		val := reflect.ValueOf(&statistic.Rtm).Elem().FieldByName(metricName).Interface()
+		val := reflect.ValueOf(statistic.Rtm).Elem().FieldByName(metricName).Interface()
 		metric := NewGaugeJSONMetric(metricName, ToFloat64(val))
 		metric.Hash = CalcHash(metric.String(), hashKey)
 		metrics = append(metrics, metric)

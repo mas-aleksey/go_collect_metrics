@@ -5,6 +5,9 @@ import (
 	"github.com/tiraill/go_collect_metrics/internal/clients"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
+	"os"
+	"runtime"
+	"runtime/pprof"
 	"time"
 )
 
@@ -15,6 +18,8 @@ var (
 	timeout        = 5 * time.Second
 	hashKey        *string
 	rateLimit      *int
+	pprofMode      *bool
+	pprofDuration  *time.Duration
 )
 
 func init() {
@@ -23,6 +28,8 @@ func init() {
 	pollInterval = flag.Duration("p", 2*time.Second, "pool interval")
 	hashKey = flag.String("k", "", "hash key")
 	rateLimit = flag.Int("l", 10, "rate limit")
+	pprofMode = flag.Bool("pp", false, "pprof mode")
+	pprofDuration = flag.Duration("pd", 30*time.Second, "pprof duration")
 }
 
 func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
@@ -72,5 +79,19 @@ func main() {
 	go updateStatistic(stat, config)
 	go updateMemCPUStatistic(stat, config)
 	go reportStatistic(stat, config)
-	select {}
+
+	if *pprofMode == true {
+		time.Sleep(*pprofDuration)
+		fmem, err := os.Create(`mem.pprof`)
+		if err != nil {
+			panic(err)
+		}
+		defer fmem.Close()
+		runtime.GC()
+		if err := pprof.WriteHeapProfile(fmem); err != nil {
+			panic(err)
+		}
+	} else {
+		select {}
+	}
 }

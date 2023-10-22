@@ -108,3 +108,30 @@ func TestMetricClient_SendBatchJSONReport(t *testing.T) {
 	err := mc.SendBatchJSONReport(report)
 	assert.Nil(t, err)
 }
+
+func BenchmarkSendReport(b *testing.B) {
+	const triesN = 100
+
+	statistic := utils.NewStatistic()
+	report := utils.NewJSONReport(statistic, "")
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var metric utils.JSONMetric
+		_ = json.Unmarshal(body, &metric)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer svr.Close()
+	mc := NewMetricClient(svr.URL, 1*time.Second, 1)
+
+	b.Run("by_one", func(b *testing.B) {
+		for i := 0; i < triesN; i++ {
+			_ = mc.SendJSONReport(report)
+		}
+	})
+
+	b.Run("batch", func(b *testing.B) {
+		for i := 0; i < triesN; i++ {
+			_ = mc.SendBatchJSONReport(report)
+		}
+	})
+}

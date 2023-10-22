@@ -43,7 +43,7 @@ func TestBaseClient_DoRequest(t *testing.T) {
 		Body:         []byte(`{"msg": "ping"}`),
 		OkStatusCode: http.StatusCreated,
 	}
-	resp, err := baseClient.DoRequest(request)
+	resp, err := baseClient.DoRequest(&request)
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 	assert.Equal(t, "text/plain", resp.Headers.Get("Content-Type"))
@@ -65,7 +65,7 @@ func TestBaseClient_DoRequest_Failed(t *testing.T) {
 		Body:         []byte(`{"msg": "ping"}`),
 		OkStatusCode: http.StatusCreated,
 	}
-	resp, err := baseClient.DoRequest(request)
+	resp, err := baseClient.DoRequest(&request)
 	assert.Equal(t, Response{}, resp)
 	assert.NotNil(t, err)
 	assert.Equal(t, "error: 400 Bad Request details: {\"msg\": \"Something went wrong\"}", err.Error())

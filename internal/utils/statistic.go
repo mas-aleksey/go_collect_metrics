@@ -14,18 +14,34 @@ type Statistic struct {
 	RndValue       float64
 	MemStat        *mem.VirtualMemoryStat
 	CPUUtilization []float64
-	Rtm            runtime.MemStats
+	Rtm            *runtime.MemStats
 	Mutex          sync.RWMutex
+}
+
+func getRtm() *runtime.MemStats {
+	buf := runtime.MemStats{}
+	runtime.ReadMemStats(&buf)
+	return &buf
+}
+
+func getMemStat() *mem.VirtualMemoryStat {
+	memStat, _ := mem.VirtualMemory()
+	return memStat
+}
+
+func getCpuStat() []float64 {
+	CPUUtilization, _ := cpu.Percent(0, true)
+	return CPUUtilization
 }
 
 func NewStatistic() *Statistic {
 	s := &Statistic{
-		Counter:  0,
-		RndValue: rand.Float64(),
+		Counter:        0,
+		RndValue:       rand.Float64(),
+		MemStat:        getMemStat(),
+		CPUUtilization: getCpuStat(),
+		Rtm:            getRtm(),
 	}
-	s.MemStat, _ = mem.VirtualMemory()
-	s.CPUUtilization, _ = cpu.Percent(0, true)
-	runtime.ReadMemStats(&s.Rtm)
 	return s
 }
 
@@ -34,15 +50,15 @@ func (s *Statistic) CollectRuntime() {
 	defer s.Mutex.Unlock()
 	s.Counter++
 	s.RndValue = rand.Float64()
-	runtime.ReadMemStats(&s.Rtm)
+	s.Rtm = getRtm()
 	log.Println("Collect runtime statistic", s.Counter)
 }
 
 func (s *Statistic) CollectMemCPU() {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
-	s.MemStat, _ = mem.VirtualMemory()
-	s.CPUUtilization, _ = cpu.Percent(0, true)
+	s.MemStat = getMemStat()
+	s.CPUUtilization = getCpuStat()
 	log.Println("Collect mem cpu statistic")
 }
 
