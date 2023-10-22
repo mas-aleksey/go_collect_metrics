@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -36,6 +37,7 @@ func readGzipBody(reader io.ReadCloser) ([]byte, error) {
 func ReadBody(r *http.Request) ([]byte, error) {
 	switch r.Header.Get("Content-Encoding") {
 	case "gzip":
+		log.Println("Gzip content")
 		return readGzipBody(r.Body)
 	default:
 		return readAll(r.Body)

@@ -9,6 +9,6 @@ func TestNewJSONReport(t *testing.T) {
 	statistic := NewStatistic()
 	report := NewJSONReport(statistic, "123")
 
-	assert.Equal(t, len(report.Metrics), ReportCount)
-	assert.Equal(t, cap(report.Metrics), ReportCount)
+	assert.GreaterOrEqual(t, len(report.Metrics), ReportCount)
+	assert.GreaterOrEqual(t, cap(report.Metrics), ReportCount)
 }

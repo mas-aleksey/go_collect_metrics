@@ -35,6 +35,8 @@ func ToStr(v interface{}) string {
 
 func ToFloat64(v interface{}) float64 {
 	switch val := v.(type) {
+	case int:
+		return float64(val)
 	case uint64:
 		return float64(val)
 	case int64:
@@ -56,6 +58,5 @@ func CalcHash(data, hashKey string) *string {
 	h := hmac.New(sha256.New, []byte(hashKey))
 	h.Write([]byte(data))
 	dst := fmt.Sprintf("%x", h.Sum(nil))
-	log.Println(data, dst)
 	return &dst
 }

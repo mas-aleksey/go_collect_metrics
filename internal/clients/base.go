@@ -25,11 +25,12 @@ type Response struct {
 }
 
 type BaseClient struct {
-	baseURL string
-	client  *http.Client
+	baseURL   string
+	client    *http.Client
+	rateLimit int
 }
 
-func NewBaseClient(baseURL string, timeout time.Duration) *BaseClient {
+func NewBaseClient(baseURL string, timeout time.Duration, rateLimit int) *BaseClient {
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "http://" + baseURL
 	}
@@ -38,6 +39,7 @@ func NewBaseClient(baseURL string, timeout time.Duration) *BaseClient {
 		client: &http.Client{
 			Timeout: timeout,
 		},
+		rateLimit: rateLimit,
 	}
 }
 
