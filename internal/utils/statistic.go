@@ -19,7 +19,7 @@ type Statistic struct {
 }
 
 func getRtm() *runtime.MemStats {
-	buf := runtime.MemStats{}
+	var buf runtime.MemStats
 	runtime.ReadMemStats(&buf)
 	return &buf
 }
