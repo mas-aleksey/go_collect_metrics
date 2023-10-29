@@ -32,15 +32,19 @@ var pageTemp = `<!DOCTYPE html>
   </body>
 </html>`
 
+// MetricData - структура для данных метрики
 type MetricData struct {
 	Name  string
 	Value string
 }
 
+// TemplateData - структура для шаблона данных с метриками
 type TemplateData struct {
 	Metrics []MetricData
 }
 
+// IndexHandler - метод для получения HTML страници со списком всех метрик
+// GET /.
 func IndexHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

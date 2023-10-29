@@ -5,12 +5,15 @@ import (
 	"reflect"
 )
 
+// ReportCount - количество метрик в отчете
 var ReportCount = 47
 
+// JSONReport - струкрура отчета с метриками в формате JSON
 type JSONReport struct {
 	Metrics []JSONMetric
 }
 
+// NewJSONReport - метод создания отчета с метриками
 func NewJSONReport(statistic *Statistic, hashKey string) *JSONReport {
 	metrics := make([]JSONMetric, 0, ReportCount)
 

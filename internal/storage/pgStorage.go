@@ -18,6 +18,7 @@ var gaugeStmt = `INSERT INTO metric(name, type, gauge_value, counter_value) VALU
 		    gauge_value = excluded.gauge_value
 		RETURNING name, type, gauge_value, counter_value;`
 
+// PgStorage - структура для работы с бд Postgres
 type PgStorage struct {
 	Conn   *pgx.Conn
 	Config *utils.StorageConfig

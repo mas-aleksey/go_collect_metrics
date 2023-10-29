@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// SaveJSONMetricHandler - метод для загрузки метрики в формате JSON.
+// POST /update/
 func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

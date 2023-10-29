@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -134,4 +135,23 @@ func BenchmarkSendReport(b *testing.B) {
 			_ = mc.SendBatchJSONReport(report)
 		}
 	})
+}
+
+func ExampleMetricClient_SendBatchJSONReport() {
+	metricServerHost := "0.0.0.0:8000"
+	requestTimeout := 15 * time.Second
+	requestPerSecond := 10
+	hashKey := "secret"
+
+	metricClient := NewMetricClient(metricServerHost, requestTimeout, requestPerSecond)
+
+	statistic := utils.NewStatistic()
+	report := utils.NewJSONReport(statistic, hashKey)
+
+	err := metricClient.SendBatchJSONReport(report)
+	if err != nil {
+		log.Println("Fail send report", err)
+	} else {
+		log.Println("Send report successfully")
+	}
 }

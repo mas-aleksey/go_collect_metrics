@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// SaveMetricHandler - метод для загрузки метрики.
+// POST /update/{mType}/{mName}/{mValue}.
 func SaveMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

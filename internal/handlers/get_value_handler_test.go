@@ -114,3 +114,7 @@ func TestGetValueMetricHandler(t *testing.T) {
 		})
 	}
 }
+
+func ExampleGetValueMetricHandler() {
+
+}

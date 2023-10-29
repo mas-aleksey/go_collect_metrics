@@ -1,3 +1,4 @@
+// Package handlers - фунционал обработчиков API методов сервера
 package handlers
 
 import (
@@ -8,6 +9,7 @@ import (
 	"time"
 )
 
+// GetRouter - метод регистрирует роуты для сервера.
 func GetRouter(db storage.Storage, config utils.ServerConfig) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

@@ -9,6 +9,7 @@ import (
 	"sync"
 )
 
+// Statistic - струкрура для хранения метрик.
 type Statistic struct {
 	Counter        int64
 	RndValue       float64
@@ -34,6 +35,7 @@ func getCpuStat() []float64 {
 	return CPUUtilization
 }
 
+// NewStatistic - метод для создания струкруры Statistic.
 func NewStatistic() *Statistic {
 	s := &Statistic{
 		Counter:        0,
@@ -45,6 +47,7 @@ func NewStatistic() *Statistic {
 	return s
 }
 
+// CollectRuntime - метод для сбора Runtime метрик.
 func (s *Statistic) CollectRuntime() {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
@@ -54,6 +57,7 @@ func (s *Statistic) CollectRuntime() {
 	log.Println("Collect runtime statistic", s.Counter)
 }
 
+// CollectMemCPU - метод для сбора Memory и CPU метрик.
 func (s *Statistic) CollectMemCPU() {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
@@ -62,12 +66,14 @@ func (s *Statistic) CollectMemCPU() {
 	log.Println("Collect mem cpu statistic")
 }
 
+// ResetCounter - метод для сброса счетчика Counter.
 func (s *Statistic) ResetCounter() {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 	s.Counter = 0
 }
 
+// Copy - метод для создания копии структуры Statistic.
 func (s *Statistic) Copy() *Statistic {
 	s.Mutex.RLock()
 	defer s.Mutex.RUnlock()

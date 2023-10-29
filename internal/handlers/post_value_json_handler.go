@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+// GetJSONMetricHandler - метод получения значения метрики в формате JSON
+// POST /value/
 func GetJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

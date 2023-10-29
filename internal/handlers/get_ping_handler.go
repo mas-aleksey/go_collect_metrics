@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+// GetPingHandler - метод проверки доступности хранилища
+// GET /ping.
 func GetPingHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

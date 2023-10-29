@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// GetValueMetricHandler - метод для получения значения метрики
 func GetValueMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

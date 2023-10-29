@@ -1,3 +1,4 @@
+// Сервер сбора метрик
 package main
 
 import (

@@ -1,3 +1,4 @@
+// Package clients - функционал для отправки API запросов.
 package clients
 
 import (
@@ -10,26 +11,30 @@ import (
 	"time"
 )
 
+// Request - струкртура описывает API запрос.
 type Request struct {
-	Method       string
-	URL          string
-	Headers      map[string]string
-	Body         []byte
-	OkStatusCode int
+	Method       string            // метод запроса
+	URL          string            // URL запроса
+	Headers      map[string]string // заголовки запроса
+	Body         []byte            // тело запроса
+	OkStatusCode int               // ожидаемый код ответа
 }
 
+// Response - струкртура описывает API ответ.
 type Response struct {
-	Body       []byte
-	StatusCode int
-	Headers    http.Header
+	Body       []byte      // тело ответа
+	StatusCode int         // статус код ответа
+	Headers    http.Header // заголовки ответа
 }
 
+// BaseClient - струкртура описывает базового клиента.
 type BaseClient struct {
 	baseURL   string
 	client    *http.Client
 	rateLimit int
 }
 
+// NewBaseClient - метод для создания базового клиента.
 func NewBaseClient(baseURL string, timeout time.Duration, rateLimit int) *BaseClient {
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "http://" + baseURL
@@ -43,12 +48,14 @@ func NewBaseClient(baseURL string, timeout time.Duration, rateLimit int) *BaseCl
 	}
 }
 
+// MakeURL - метод формирует url для запроса.
 func (c *BaseClient) MakeURL(URL string) string {
 	baseURL := strings.TrimRight(c.baseURL, "/")
 	path := strings.TrimLeft(URL, "/")
 	return fmt.Sprint(baseURL, "/", path)
 }
 
+// DoRequest - метод выполняет API запрос.
 func (c *BaseClient) DoRequest(r *Request) (Response, error) {
 	client := &http.Client{}
 	var requestBody bytes.Buffer

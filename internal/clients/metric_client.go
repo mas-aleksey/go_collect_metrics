@@ -10,16 +10,22 @@ import (
 	"time"
 )
 
+// MetricClient - струкрура описывает клиента для отпарвки метрик
 type MetricClient struct {
 	*BaseClient
 }
 
+// NewMetricClient - метод для создания клиента отпарвки метрик
 func NewMetricClient(baseURL string, timeout time.Duration, rateLimit int) *MetricClient {
 	return &MetricClient{
 		BaseClient: NewBaseClient(baseURL, timeout, rateLimit),
 	}
 }
 
+// SendJSONReport - метод для отправки отчета в формате JSON
+// для отправки каждой метрики выполняется отдельный API запрос
+//
+// Deprecated: используйте метод SendBatchJSONReport
 func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	g, _ := errgroup.WithContext(ctx)
@@ -62,6 +68,8 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	return nil
 }
 
+// SendBatchJSONReport - метод для отправки отчета в формате JSON
+// для отправки всех метрик будет выполнен один API запрос
 func (mc MetricClient) SendBatchJSONReport(report *utils.JSONReport) error {
 	body, err := json.Marshal(report.Metrics)
 	if err != nil {

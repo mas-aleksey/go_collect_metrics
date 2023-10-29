@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// MemStorage - структура для хранения метрик в памяти
 type MemStorage struct {
 	GaugeMetrics   map[string]float64   `json:"GaugeMetrics"`
 	CounterMetrics map[string]int64     `json:"CounterMetrics"`

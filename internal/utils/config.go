@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// AgentConfig - структура конфигурации агента.
 type AgentConfig struct {
 	Address        string
 	ReportInterval time.Duration
@@ -16,11 +17,13 @@ type AgentConfig struct {
 	RateLimit      int
 }
 
+// ServerConfig - структура конфигурации сервера.
 type ServerConfig struct {
 	Address string
 	HashKey string
 }
 
+// StorageConfig - структура конфигурации хранилища.
 type StorageConfig struct {
 	StoreInterval time.Duration
 	StoreFile     string
@@ -28,17 +31,19 @@ type StorageConfig struct {
 	DatabaseDSN   string
 }
 
+// EnvError - тип ошибки связанный с получением переменной из окружения.
 type EnvError struct {
 	EnvName string
 	EnvType string
 	Err     error
 }
 
+// метод преобразования ошибки EnvError к строке.
 func (e *EnvError) Error() string {
 	return fmt.Sprintf("Filed to parse %s env: %s: %v", e.EnvType, e.EnvName, e.Err)
 }
 
-func NewEnvError(eName, eType string, err error) error {
+func newEnvError(eName, eType string, err error) error {
 	return &EnvError{
 		EnvName: eName,
 		EnvType: eType,
@@ -46,7 +51,7 @@ func NewEnvError(eName, eType string, err error) error {
 	}
 }
 
-func LookupString(envName, defaultValue string) string {
+func lookupString(envName, defaultValue string) string {
 	result := defaultValue
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
@@ -56,13 +61,13 @@ func LookupString(envName, defaultValue string) string {
 	return result
 }
 
-func LookupInt(envName string, defaultValue int) (int, error) {
+func lookupInt(envName string, defaultValue int) (int, error) {
 	result := defaultValue
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
 		intVar, err := strconv.Atoi(valueEnv)
 		if err != nil {
-			return result, NewEnvError(envName, "int", err)
+			return result, newEnvError(envName, "int", err)
 		} else {
 			result = intVar
 		}
@@ -71,13 +76,13 @@ func LookupInt(envName string, defaultValue int) (int, error) {
 	return result, nil
 }
 
-func LookupDuration(envName string, defaultValue time.Duration) (time.Duration, error) {
+func lookupDuration(envName string, defaultValue time.Duration) (time.Duration, error) {
 	result := defaultValue
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
 		value, err := time.ParseDuration(valueEnv)
 		if err != nil {
-			return result, NewEnvError(envName, "int", err)
+			return result, newEnvError(envName, "int", err)
 		} else {
 			result = value
 		}
@@ -86,13 +91,13 @@ func LookupDuration(envName string, defaultValue time.Duration) (time.Duration, 
 	return result, nil
 }
 
-func LookupBool(envName string, defaultValue bool) (bool, error) {
+func lookupBool(envName string, defaultValue bool) (bool, error) {
 	result := defaultValue
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
 		value, err := strconv.ParseBool(valueEnv)
 		if err != nil {
-			return result, NewEnvError(envName, "int", err)
+			return result, newEnvError(envName, "int", err)
 		} else {
 			result = value
 		}
@@ -100,45 +105,51 @@ func LookupBool(envName string, defaultValue bool) (bool, error) {
 	return result, nil
 }
 
+// MakeAgentConfig - метод создания конфигурации агента.
+// значения переданные через параметры запуска, переопределяются значениями из переменных окружения.
 func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval time.Duration, hashKey string, rateLimit int) (AgentConfig, error) {
 	var err error = nil
 	cfg := AgentConfig{}
-	cfg.Address = LookupString("ADDRESS", address)
-	cfg.ReportInterval, err = LookupDuration("REPORT_INTERVAL", reportInterval)
+	cfg.Address = lookupString("ADDRESS", address)
+	cfg.ReportInterval, err = lookupDuration("REPORT_INTERVAL", reportInterval)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.PollInterval, err = LookupDuration("POLL_INTERVAL", pollInterval)
+	cfg.PollInterval, err = lookupDuration("POLL_INTERVAL", pollInterval)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.HashKey = LookupString("KEY", hashKey)
-	cfg.RateLimit, err = LookupInt("RATE_LIMIT", rateLimit)
+	cfg.HashKey = lookupString("KEY", hashKey)
+	cfg.RateLimit, err = lookupInt("RATE_LIMIT", rateLimit)
 	if err != nil {
 		return cfg, err
 	}
 	return cfg, nil
 }
 
+// MakeServerConfig - метод создания конфигурации сервера.
+// значения переданные через параметры запуска, переопределяются значениями из переменных окружения.
 func MakeServerConfig(address, hashKey string) ServerConfig {
 	cfg := ServerConfig{}
-	cfg.Address = LookupString("ADDRESS", address)
-	cfg.HashKey = LookupString("KEY", hashKey)
+	cfg.Address = lookupString("ADDRESS", address)
+	cfg.HashKey = lookupString("KEY", hashKey)
 	return cfg
 }
 
+// MakeStorageConfig - метод создания конфигурации хранилища.
+// значения переданные через параметры запуска, переопределяются значениями из переменных окружения.
 func MakeStorageConfig(restore bool, storeInterval time.Duration, storeFile, databaseDSN string) (StorageConfig, error) {
 	var err error = nil
 	cfg := StorageConfig{}
-	cfg.Restore, err = LookupBool("RESTORE", restore)
+	cfg.Restore, err = lookupBool("RESTORE", restore)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.StoreInterval, err = LookupDuration("STORE_INTERVAL", storeInterval)
+	cfg.StoreInterval, err = lookupDuration("STORE_INTERVAL", storeInterval)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.StoreFile = LookupString("STORE_FILE", storeFile)
-	cfg.DatabaseDSN = LookupString("DATABASE_DSN", databaseDSN)
+	cfg.StoreFile = lookupString("STORE_FILE", storeFile)
+	cfg.DatabaseDSN = lookupString("DATABASE_DSN", databaseDSN)
 	return cfg, nil
 }
