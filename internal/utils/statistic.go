@@ -30,7 +30,7 @@ func getMemStat() *mem.VirtualMemoryStat {
 	return memStat
 }
 
-func getCpuStat() []float64 {
+func getCPUStat() []float64 {
 	CPUUtilization, _ := cpu.Percent(0, true)
 	return CPUUtilization
 }
@@ -41,7 +41,7 @@ func NewStatistic() *Statistic {
 		Counter:        0,
 		RndValue:       rand.Float64(),
 		MemStat:        getMemStat(),
-		CPUUtilization: getCpuStat(),
+		CPUUtilization: getCPUStat(),
 		Rtm:            getRtm(),
 	}
 	return s
@@ -62,7 +62,7 @@ func (s *Statistic) CollectMemCPU() {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 	s.MemStat = getMemStat()
-	s.CPUUtilization = getCpuStat()
+	s.CPUUtilization = getCPUStat()
 	log.Println("Collect mem cpu statistic")
 }
 

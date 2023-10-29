@@ -81,7 +81,7 @@ func main() {
 	go updateMemCPUStatistic(stat, config)
 	go reportStatistic(stat, config)
 
-	if *pprofMode == true {
+	if *pprofMode {
 		time.Sleep(*pprofDuration)
 		fmem, err := os.Create(`mem.pprof`)
 		if err != nil {

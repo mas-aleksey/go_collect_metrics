@@ -30,7 +30,7 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	g, _ := errgroup.WithContext(ctx)
 
-	metricCh := make(chan utils.JSONMetric, 33)
+	metricCh := make(chan utils.JSONMetric, 47)
 
 	for i := 0; i < mc.rateLimit; i++ {
 		g.Go(func() error {
