@@ -1,15 +1,16 @@
-// Агент для периодеческой отправки CPU, Memory и других метрик.
+// Агент для периодической отправки CPU, Memory и других метрик.
 package main
 
 import (
 	"flag"
-	"github.com/tiraill/go_collect_metrics/internal/clients"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
 	"os"
 	"runtime"
 	"runtime/pprof"
 	"time"
+
+	"github.com/tiraill/go_collect_metrics/internal/clients"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 var (

@@ -1,11 +1,12 @@
 package clients
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBaseClient_MakeURL(t *testing.T) {

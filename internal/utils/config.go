@@ -31,7 +31,7 @@ type StorageConfig struct {
 	DatabaseDSN   string
 }
 
-// EnvError - тип ошибки связанный с получением переменной из окружения.
+// EnvError - тип ошибки, связанный с получением переменной из окружения.
 type EnvError struct {
 	EnvName string
 	EnvType string
@@ -106,7 +106,7 @@ func lookupBool(envName string, defaultValue bool) (bool, error) {
 }
 
 // MakeAgentConfig - метод создания конфигурации агента.
-// значения переданные через параметры запуска, переопределяются значениями из переменных окружения.
+// значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
 func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval time.Duration, hashKey string, rateLimit int) (AgentConfig, error) {
 	var err error = nil
 	cfg := AgentConfig{}
@@ -128,7 +128,7 @@ func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval 
 }
 
 // MakeServerConfig - метод создания конфигурации сервера.
-// значения переданные через параметры запуска, переопределяются значениями из переменных окружения.
+// значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
 func MakeServerConfig(address, hashKey string) ServerConfig {
 	cfg := ServerConfig{}
 	cfg.Address = lookupString("ADDRESS", address)
@@ -137,7 +137,7 @@ func MakeServerConfig(address, hashKey string) ServerConfig {
 }
 
 // MakeStorageConfig - метод создания конфигурации хранилища.
-// значения переданные через параметры запуска, переопределяются значениями из переменных окружения.
+// значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
 func MakeStorageConfig(restore bool, storeInterval time.Duration, storeFile, databaseDSN string) (StorageConfig, error) {
 	var err error = nil
 	cfg := StorageConfig{}

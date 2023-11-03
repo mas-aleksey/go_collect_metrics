@@ -1,9 +1,11 @@
 package handlers
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 func TestGetRouter(t *testing.T) {

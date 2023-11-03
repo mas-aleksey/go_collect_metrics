@@ -3,11 +3,12 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
-// ErrMetricHash ошибка невалидного хеша метрики.
+// ErrMetricHash ошибка невалидной хеш-суммы метрики.
 var ErrMetricHash = errors.New("invalid metric hash")
 
 // ErrMetricType ошибка невалидного типа метрики.

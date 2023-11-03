@@ -3,19 +3,21 @@ package clients
 import (
 	"context"
 	"encoding/json"
-	"github.com/pkg/errors"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
-	"golang.org/x/sync/errgroup"
 	"net/http"
 	"time"
+
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
-// MetricClient - струкрура описывает клиента для отпарвки метрик
+// MetricClient - структура описывает клиента для отправки метрик
 type MetricClient struct {
 	*BaseClient
 }
 
-// NewMetricClient - метод для создания клиента отпарвки метрик
+// NewMetricClient - метод для создания клиента отправки метрик
 func NewMetricClient(baseURL string, timeout time.Duration, rateLimit int) *MetricClient {
 	return &MetricClient{
 		BaseClient: NewBaseClient(baseURL, timeout, rateLimit),

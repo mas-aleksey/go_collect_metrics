@@ -3,15 +3,17 @@ package clients
 import (
 	"compress/gzip"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 func TestNewMetricClient(t *testing.T) {

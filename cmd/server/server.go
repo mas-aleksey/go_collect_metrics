@@ -4,15 +4,16 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/tiraill/go_collect_metrics/internal/handlers"
-	"github.com/tiraill/go_collect_metrics/internal/storage"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/tiraill/go_collect_metrics/internal/handlers"
+	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 var (

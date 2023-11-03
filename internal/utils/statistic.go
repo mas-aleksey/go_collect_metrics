@@ -1,15 +1,16 @@
 package utils
 
 import (
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/mem"
 	"log"
 	"math/rand"
 	"runtime"
 	"sync"
+
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
 )
 
-// Statistic - струкрура для хранения метрик.
+// Statistic - структура для хранения метрик.
 type Statistic struct {
 	Counter        int64
 	RndValue       float64

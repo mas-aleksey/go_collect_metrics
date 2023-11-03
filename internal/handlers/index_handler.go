@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"html/template"
 	"net/http"
+
+	"github.com/tiraill/go_collect_metrics/internal/storage"
 )
 
 var pageTemp = `<!DOCTYPE html>
@@ -43,7 +44,7 @@ type TemplateData struct {
 	Metrics []MetricData
 }
 
-// IndexHandler - метод для получения HTML страници со списком всех метрик
+// IndexHandler - метод для получения HTML страницы со списком всех метрик
 // GET /.
 func IndexHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -18,7 +18,7 @@ var RuntimeMetricNames = []string{
 	"StackSys", "Sys", "TotalAlloc",
 }
 
-// ToStr - метод для приведерия чисел в строку
+// ToStr - метод для приведения чисел в строку
 func ToStr(v interface{}) string {
 
 	switch val := v.(type) {
@@ -36,7 +36,7 @@ func ToStr(v interface{}) string {
 	}
 }
 
-// ToFloat64 - метод для приведерия чисел к формату float64
+// ToFloat64 - метод для приведения чисел к формату float64
 func ToFloat64(v interface{}) float64 {
 	switch val := v.(type) {
 	case int:
@@ -55,7 +55,7 @@ func ToFloat64(v interface{}) float64 {
 	}
 }
 
-// CalcHash - метод для вычисления хеш суммы
+// CalcHash - метод для вычисления хеш-суммы
 func CalcHash(data, hashKey string) *string {
 	if hashKey == "" {
 		return nil

@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// Request - струкртура описывает API запрос.
+// Request - структура описывает API запрос.
 type Request struct {
 	Method       string            // метод запроса
 	URL          string            // URL запроса
@@ -20,14 +20,14 @@ type Request struct {
 	OkStatusCode int               // ожидаемый код ответа
 }
 
-// Response - струкртура описывает API ответ.
+// Response - структура описывает API ответ.
 type Response struct {
 	Body       []byte      // тело ответа
 	StatusCode int         // статус код ответа
 	Headers    http.Header // заголовки ответа
 }
 
-// BaseClient - струкртура описывает базового клиента.
+// BaseClient - структура описывает базового клиента.
 type BaseClient struct {
 	baseURL   string
 	client    *http.Client

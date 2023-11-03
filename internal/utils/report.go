@@ -8,7 +8,7 @@ import (
 // ReportCount - количество метрик в отчете
 var ReportCount = 47
 
-// JSONReport - струкрура отчета с метриками в формате JSON
+// JSONReport - структура отчета с метриками в формате JSON
 type JSONReport struct {
 	Metrics []JSONMetric
 }

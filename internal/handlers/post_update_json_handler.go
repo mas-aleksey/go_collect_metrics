@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
-	"net/http"
 )
 
 // SaveJSONMetricHandler - метод для загрузки метрики в формате JSON.

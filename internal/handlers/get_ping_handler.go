@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"net/http"
+
+	"github.com/tiraill/go_collect_metrics/internal/storage"
 )
 
 // GetPingHandler - метод проверки доступности хранилища

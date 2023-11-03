@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 // MemStorage - структура для хранения метрик в памяти
