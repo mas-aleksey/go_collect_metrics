@@ -49,9 +49,9 @@ func NewBaseClient(baseURL string, timeout time.Duration, rateLimit int) *BaseCl
 }
 
 // MakeURL - метод формирует url для запроса.
-func (c *BaseClient) MakeURL(URL string) string {
+func (c *BaseClient) MakeURL(url string) string {
 	baseURL := strings.TrimRight(c.baseURL, "/")
-	path := strings.TrimLeft(URL, "/")
+	path := strings.TrimLeft(url, "/")
 	return fmt.Sprint(baseURL, "/", path)
 }
 

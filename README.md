@@ -36,3 +36,9 @@ git fetch template && git checkout template/main .github
 
 1. `godoc -http=:8080`
 2. http://localhost:8080/pkg/github.com/tiraill/go_collect_metrics/?m=all
+3. wget -r -np -E -p -k -nH -P doc "http://localhost:8080/pkg/github.com/tiraill/go_collect_metrics/?m=all"
+
+# Запуск линтеров
+
+1. `go build cmd/staticlint/mycheck.go`
+2. `./mycheck ./...`

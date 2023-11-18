@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>handlers - Go Documentation Server</title>
+
+<link type="text/css" rel="stylesheet" href="../../../../../../lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="../../../../../../lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.19.5";</script>
+<script src="../../../../../../lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="http://localhost:8080/pkg/">Go Documentation Server</a></div>
+<div class="top-heading" id="heading-narrow"><a href="http://localhost:8080/pkg/">GoDoc</a></div>
+<a href="index.html%3Fm=all.html#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+<form method="GET" action="http://localhost:8080/search">
+<div id="menu">
+
+<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>
+</div>
+</form>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package handlers
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/tiraill/go_collect_metrics/internal/handlers"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="index.html%3Fm=all.html#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="index.html%3Fm=all.html#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>Package handlers - функционал обработчиков API методов сервера
+
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+				<dd><a href="index.html%3Fm=all.html#pkg-variables">Variables</a></dd>
+			
+			
+				
+				<dd><a href="index.html%3Fm=all.html#GetJSONMetricHandler">func GetJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#GetPingHandler">func GetPingHandler(db storage.Storage) http.HandlerFunc</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#GetRouter">func GetRouter(db storage.Storage, config utils.ServerConfig) *chi.Mux</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#GetValueMetricHandler">func GetValueMetricHandler(db storage.Storage) http.HandlerFunc</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#IndexHandler">func IndexHandler(db storage.Storage) http.HandlerFunc</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#ReadBody">func ReadBody(r *http.Request) ([]byte, error)</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#SaveBatchJSONMetricHandler">func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#SaveJSONMetricHandler">func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#SaveMetricHandler">func SaveMetricHandler(db storage.Storage) http.HandlerFunc</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#readAll">func readAll(reader io.ReadCloser) ([]byte, error)</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#readGzipBody">func readGzipBody(reader io.ReadCloser) ([]byte, error)</a></dd>
+			
+			
+				
+				<dd><a href="index.html%3Fm=all.html#MetricData">type MetricData</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html%3Fm=all.html#TemplateData">type TemplateData</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/get_ping_handler.go">get_ping_handler.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/get_value_handler.go">get_value_handler.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/index_handler.go">index_handler.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/post_update_handler.go">post_update_handler.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/post_update_json_handler.go">post_update_json_handler.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/post_updates_json_handler.go">post_updates_json_handler.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/post_value_json_handler.go">post_value_json_handler.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/route.go">route.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/utils.go">utils.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				
+				<pre>var <span id="pageTemp">pageTemp</span> = `&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Metrics&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      List of metrics.
+    &lt;/p&gt;
+    &lt;table&gt;
+          &lt;tr&gt;
+          &lt;td&gt;Name&lt;/td&gt;
+          &lt;td&gt;Value&lt;/td&gt;
+        &lt;/tr&gt;
+          {{ with .Metrics }}
+            {{ range . }}
+                  &lt;tr&gt;
+                      &lt;td&gt;{{ .Name }}&lt;/td&gt;
+                      &lt;td&gt;{{ .Value }}&lt;/td&gt;
+                  &lt;/tr&gt;
+            {{ end }} 
+          {{ end }}
+    &lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;`</pre>
+			
+		
+		
+			
+			
+			<h2 id="GetJSONMetricHandler">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/post_value_json_handler.go?s=308:386#L4">GetJSONMetricHandler</a>
+				<a class="permalink" href="index.html%3Fm=all.html#GetJSONMetricHandler">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func GetJSONMetricHandler(db <a href="../storage/index.html">storage</a>.<a href="../storage/index.html#Storage">Storage</a>, hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>) <a href="http://localhost:8080/pkg/net/http/">http</a>.<a href="http://localhost:8080/pkg/net/http/#HandlerFunc">HandlerFunc</a></pre>
+			<p>GetJSONMetricHandler - метод получения значения метрики в формате JSON
+POST /value/
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetPingHandler">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/get_ping_handler.go?s=205:261#L1">GetPingHandler</a>
+				<a class="permalink" href="index.html%3Fm=all.html#GetPingHandler">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func GetPingHandler(db <a href="../storage/index.html">storage</a>.<a href="../storage/index.html#Storage">Storage</a>) <a href="http://localhost:8080/pkg/net/http/">http</a>.<a href="http://localhost:8080/pkg/net/http/#HandlerFunc">HandlerFunc</a></pre>
+			<p>GetPingHandler - метод проверки доступности хранилища
+GET /ping.
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetRouter">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/route.go?s=408:478#L5">GetRouter</a>
+				<a class="permalink" href="index.html%3Fm=all.html#GetRouter">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func GetRouter(db <a href="../storage/index.html">storage</a>.<a href="../storage/index.html#Storage">Storage</a>, config <a href="../utils/index.html">utils</a>.<a href="../utils/index.html#ServerConfig">ServerConfig</a>) *chi.<a href="index.html%3Fm=all.html#Mux">Mux</a></pre>
+			<p>GetRouter - метод регистрирует роуты для сервера.
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetValueMetricHandler">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/get_value_handler.go?s=226:289#L2">GetValueMetricHandler</a>
+				<a class="permalink" href="index.html%3Fm=all.html#GetValueMetricHandler">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func GetValueMetricHandler(db <a href="../storage/index.html">storage</a>.<a href="../storage/index.html#Storage">Storage</a>) <a href="http://localhost:8080/pkg/net/http/">http</a>.<a href="http://localhost:8080/pkg/net/http/#HandlerFunc">HandlerFunc</a></pre>
+			<p>GetValueMetricHandler - метод для получения значения метрики
+
+			
+			
+
+		
+			
+			
+			<h2 id="IndexHandler">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/index_handler.go?s=949:1003#L39">IndexHandler</a>
+				<a class="permalink" href="index.html%3Fm=all.html#IndexHandler">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func IndexHandler(db <a href="../storage/index.html">storage</a>.<a href="../storage/index.html#Storage">Storage</a>) <a href="http://localhost:8080/pkg/net/http/">http</a>.<a href="http://localhost:8080/pkg/net/http/#HandlerFunc">HandlerFunc</a></pre>
+			<p>IndexHandler - метод для получения HTML страницы со списком всех метрик
+GET /.
+
+			
+			
+
+		
+			
+			
+			<h2 id="ReadBody">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/utils.go?s=857:903#L29">ReadBody</a>
+				<a class="permalink" href="index.html%3Fm=all.html#ReadBody">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func ReadBody(r *<a href="http://localhost:8080/pkg/net/http/">http</a>.<a href="http://localhost:8080/pkg/net/http/#Request">Request</a>) ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+			<p>ReadBody - метод чтения тела API запроса.
+поддержка сжатия данных gzip.
+
+			
+			
+
+		
+			
+			
+			<h2 id="SaveBatchJSONMetricHandler">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/post_updates_json_handler.go?s=316:400#L4">SaveBatchJSONMetricHandler</a>
+				<a class="permalink" href="index.html%3Fm=all.html#SaveBatchJSONMetricHandler">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func SaveBatchJSONMetricHandler(db <a href="../storage/index.html">storage</a>.<a href="../storage/index.html#Storage">Storage</a>, hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>) <a href="http://localhost:8080/pkg/net/http/">http</a>.<a href="http://localhost:8080/pkg/net/http/#HandlerFunc">HandlerFunc</a></pre>
+			<p>SaveBatchJSONMetricHandler - метод для загрузки списка метрик в формате JSON.
+POST /updates/
+
+			
+			
+
+		
+			
+			
+			<h2 id="SaveJSONMetricHandler">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/post_update_json_handler.go?s=292:371#L3">SaveJSONMetricHandler</a>
+				<a class="permalink" href="index.html%3Fm=all.html#SaveJSONMetricHandler">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func SaveJSONMetricHandler(db <a href="../storage/index.html">storage</a>.<a href="../storage/index.html#Storage">Storage</a>, hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>) <a href="http://localhost:8080/pkg/net/http/">http</a>.<a href="http://localhost:8080/pkg/net/http/#HandlerFunc">HandlerFunc</a></pre>
+			<p>SaveJSONMetricHandler - метод для загрузки метрики в формате JSON.
+POST /update/
+
+			
+			
+
+		
+			
+			
+			<h2 id="SaveMetricHandler">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/post_update_handler.go?s=302:361#L4">SaveMetricHandler</a>
+				<a class="permalink" href="index.html%3Fm=all.html#SaveMetricHandler">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func SaveMetricHandler(db <a href="../storage/index.html">storage</a>.<a href="../storage/index.html#Storage">Storage</a>) <a href="http://localhost:8080/pkg/net/http/">http</a>.<a href="http://localhost:8080/pkg/net/http/#HandlerFunc">HandlerFunc</a></pre>
+			<p>SaveMetricHandler - метод для загрузки метрики.
+POST /update/{mType}/{mName}/{mValue}.
+
+			
+			
+
+		
+			
+			
+			<h2 id="readAll">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/utils.go?s=79:129#L1">readAll</a>
+				<a class="permalink" href="index.html%3Fm=all.html#readAll">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func readAll(reader <a href="http://localhost:8080/pkg/io/">io</a>.<a href="http://localhost:8080/pkg/io/#ReadCloser">ReadCloser</a>) ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="readGzipBody">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/utils.go?s=359:414#L12">readGzipBody</a>
+				<a class="permalink" href="index.html%3Fm=all.html#readGzipBody">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func readGzipBody(reader <a href="http://localhost:8080/pkg/io/">io</a>.<a href="http://localhost:8080/pkg/io/#ReadCloser">ReadCloser</a>) ([]<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+			
+			
+			
+
+		
+		
+			
+			
+			<h2 id="MetricData">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/index_handler.go?s=618:672#L27">MetricData</a>
+				<a class="permalink" href="index.html%3Fm=all.html#MetricData">&#xb6;</a>
+				
+				
+			</h2>
+			<p>MetricData - структура для данных метрики
+
+			<pre>type MetricData struct {
+<span id="MetricData.Name"></span>    Name  <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+<span id="MetricData.Value"></span>    Value <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="TemplateData">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/handlers/index_handler.go?s=768:818#L33">TemplateData</a>
+				<a class="permalink" href="index.html%3Fm=all.html#TemplateData">&#xb6;</a>
+				
+				
+			</h2>
+			<p>TemplateData - структура для шаблона данных с метриками
+
+			<pre>type TemplateData struct {
+<span id="TemplateData.Metrics"></span>    Metrics []<a href="index.html%3Fm=all.html#MetricData">MetricData</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.19.5.<br>
+Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="http://localhost:8080/LICENSE">BSD license</a>.<br>
+<a href="https://golang.org/doc/tos.html">Terms of Service</a> |
+<a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>

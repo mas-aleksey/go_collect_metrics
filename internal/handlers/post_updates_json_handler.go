@@ -28,7 +28,8 @@ func SaveBatchJSONMetricHandler(db storage.Storage, hashKey string) http.Handler
 			return
 		}
 		for _, metric := range metrics {
-			if err := metric.ValidatesAll(hashKey); err != nil {
+			err = metric.ValidatesAll(hashKey)
+			if err != nil {
 				log.Printf("error Validate metric %s: %s", metric.ID, err)
 				switch err {
 				case utils.ErrMetricHash:

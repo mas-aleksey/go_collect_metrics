@@ -23,7 +23,8 @@ func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if err := metric.ValidatesAll(hashKey); err != nil {
+		err = metric.ValidatesAll(hashKey)
+		if err != nil {
 			switch err {
 			case utils.ErrMetricHash:
 				http.Error(w, err.Error(), http.StatusBadRequest)

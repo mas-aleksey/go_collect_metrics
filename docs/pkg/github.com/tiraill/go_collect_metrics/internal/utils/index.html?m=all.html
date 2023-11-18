@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>utils - Go Documentation Server</title>
+
+<link type="text/css" rel="stylesheet" href="../../../../../../lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="../../../../../../lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.19.5";</script>
+<script src="../../../../../../lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="http://localhost:8080/pkg/">Go Documentation Server</a></div>
+<div class="top-heading" id="heading-narrow"><a href="http://localhost:8080/pkg/">GoDoc</a></div>
+<a href="index.html%3Fm=all.html#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+<form method="GET" action="http://localhost:8080/search">
+<div id="menu">
+
+<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>
+</div>
+</form>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package utils
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/tiraill/go_collect_metrics/internal/utils"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="index.html%3Fm=all.html#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="index.html%3Fm=all.html#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>Package utils - пакет для вспомогательных функций
+
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+				<dd><a href="index.html%3Fm=all.html#pkg-variables">Variables</a></dd>
+			
+			
+				
+				<dd><a href="index.html%3Fm=all.html#CalcHash">func CalcHash(data, hashKey string) *string</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#ToFloat64">func ToFloat64(v interface{}) float64</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#ToStr">func ToStr(v interface{}) string</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#getCPUStat">func getCPUStat() []float64</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#getMemStat">func getMemStat() *mem.VirtualMemoryStat</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#getRtm">func getRtm() *runtime.MemStats</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#lookupBool">func lookupBool(envName string, defaultValue bool) (bool, error)</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#lookupDuration">func lookupDuration(envName string, defaultValue time.Duration) (time.Duration, error)</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#lookupInt">func lookupInt(envName string, defaultValue int) (int, error)</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#lookupString">func lookupString(envName, defaultValue string) string</a></dd>
+			
+				
+				<dd><a href="index.html%3Fm=all.html#newEnvError">func newEnvError(eName, eType string, err error) error</a></dd>
+			
+			
+				
+				<dd><a href="index.html%3Fm=all.html#AgentConfig">type AgentConfig</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#MakeAgentConfig">func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval time.Duration, hashKey string, rateLimit int) (AgentConfig, error)</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html%3Fm=all.html#EnvError">type EnvError</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#EnvError.Error">func (e *EnvError) Error() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html%3Fm=all.html#JSONMetric">type JSONMetric</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#LoadButchJSONMetric">func LoadButchJSONMetric(body []byte) ([]JSONMetric, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#LoadJSONMetric">func LoadJSONMetric(body []byte) (JSONMetric, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#NewCounterJSONMetric">func NewCounterJSONMetric(mName string, delta int64) JSONMetric</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#NewGaugeJSONMetric">func NewGaugeJSONMetric(mName string, value float64) JSONMetric</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#NewJSONMetric">func NewJSONMetric(metricType, metricName, metricValue string) (JSONMetric, error)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#JSONMetric.IsValidHash">func (m JSONMetric) IsValidHash(hashKey string) bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#JSONMetric.IsValidType">func (m JSONMetric) IsValidType() bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#JSONMetric.IsValidValue">func (m JSONMetric) IsValidValue() bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#JSONMetric.String">func (m JSONMetric) String() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#JSONMetric.ValidatesAll">func (m JSONMetric) ValidatesAll(hashKey string) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#JSONMetric.ValueString">func (m JSONMetric) ValueString() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html%3Fm=all.html#JSONReport">type JSONReport</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#NewJSONReport">func NewJSONReport(statistic *Statistic, hashKey string) *JSONReport</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html%3Fm=all.html#ServerConfig">type ServerConfig</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#MakeServerConfig">func MakeServerConfig(address, hashKey string) ServerConfig</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html%3Fm=all.html#Statistic">type Statistic</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#NewStatistic">func NewStatistic() *Statistic</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#Statistic.CollectMemCPU">func (s *Statistic) CollectMemCPU()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#Statistic.CollectRuntime">func (s *Statistic) CollectRuntime()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#Statistic.Copy">func (s *Statistic) Copy() *Statistic</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#Statistic.ResetCounter">func (s *Statistic) ResetCounter()</a></dd>
+				
+			
+				
+				<dd><a href="index.html%3Fm=all.html#StorageConfig">type StorageConfig</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html%3Fm=all.html#MakeStorageConfig">func MakeStorageConfig(restore bool, storeInterval time.Duration, storeFile, databaseDSN string) (StorageConfig, error)</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/common.go">common.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go">config.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go">json_metric.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/report.go">report.go</a>
+			
+				<a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go">statistic.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				<p>ErrMetricHash ошибка невалидной хеш-суммы метрики.
+
+				<pre>var <span id="ErrMetricHash">ErrMetricHash</span> = <a href="http://localhost:8080/pkg/github.com/pkg/errors/">errors</a>.<a href="http://localhost:8080/pkg/github.com/pkg/errors/#New">New</a>(&#34;invalid metric hash&#34;)</pre>
+			
+				<p>ErrMetricType ошибка невалидного типа метрики.
+
+				<pre>var <span id="ErrMetricType">ErrMetricType</span> = <a href="http://localhost:8080/pkg/github.com/pkg/errors/">errors</a>.<a href="http://localhost:8080/pkg/github.com/pkg/errors/#New">New</a>(&#34;invalid metric type&#34;)</pre>
+			
+				<p>ErrMetricValue ошибка невалидного значения метрики.
+
+				<pre>var <span id="ErrMetricValue">ErrMetricValue</span> = <a href="http://localhost:8080/pkg/github.com/pkg/errors/">errors</a>.<a href="http://localhost:8080/pkg/github.com/pkg/errors/#New">New</a>(&#34;invalid metric value&#34;)</pre>
+			
+				<p>ReportCount - количество метрик в отчете
+
+				<pre>var <span id="ReportCount">ReportCount</span> = 47</pre>
+			
+				<p>RuntimeMetricNames - список имен для Runtime метрик
+
+				<pre>var <span id="RuntimeMetricNames">RuntimeMetricNames</span> = []<a href="http://localhost:8080/pkg/builtin/#string">string</a>{
+    &#34;Alloc&#34;, &#34;BuckHashSys&#34;, &#34;Frees&#34;, &#34;GCCPUFraction&#34;, &#34;GCSys&#34;, &#34;HeapAlloc&#34;, &#34;HeapIdle&#34;, &#34;HeapInuse&#34;,
+    &#34;HeapObjects&#34;, &#34;HeapReleased&#34;, &#34;HeapSys&#34;, &#34;LastGC&#34;, &#34;Lookups&#34;, &#34;MCacheInuse&#34;, &#34;MCacheSys&#34;, &#34;MSpanInuse&#34;,
+    &#34;MSpanSys&#34;, &#34;Mallocs&#34;, &#34;NextGC&#34;, &#34;NumForcedGC&#34;, &#34;NumGC&#34;, &#34;OtherSys&#34;, &#34;PauseTotalNs&#34;, &#34;StackInuse&#34;,
+    &#34;StackSys&#34;, &#34;Sys&#34;, &#34;TotalAlloc&#34;,
+}</pre>
+			
+		
+		
+			
+			
+			<h2 id="CalcHash">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/common.go?s=1556:1599#L49">CalcHash</a>
+				<a class="permalink" href="index.html%3Fm=all.html#CalcHash">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func CalcHash(data, hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>) *<a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+			<p>CalcHash - метод для вычисления хеш-суммы
+
+			
+			
+
+		
+			
+			
+			<h2 id="ToFloat64">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/common.go?s=1161:1198#L30">ToFloat64</a>
+				<a class="permalink" href="index.html%3Fm=all.html#ToFloat64">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func ToFloat64(v interface{}) <a href="http://localhost:8080/pkg/builtin/#float64">float64</a></pre>
+			<p>ToFloat64 - метод для приведения чисел к формату float64
+
+			
+			
+
+		
+			
+			
+			<h2 id="ToStr">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/common.go?s=705:737#L12">ToStr</a>
+				<a class="permalink" href="index.html%3Fm=all.html#ToStr">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func ToStr(v interface{}) <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+			<p>ToStr - метод для приведения чисел в строку
+
+			
+			
+
+		
+			
+			
+			<h2 id="getCPUStat">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=615:642#L24">getCPUStat</a>
+				<a class="permalink" href="index.html%3Fm=all.html#getCPUStat">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func getCPUStat() []<a href="http://localhost:8080/pkg/builtin/#float64">float64</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="getMemStat">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=518:558#L19">getMemStat</a>
+				<a class="permalink" href="index.html%3Fm=all.html#getMemStat">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func getMemStat() *<a href="http://localhost:8080/pkg/github.com/shirou/gopsutil/v3/mem/">mem</a>.<a href="http://localhost:8080/pkg/github.com/shirou/gopsutil/v3/mem/#VirtualMemoryStat">VirtualMemoryStat</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="getRtm">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=414:445#L13">getRtm</a>
+				<a class="permalink" href="index.html%3Fm=all.html#getRtm">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func getRtm() *<a href="http://localhost:8080/pkg/runtime/">runtime</a>.<a href="http://localhost:8080/pkg/runtime/#MemStats">MemStats</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="lookupBool">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=2118:2182#L84">lookupBool</a>
+				<a class="permalink" href="index.html%3Fm=all.html#lookupBool">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func lookupBool(envName <a href="http://localhost:8080/pkg/builtin/#string">string</a>, defaultValue <a href="http://localhost:8080/pkg/builtin/#bool">bool</a>) (<a href="http://localhost:8080/pkg/builtin/#bool">bool</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="lookupDuration">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=1740:1826#L69">lookupDuration</a>
+				<a class="permalink" href="index.html%3Fm=all.html#lookupDuration">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func lookupDuration(envName <a href="http://localhost:8080/pkg/builtin/#string">string</a>, defaultValue <a href="http://localhost:8080/pkg/time/">time</a>.<a href="http://localhost:8080/pkg/time/#Duration">Duration</a>) (<a href="http://localhost:8080/pkg/time/">time</a>.<a href="http://localhost:8080/pkg/time/#Duration">Duration</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="lookupInt">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=1391:1452#L54">lookupInt</a>
+				<a class="permalink" href="index.html%3Fm=all.html#lookupInt">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func lookupInt(envName <a href="http://localhost:8080/pkg/builtin/#string">string</a>, defaultValue <a href="http://localhost:8080/pkg/builtin/#int">int</a>) (<a href="http://localhost:8080/pkg/builtin/#int">int</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="lookupString">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=1177:1231#L44">lookupString</a>
+				<a class="permalink" href="index.html%3Fm=all.html#lookupString">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func lookupString(envName, defaultValue <a href="http://localhost:8080/pkg/builtin/#string">string</a>) <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="newEnvError">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=1043:1097#L36">newEnvError</a>
+				<a class="permalink" href="index.html%3Fm=all.html#newEnvError">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func newEnvError(eName, eType <a href="http://localhost:8080/pkg/builtin/#string">string</a>, err <a href="http://localhost:8080/pkg/builtin/#error">error</a>) <a href="http://localhost:8080/pkg/builtin/#error">error</a></pre>
+			
+			
+			
+
+		
+		
+			
+			
+			<h2 id="AgentConfig">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=141:294#L2">AgentConfig</a>
+				<a class="permalink" href="index.html%3Fm=all.html#AgentConfig">&#xb6;</a>
+				
+				
+			</h2>
+			<p>AgentConfig - структура конфигурации агента.
+
+			<pre>type AgentConfig struct {
+<span id="AgentConfig.Address"></span>    Address        <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+<span id="AgentConfig.ReportInterval"></span>    ReportInterval <a href="http://localhost:8080/pkg/time/">time</a>.<a href="http://localhost:8080/pkg/time/#Duration">Duration</a>
+<span id="AgentConfig.PollInterval"></span>    PollInterval   <a href="http://localhost:8080/pkg/time/">time</a>.<a href="http://localhost:8080/pkg/time/#Duration">Duration</a>
+<span id="AgentConfig.HashKey"></span>    HashKey        <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+<span id="AgentConfig.RateLimit"></span>    RateLimit      <a href="http://localhost:8080/pkg/builtin/#int">int</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="MakeAgentConfig">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=2705:2851#L100">MakeAgentConfig</a>
+					<a class="permalink" href="index.html%3Fm=all.html#MakeAgentConfig">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func MakeAgentConfig(address <a href="http://localhost:8080/pkg/builtin/#string">string</a>, reportInterval <a href="http://localhost:8080/pkg/time/">time</a>.<a href="http://localhost:8080/pkg/time/#Duration">Duration</a>, pollInterval <a href="http://localhost:8080/pkg/time/">time</a>.<a href="http://localhost:8080/pkg/time/#Duration">Duration</a>, hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>, rateLimit <a href="http://localhost:8080/pkg/builtin/#int">int</a>) (<a href="index.html%3Fm=all.html#AgentConfig">AgentConfig</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>MakeAgentConfig - метод создания конфигурации агента.
+значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="EnvError">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=767:838#L25">EnvError</a>
+				<a class="permalink" href="index.html%3Fm=all.html#EnvError">&#xb6;</a>
+				
+				
+			</h2>
+			<p>EnvError - тип ошибки, связанный с получением переменной из окружения.
+
+			<pre>type EnvError struct {
+<span id="EnvError.EnvName"></span>    EnvName <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+<span id="EnvError.EnvType"></span>    EnvType <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+<span id="EnvError.Err"></span>    Err     <a href="http://localhost:8080/pkg/builtin/#error">error</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="EnvError.Error">func (*EnvError) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=922:955#L32">Error</a>
+					<a class="permalink" href="index.html%3Fm=all.html#EnvError.Error">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (e *<a href="index.html%3Fm=all.html#EnvError">EnvError</a>) Error() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				<p>метод преобразования ошибки EnvError к строке.
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="JSONMetric">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=579:1109#L11">JSONMetric</a>
+				<a class="permalink" href="index.html%3Fm=all.html#JSONMetric">&#xb6;</a>
+				
+				
+			</h2>
+			<p>JSONMetric - структура метрики в формате JSON.
+
+			<pre>type JSONMetric struct {
+<span id="JSONMetric.ID"></span>    ID    <a href="http://localhost:8080/pkg/builtin/#string">string</a>   `json:&#34;id&#34;`              <span class="comment">// имя метрики</span>
+<span id="JSONMetric.MType"></span>    MType <a href="http://localhost:8080/pkg/builtin/#string">string</a>   `json:&#34;type&#34;`            <span class="comment">// параметр, принимающий значение gauge или counter</span>
+<span id="JSONMetric.Delta"></span>    Delta *<a href="http://localhost:8080/pkg/builtin/#int64">int64</a>   `json:&#34;delta,omitempty&#34;` <span class="comment">// значение метрики в случае передачи counter</span>
+<span id="JSONMetric.Value"></span>    Value *<a href="http://localhost:8080/pkg/builtin/#float64">float64</a> `json:&#34;value,omitempty&#34;` <span class="comment">// значение метрики в случае передачи gauge</span>
+<span id="JSONMetric.Hash"></span>    Hash  *<a href="http://localhost:8080/pkg/builtin/#string">string</a>  `json:&#34;hash,omitempty&#34;`  <span class="comment">// значение хеш-функции</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="LoadButchJSONMetric">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=2607:2666#L68">LoadButchJSONMetric</a>
+					<a class="permalink" href="index.html%3Fm=all.html#LoadButchJSONMetric">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func LoadButchJSONMetric(body []<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>) ([]<a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>LoadButchJSONMetric - метод парсинга списка метрик из данных в формате JSON.
+
+				
+				
+			
+				
+				<h3 id="LoadJSONMetric">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=2306:2358#L59">LoadJSONMetric</a>
+					<a class="permalink" href="index.html%3Fm=all.html#LoadJSONMetric">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func LoadJSONMetric(body []<a href="http://localhost:8080/pkg/builtin/#byte">byte</a>) (<a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>LoadJSONMetric - метод парсинга метрики из данных в формате JSON.
+
+				
+				
+			
+				
+				<h3 id="NewCounterJSONMetric">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=1218:1281#L20">NewCounterJSONMetric</a>
+					<a class="permalink" href="index.html%3Fm=all.html#NewCounterJSONMetric">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewCounterJSONMetric(mName <a href="http://localhost:8080/pkg/builtin/#string">string</a>, delta <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>) <a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a></pre>
+				<p>NewCounterJSONMetric - метод создания объекта метрики с типом counter.
+
+				
+				
+			
+				
+				<h3 id="NewGaugeJSONMetric">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=1466:1529#L29">NewGaugeJSONMetric</a>
+					<a class="permalink" href="index.html%3Fm=all.html#NewGaugeJSONMetric">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewGaugeJSONMetric(mName <a href="http://localhost:8080/pkg/builtin/#string">string</a>, value <a href="http://localhost:8080/pkg/builtin/#float64">float64</a>) <a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a></pre>
+				<p>NewGaugeJSONMetric - метод создания объекта метрики с типом gauge.
+
+				
+				
+			
+				
+				<h3 id="NewJSONMetric">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=1698:1780#L38">NewJSONMetric</a>
+					<a class="permalink" href="index.html%3Fm=all.html#NewJSONMetric">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewJSONMetric(metricType, metricName, metricValue <a href="http://localhost:8080/pkg/builtin/#string">string</a>) (<a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>NewJSONMetric - общий метод создания объекта метрики.
+
+				
+				
+			
+
+			
+				
+				<h3 id="JSONMetric.IsValidHash">func (JSONMetric) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=3913:3965#L123">IsValidHash</a>
+					<a class="permalink" href="index.html%3Fm=all.html#JSONMetric.IsValidHash">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m <a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>) IsValidHash(hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>) <a href="http://localhost:8080/pkg/builtin/#bool">bool</a></pre>
+				<p>IsValidHash - метод валидации хеш-суммы метрики.
+
+				
+				
+				
+			
+				
+				<h3 id="JSONMetric.IsValidType">func (JSONMetric) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=3450:3488#L101">IsValidType</a>
+					<a class="permalink" href="index.html%3Fm=all.html#JSONMetric.IsValidType">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m <a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>) IsValidType() <a href="http://localhost:8080/pkg/builtin/#bool">bool</a></pre>
+				<p>IsValidType - метод валидации типа метрики.
+
+				
+				
+				
+			
+				
+				<h3 id="JSONMetric.IsValidValue">func (JSONMetric) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=3661:3700#L111">IsValidValue</a>
+					<a class="permalink" href="index.html%3Fm=all.html#JSONMetric.IsValidValue">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m <a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>) IsValidValue() <a href="http://localhost:8080/pkg/builtin/#bool">bool</a></pre>
+				<p>IsValidValue - метод валидации значения метрики.
+
+				
+				
+				
+			
+				
+				<h3 id="JSONMetric.String">func (JSONMetric) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=2863:2898#L77">String</a>
+					<a class="permalink" href="index.html%3Fm=all.html#JSONMetric.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m <a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>) String() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				<p>Метод приведения JSONMetric к строке.
+
+				
+				
+				
+			
+				
+				<h3 id="JSONMetric.ValidatesAll">func (JSONMetric) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=4196:4250#L135">ValidatesAll</a>
+					<a class="permalink" href="index.html%3Fm=all.html#JSONMetric.ValidatesAll">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m <a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>) ValidatesAll(hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>) <a href="http://localhost:8080/pkg/builtin/#error">error</a></pre>
+				<p>ValidatesAll - общий метод валидации метрики.
+
+				
+				
+				
+			
+				
+				<h3 id="JSONMetric.ValueString">func (JSONMetric) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/json_metric.go?s=3183:3223#L89">ValueString</a>
+					<a class="permalink" href="index.html%3Fm=all.html#JSONMetric.ValueString">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m <a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>) ValueString() <a href="http://localhost:8080/pkg/builtin/#string">string</a></pre>
+				<p>ValueString - метод приведения значения метрики к строке.
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="JSONReport">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/report.go?s=227:275#L2">JSONReport</a>
+				<a class="permalink" href="index.html%3Fm=all.html#JSONReport">&#xb6;</a>
+				
+				
+			</h2>
+			<p>JSONReport - структура отчета с метриками в формате JSON
+
+			<pre>type JSONReport struct {
+<span id="JSONReport.Metrics"></span>    Metrics []<a href="index.html%3Fm=all.html#JSONMetric">JSONMetric</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewJSONReport">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/report.go?s=359:427#L7">NewJSONReport</a>
+					<a class="permalink" href="index.html%3Fm=all.html#NewJSONReport">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewJSONReport(statistic *<a href="index.html%3Fm=all.html#Statistic">Statistic</a>, hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>) *<a href="index.html%3Fm=all.html#JSONReport">JSONReport</a></pre>
+				<p>NewJSONReport - метод создания отчета с метриками
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="ServerConfig">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=374:434#L11">ServerConfig</a>
+				<a class="permalink" href="index.html%3Fm=all.html#ServerConfig">&#xb6;</a>
+				
+				
+			</h2>
+			<p>ServerConfig - структура конфигурации сервера.
+
+			<pre>type ServerConfig struct {
+<span id="ServerConfig.Address"></span>    Address <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+<span id="ServerConfig.HashKey"></span>    HashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="MakeServerConfig">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=3607:3666#L122">MakeServerConfig</a>
+					<a class="permalink" href="index.html%3Fm=all.html#MakeServerConfig">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func MakeServerConfig(address, hashKey <a href="http://localhost:8080/pkg/builtin/#string">string</a>) <a href="index.html%3Fm=all.html#ServerConfig">ServerConfig</a></pre>
+				<p>MakeServerConfig - метод создания конфигурации сервера.
+значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="Statistic">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=213:412#L4">Statistic</a>
+				<a class="permalink" href="index.html%3Fm=all.html#Statistic">&#xb6;</a>
+				
+				
+			</h2>
+			<p>Statistic - структура для хранения метрик.
+
+			<pre>type Statistic struct {
+<span id="Statistic.Counter"></span>    Counter        <a href="http://localhost:8080/pkg/builtin/#int64">int64</a>
+<span id="Statistic.RndValue"></span>    RndValue       <a href="http://localhost:8080/pkg/builtin/#float64">float64</a>
+<span id="Statistic.MemStat"></span>    MemStat        *<a href="http://localhost:8080/pkg/github.com/shirou/gopsutil/v3/mem/">mem</a>.<a href="http://localhost:8080/pkg/github.com/shirou/gopsutil/v3/mem/#VirtualMemoryStat">VirtualMemoryStat</a>
+<span id="Statistic.CPUUtilization"></span>    CPUUtilization []<a href="http://localhost:8080/pkg/builtin/#float64">float64</a>
+<span id="Statistic.Rtm"></span>    Rtm            *<a href="http://localhost:8080/pkg/runtime/">runtime</a>.<a href="http://localhost:8080/pkg/runtime/#MemStats">MemStats</a>
+<span id="Statistic.Mutex"></span>    Mutex          <a href="http://localhost:8080/pkg/sync/">sync</a>.<a href="http://localhost:8080/pkg/sync/#RWMutex">RWMutex</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewStatistic">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=797:827#L30">NewStatistic</a>
+					<a class="permalink" href="index.html%3Fm=all.html#NewStatistic">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewStatistic() *<a href="index.html%3Fm=all.html#Statistic">Statistic</a></pre>
+				<p>NewStatistic - метод для создания струкруры Statistic.
+
+				
+				
+			
+
+			
+				
+				<h3 id="Statistic.CollectMemCPU">func (*Statistic) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=1353:1388#L52">CollectMemCPU</a>
+					<a class="permalink" href="index.html%3Fm=all.html#Statistic.CollectMemCPU">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *<a href="index.html%3Fm=all.html#Statistic">Statistic</a>) CollectMemCPU()</pre>
+				<p>CollectMemCPU - метод для сбора Memory и CPU метрик.
+
+				
+				
+				
+			
+				
+				<h3 id="Statistic.CollectRuntime">func (*Statistic) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=1082:1118#L42">CollectRuntime</a>
+					<a class="permalink" href="index.html%3Fm=all.html#Statistic.CollectRuntime">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *<a href="index.html%3Fm=all.html#Statistic">Statistic</a>) CollectRuntime()</pre>
+				<p>CollectRuntime - метод для сбора Runtime метрик.
+
+				
+				
+				
+			
+				
+				<h3 id="Statistic.Copy">func (*Statistic) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=1791:1828#L68">Copy</a>
+					<a class="permalink" href="index.html%3Fm=all.html#Statistic.Copy">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *<a href="index.html%3Fm=all.html#Statistic">Statistic</a>) Copy() *<a href="index.html%3Fm=all.html#Statistic">Statistic</a></pre>
+				<p>Copy - метод для создания копии структуры Statistic.
+
+				
+				
+				
+			
+				
+				<h3 id="Statistic.ResetCounter">func (*Statistic) <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/statistic.go?s=1610:1644#L61">ResetCounter</a>
+					<a class="permalink" href="index.html%3Fm=all.html#Statistic.ResetCounter">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *<a href="index.html%3Fm=all.html#Statistic">Statistic</a>) ResetCounter()</pre>
+				<p>ResetCounter - метод для сброса счетчика Counter.
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="StorageConfig">type <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=519:641#L17">StorageConfig</a>
+				<a class="permalink" href="index.html%3Fm=all.html#StorageConfig">&#xb6;</a>
+				
+				
+			</h2>
+			<p>StorageConfig - структура конфигурации хранилища.
+
+			<pre>type StorageConfig struct {
+<span id="StorageConfig.StoreInterval"></span>    StoreInterval <a href="http://localhost:8080/pkg/time/">time</a>.<a href="http://localhost:8080/pkg/time/#Duration">Duration</a>
+<span id="StorageConfig.StoreFile"></span>    StoreFile     <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+<span id="StorageConfig.Restore"></span>    Restore       <a href="http://localhost:8080/pkg/builtin/#bool">bool</a>
+<span id="StorageConfig.DatabaseDSN"></span>    DatabaseDSN   <a href="http://localhost:8080/pkg/builtin/#string">string</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="MakeStorageConfig">func <a href="http://localhost:8080/src/github.com/tiraill/go_collect_metrics/internal/utils/config.go?s=4083:4202#L131">MakeStorageConfig</a>
+					<a class="permalink" href="index.html%3Fm=all.html#MakeStorageConfig">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func MakeStorageConfig(restore <a href="http://localhost:8080/pkg/builtin/#bool">bool</a>, storeInterval <a href="http://localhost:8080/pkg/time/">time</a>.<a href="http://localhost:8080/pkg/time/#Duration">Duration</a>, storeFile, databaseDSN <a href="http://localhost:8080/pkg/builtin/#string">string</a>) (<a href="index.html%3Fm=all.html#StorageConfig">StorageConfig</a>, <a href="http://localhost:8080/pkg/builtin/#error">error</a>)</pre>
+				<p>MakeStorageConfig - метод создания конфигурации хранилища.
+значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
+
+				
+				
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.19.5.<br>
+Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="http://localhost:8080/LICENSE">BSD license</a>.<br>
+<a href="https://golang.org/doc/tos.html">Terms of Service</a> |
+<a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
