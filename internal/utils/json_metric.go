@@ -3,14 +3,21 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
+// ErrMetricHash ошибка невалидной хеш-суммы метрики.
 var ErrMetricHash = errors.New("invalid metric hash")
+
+// ErrMetricType ошибка невалидного типа метрики.
 var ErrMetricType = errors.New("invalid metric type")
+
+// ErrMetricValue ошибка невалидного значения метрики.
 var ErrMetricValue = errors.New("invalid metric value")
 
+// JSONMetric - структура метрики в формате JSON.
 type JSONMetric struct {
 	ID    string   `json:"id"`              // имя метрики
 	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
@@ -19,6 +26,7 @@ type JSONMetric struct {
 	Hash  *string  `json:"hash,omitempty"`  // значение хеш-функции
 }
 
+// NewCounterJSONMetric - метод создания объекта метрики с типом counter.
 func NewCounterJSONMetric(mName string, delta int64) JSONMetric {
 	return JSONMetric{
 		ID:    mName,
@@ -27,6 +35,7 @@ func NewCounterJSONMetric(mName string, delta int64) JSONMetric {
 	}
 }
 
+// NewGaugeJSONMetric - метод создания объекта метрики с типом gauge.
 func NewGaugeJSONMetric(mName string, value float64) JSONMetric {
 	return JSONMetric{
 		ID:    mName,
@@ -35,6 +44,7 @@ func NewGaugeJSONMetric(mName string, value float64) JSONMetric {
 	}
 }
 
+// NewJSONMetric - общий метод создания объекта метрики.
 func NewJSONMetric(metricType, metricName, metricValue string) (JSONMetric, error) {
 	m := JSONMetric{}
 	switch metricType {
@@ -55,6 +65,7 @@ func NewJSONMetric(metricType, metricName, metricValue string) (JSONMetric, erro
 	}
 }
 
+// LoadJSONMetric - метод парсинга метрики из данных в формате JSON.
 func LoadJSONMetric(body []byte) (JSONMetric, error) {
 	var metric JSONMetric
 	if err := json.Unmarshal(body, &metric); err != nil {
@@ -63,6 +74,7 @@ func LoadJSONMetric(body []byte) (JSONMetric, error) {
 	return metric, nil
 }
 
+// LoadButchJSONMetric - метод парсинга списка метрик из данных в формате JSON.
 func LoadButchJSONMetric(body []byte) ([]JSONMetric, error) {
 	var metrics []JSONMetric
 	if err := json.Unmarshal(body, &metrics); err != nil {
@@ -71,6 +83,7 @@ func LoadButchJSONMetric(body []byte) ([]JSONMetric, error) {
 	return metrics, nil
 }
 
+// Метод приведения JSONMetric к строке.
 func (m JSONMetric) String() string {
 	switch m.MType {
 	case "gauge":
@@ -82,6 +95,7 @@ func (m JSONMetric) String() string {
 	}
 }
 
+// ValueString - метод приведения значения метрики к строке.
 func (m JSONMetric) ValueString() string {
 	switch m.MType {
 	case "gauge":
@@ -93,6 +107,7 @@ func (m JSONMetric) ValueString() string {
 	}
 }
 
+// IsValidType - метод валидации типа метрики.
 func (m JSONMetric) IsValidType() bool {
 	switch m.MType {
 	case "gauge", "counter":
@@ -102,6 +117,7 @@ func (m JSONMetric) IsValidType() bool {
 	}
 }
 
+// IsValidValue - метод валидации значения метрики.
 func (m JSONMetric) IsValidValue() bool {
 	switch m.MType {
 	case "gauge":
@@ -113,6 +129,7 @@ func (m JSONMetric) IsValidValue() bool {
 	}
 }
 
+// IsValidHash - метод валидации хеш-суммы метрики.
 func (m JSONMetric) IsValidHash(hashKey string) bool {
 	if m.Hash == nil {
 		return true
@@ -124,6 +141,7 @@ func (m JSONMetric) IsValidHash(hashKey string) bool {
 	return *actualHash == *m.Hash
 }
 
+// ValidatesAll - общий метод валидации метрики.
 func (m JSONMetric) ValidatesAll(hashKey string) error {
 	if !m.IsValidHash(hashKey) {
 		return ErrMetricHash

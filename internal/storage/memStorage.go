@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
+// MemStorage - структура для хранения метрик в памяти
 type MemStorage struct {
 	GaugeMetrics   map[string]float64   `json:"GaugeMetrics"`
 	CounterMetrics map[string]int64     `json:"CounterMetrics"`

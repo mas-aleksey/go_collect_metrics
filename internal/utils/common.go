@@ -1,3 +1,4 @@
+// Package utils - пакет для вспомогательных функций
 package utils
 
 import (
@@ -9,6 +10,7 @@ import (
 	"strconv"
 )
 
+// RuntimeMetricNames - список имен для Runtime метрик
 var RuntimeMetricNames = []string{
 	"Alloc", "BuckHashSys", "Frees", "GCCPUFraction", "GCSys", "HeapAlloc", "HeapIdle", "HeapInuse",
 	"HeapObjects", "HeapReleased", "HeapSys", "LastGC", "Lookups", "MCacheInuse", "MCacheSys", "MSpanInuse",
@@ -16,6 +18,7 @@ var RuntimeMetricNames = []string{
 	"StackSys", "Sys", "TotalAlloc",
 }
 
+// ToStr - метод для приведения чисел в строку
 func ToStr(v interface{}) string {
 
 	switch val := v.(type) {
@@ -33,6 +36,7 @@ func ToStr(v interface{}) string {
 	}
 }
 
+// ToFloat64 - метод для приведения чисел к формату float64
 func ToFloat64(v interface{}) float64 {
 	switch val := v.(type) {
 	case int:
@@ -51,6 +55,7 @@ func ToFloat64(v interface{}) float64 {
 	}
 }
 
+// CalcHash - метод для вычисления хеш-суммы
 func CalcHash(data, hashKey string) *string {
 	if hashKey == "" {
 		return nil

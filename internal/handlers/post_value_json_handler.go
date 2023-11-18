@@ -2,12 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/tiraill/go_collect_metrics/internal/storage"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
 	"net/http"
+
+	"github.com/tiraill/go_collect_metrics/internal/storage"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
+// GetJSONMetricHandler - метод получения значения метрики в формате JSON
+// POST /value/
 func GetJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

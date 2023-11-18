@@ -1,13 +1,17 @@
+// Package handlers - функционал обработчиков API методов сервера
 package handlers
 
 import (
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
 	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"github.com/tiraill/go_collect_metrics/internal/utils"
-	"time"
 )
 
+// GetRouter - метод регистрирует роуты для сервера.
 func GetRouter(db storage.Storage, config utils.ServerConfig) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

@@ -1,11 +1,14 @@
 package handlers
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/tiraill/go_collect_metrics/internal/storage"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/tiraill/go_collect_metrics/internal/storage"
 )
 
+// GetValueMetricHandler - метод для получения значения метрики
 func GetValueMetricHandler(db storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

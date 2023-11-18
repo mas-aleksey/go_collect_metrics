@@ -30,3 +30,9 @@ git fetch template && git checkout template/main .github
 ```
 
 Затем добавьте полученные изменения в свой репозиторий.
+
+
+# Просмотр документации
+
+1. `godoc -http=:8080`
+2. http://localhost:8080/pkg/github.com/tiraill/go_collect_metrics/?m=all

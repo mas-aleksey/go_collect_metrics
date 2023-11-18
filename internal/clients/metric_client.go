@@ -3,28 +3,36 @@ package clients
 import (
 	"context"
 	"encoding/json"
-	"github.com/pkg/errors"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
-	"golang.org/x/sync/errgroup"
 	"net/http"
 	"time"
+
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
+// MetricClient - структура описывает клиента для отправки метрик
 type MetricClient struct {
 	*BaseClient
 }
 
+// NewMetricClient - метод для создания клиента отправки метрик
 func NewMetricClient(baseURL string, timeout time.Duration, rateLimit int) *MetricClient {
 	return &MetricClient{
 		BaseClient: NewBaseClient(baseURL, timeout, rateLimit),
 	}
 }
 
+// SendJSONReport - метод для отправки отчета в формате JSON
+// для отправки каждой метрики выполняется отдельный API запрос
+//
+// Deprecated: используйте метод SendBatchJSONReport
 func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	g, _ := errgroup.WithContext(ctx)
 
-	metricCh := make(chan utils.JSONMetric, 33)
+	metricCh := make(chan utils.JSONMetric, 47)
 
 	for i := 0; i < mc.rateLimit; i++ {
 		g.Go(func() error {
@@ -62,6 +70,8 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	return nil
 }
 
+// SendBatchJSONReport - метод для отправки отчета в формате JSON
+// для отправки всех метрик будет выполнен один API запрос
 func (mc MetricClient) SendBatchJSONReport(report *utils.JSONReport) error {
 	body, err := json.Marshal(report.Metrics)
 	if err != nil {
@@ -88,7 +98,7 @@ func (mc MetricClient) postBody(body []byte, url string, compress bool) error {
 		Body:         body,
 		OkStatusCode: http.StatusOK,
 	}
-	_, err := mc.DoRequest(request)
+	_, err := mc.DoRequest(&request)
 	if err != nil {
 		return errors.Wrap(err, "unable to complete update metric request")
 	}

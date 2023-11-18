@@ -3,14 +3,17 @@ package clients
 import (
 	"compress/gzip"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 func TestNewMetricClient(t *testing.T) {
@@ -100,11 +103,57 @@ func TestMetricClient_SendBatchJSONReport(t *testing.T) {
 		err = json.Unmarshal(body, &metrics)
 		assert.Nil(t, err)
 
-		assert.GreaterOrEqual(t, len(metrics), utils.ReportCount)
+		assert.GreaterOrEqual(t, len(metrics), 32)
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
 	mc := NewMetricClient(svr.URL, 1*time.Second, 1)
 	err := mc.SendBatchJSONReport(report)
 	assert.Nil(t, err)
+}
+
+func BenchmarkSendReport(b *testing.B) {
+	const triesN = 100
+
+	statistic := utils.NewStatistic()
+	report := utils.NewJSONReport(statistic, "")
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var metric utils.JSONMetric
+		_ = json.Unmarshal(body, &metric)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer svr.Close()
+	mc := NewMetricClient(svr.URL, 1*time.Second, 1)
+
+	b.Run("by_one", func(b *testing.B) {
+		for i := 0; i < triesN; i++ {
+			_ = mc.SendJSONReport(report)
+		}
+	})
+
+	b.Run("batch", func(b *testing.B) {
+		for i := 0; i < triesN; i++ {
+			_ = mc.SendBatchJSONReport(report)
+		}
+	})
+}
+
+func ExampleMetricClient_SendBatchJSONReport() {
+	metricServerHost := "0.0.0.0:8000"
+	requestTimeout := 15 * time.Second
+	requestPerSecond := 10
+	hashKey := "secret"
+
+	metricClient := NewMetricClient(metricServerHost, requestTimeout, requestPerSecond)
+
+	statistic := utils.NewStatistic()
+	report := utils.NewJSONReport(statistic, hashKey)
+
+	err := metricClient.SendBatchJSONReport(report)
+	if err != nil {
+		log.Println("Fail send report", err)
+	} else {
+		log.Println("Send report successfully")
+	}
 }

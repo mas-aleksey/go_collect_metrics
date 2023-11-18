@@ -3,9 +3,11 @@ package storage
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
+
+	"github.com/jackc/pgx/v5"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 var counterStmt = `INSERT INTO metric(name, type, gauge_value, counter_value) VALUES ($1, 'counter', null, $2) 
@@ -18,6 +20,7 @@ var gaugeStmt = `INSERT INTO metric(name, type, gauge_value, counter_value) VALU
 		    gauge_value = excluded.gauge_value
 		RETURNING name, type, gauge_value, counter_value;`
 
+// PgStorage - структура для работы с бд Postgres
 type PgStorage struct {
 	Conn   *pgx.Conn
 	Config *utils.StorageConfig

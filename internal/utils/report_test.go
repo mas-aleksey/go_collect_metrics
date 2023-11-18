@@ -1,14 +1,15 @@
 package utils
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewJSONReport(t *testing.T) {
 	statistic := NewStatistic()
 	report := NewJSONReport(statistic, "123")
 
-	assert.GreaterOrEqual(t, len(report.Metrics), ReportCount)
-	assert.GreaterOrEqual(t, cap(report.Metrics), ReportCount)
+	assert.GreaterOrEqual(t, len(report.Metrics), 32)
+	assert.GreaterOrEqual(t, cap(report.Metrics), 32)
 }

@@ -34,6 +34,8 @@ func readGzipBody(reader io.ReadCloser) ([]byte, error) {
 	return body, nil
 }
 
+// ReadBody - метод чтения тела API запроса.
+// поддержка сжатия данных gzip.
 func ReadBody(r *http.Request) ([]byte, error) {
 	switch r.Header.Get("Content-Encoding") {
 	case "gzip":
