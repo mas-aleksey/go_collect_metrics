@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +24,9 @@ var (
 	storeFile     *string
 	hashKey       *string
 	databaseDSN   *string
+	buildVersion  = "N/A"
+	buildDate     = "N/A"
+	buildCommit   = "N/A"
 )
 
 func init() {
@@ -36,6 +40,9 @@ func init() {
 }
 
 func main() {
+	fmt.Println("Build version:", buildVersion)
+	fmt.Println("Build date:", buildDate)
+	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
 	serverConfig := utils.MakeServerConfig(*address, *hashKey)
 	storageConfig, err := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
