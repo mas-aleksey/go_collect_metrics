@@ -6,9 +6,12 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 // Request - структура описывает API запрос.
@@ -32,19 +35,23 @@ type BaseClient struct {
 	baseURL   string
 	client    *http.Client
 	rateLimit int
+	publicKey *utils.PublicKey
 }
 
 // NewBaseClient - метод для создания базового клиента.
-func NewBaseClient(baseURL string, timeout time.Duration, rateLimit int) *BaseClient {
+func NewBaseClient(baseURL string, timeout time.Duration, rateLimit int, publicKeyPath string) *BaseClient {
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "http://" + baseURL
 	}
+	publicKey, err := utils.LoadPublicKey(publicKeyPath)
+	if err != nil {
+		log.Fatal("Failed to load public key:", err)
+	}
 	return &BaseClient{
-		baseURL: baseURL,
-		client: &http.Client{
-			Timeout: timeout,
-		},
+		baseURL:   baseURL,
+		client:    &http.Client{Timeout: timeout},
 		rateLimit: rateLimit,
+		publicKey: publicKey,
 	}
 }
 
@@ -59,6 +66,15 @@ func (c *BaseClient) MakeURL(url string) string {
 func (c *BaseClient) DoRequest(r *Request) (Response, error) {
 	client := &http.Client{}
 	var requestBody bytes.Buffer
+
+	if c.publicKey != nil {
+		encryptedBody, err := c.publicKey.Encrypt(r.Body)
+		if err != nil {
+			log.Println("Failed to encrypt body:", err)
+			return Response{}, err
+		}
+		r.Body = encryptedBody
+	}
 
 	_, ok := r.Headers["Content-Encoding"]
 	if ok {

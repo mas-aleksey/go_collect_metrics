@@ -18,9 +18,9 @@ type MetricClient struct {
 }
 
 // NewMetricClient - метод для создания клиента отправки метрик
-func NewMetricClient(baseURL string, timeout time.Duration, rateLimit int) *MetricClient {
+func NewMetricClient(baseURL string, timeout time.Duration, rateLimit int, publicKeyPath string) *MetricClient {
 	return &MetricClient{
-		BaseClient: NewBaseClient(baseURL, timeout, rateLimit),
+		BaseClient: NewBaseClient(baseURL, timeout, rateLimit, publicKeyPath),
 	}
 }
 

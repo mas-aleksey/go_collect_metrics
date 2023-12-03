@@ -9,6 +9,6 @@ import (
 )
 
 func TestGetRouter(t *testing.T) {
-	router := GetRouter(nil, utils.ServerConfig{})
+	router := GetRouter(nil, utils.ServerConfig{}, nil)
 	assert.NotNil(t, router)
 }

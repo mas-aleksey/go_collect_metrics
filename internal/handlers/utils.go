@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 )
 
 func readAll(reader io.ReadCloser) ([]byte, error) {
@@ -43,5 +45,19 @@ func ReadBody(r *http.Request) ([]byte, error) {
 		return readGzipBody(r.Body)
 	default:
 		return readAll(r.Body)
+	}
+}
+
+// ReadEncryptedBody - метод чтения тела если запрос зашифрован.
+// поддержка сжатия данных gzip.
+func ReadEncryptedBody(r *http.Request, privateKey *utils.PrivateKey) ([]byte, error) {
+	body, err := ReadBody(r)
+	if err != nil {
+		return nil, err
+	}
+	if privateKey != nil {
+		return privateKey.Decrypt(body)
+	} else {
+		return body, nil
 	}
 }

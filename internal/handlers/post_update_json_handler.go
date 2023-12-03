@@ -10,10 +10,10 @@ import (
 
 // SaveJSONMetricHandler - метод для загрузки метрики в формате JSON.
 // POST /update/
-func SaveJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
+func SaveJSONMetricHandler(db storage.Storage, hashKey string, privateKey *utils.PrivateKey) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		body, err := ReadBody(r)
+		body, err := ReadEncryptedBody(r, privateKey)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

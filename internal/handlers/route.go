@@ -12,7 +12,7 @@ import (
 )
 
 // GetRouter - метод регистрирует роуты для сервера.
-func GetRouter(db storage.Storage, config utils.ServerConfig) *chi.Mux {
+func GetRouter(db storage.Storage, config utils.ServerConfig, privateKey *utils.PrivateKey) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Timeout(60 * time.Second))
@@ -21,9 +21,9 @@ func GetRouter(db storage.Storage, config utils.ServerConfig) *chi.Mux {
 	r.Get("/", IndexHandler(db))
 	r.Get("/ping", GetPingHandler(db))
 	r.Get("/value/{mType}/{mName}", GetValueMetricHandler(db))
-	r.Post("/value/", GetJSONMetricHandler(db, config.HashKey))
 	r.Post("/update/{mType}/{mName}/{mValue}", SaveMetricHandler(db))
-	r.Post("/update/", SaveJSONMetricHandler(db, config.HashKey))
-	r.Post("/updates/", SaveBatchJSONMetricHandler(db, config.HashKey))
+	r.Post("/value/", GetJSONMetricHandler(db, config.HashKey, privateKey))
+	r.Post("/update/", SaveJSONMetricHandler(db, config.HashKey, privateKey))
+	r.Post("/updates/", SaveBatchJSONMetricHandler(db, config.HashKey, privateKey))
 	return r
 }

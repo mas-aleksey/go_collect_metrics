@@ -23,6 +23,7 @@ var (
 	storeInterval *time.Duration
 	storeFile     *string
 	hashKey       *string
+	cryptoKey     *string
 	databaseDSN   *string
 	buildVersion  = "N/A"
 	buildDate     = "N/A"
@@ -35,6 +36,7 @@ func init() {
 	storeInterval = flag.Duration("i", 30*time.Second, "store interval")
 	storeFile = flag.String("f", "/tmp/devops-metrics-db.json", "store file")
 	hashKey = flag.String("k", "", "hash key")
+	cryptoKey = flag.String("crypto-key", "", "private crypto key")
 	databaseDSN = flag.String("d", "", "database connection string")
 	// postgresql://ml_platform_orchestrator_admin:pwd@localhost:5467/yandex
 }
@@ -44,10 +46,14 @@ func main() {
 	fmt.Println("Build date:", buildDate)
 	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
-	serverConfig := utils.MakeServerConfig(*address, *hashKey)
+	serverConfig := utils.MakeServerConfig(*address, *hashKey, *cryptoKey)
 	storageConfig, err := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
 	if err != nil {
 		log.Fatal(err)
+	}
+	privateKey, err := utils.LoadPrivateKey(serverConfig.CryptoKey)
+	if err != nil {
+		log.Fatal("Failed to load private key: ", err)
 	}
 	ctx := context.Background()
 
@@ -59,7 +65,7 @@ func main() {
 		log.Print("Init db success")
 	}
 
-	router := handlers.GetRouter(db, serverConfig)
+	router := handlers.GetRouter(db, serverConfig, privateKey)
 	srv := &http.Server{
 		Addr:    serverConfig.Address,
 		Handler: router,

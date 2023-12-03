@@ -100,7 +100,7 @@ func TestGetIndexMetricHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := GetRouter(tt.db, utils.ServerConfig{Address: "adr", HashKey: "key"})
+			r := GetRouter(tt.db, utils.ServerConfig{Address: "adr", HashKey: "key"}, nil)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
@@ -129,7 +129,7 @@ func TestGetCompressedPage(t *testing.T) {
 		utils.NewCounterJSONMetric("PollCount", 333),
 	})
 
-	r := GetRouter(testStorage, utils.ServerConfig{})
+	r := GetRouter(testStorage, utils.ServerConfig{}, nil)
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 

@@ -14,13 +14,15 @@ type AgentConfig struct {
 	ReportInterval time.Duration
 	PollInterval   time.Duration
 	HashKey        string
+	CryptoKey      string
 	RateLimit      int
 }
 
 // ServerConfig - структура конфигурации сервера.
 type ServerConfig struct {
-	Address string
-	HashKey string
+	Address   string
+	HashKey   string
+	CryptoKey string
 }
 
 // StorageConfig - структура конфигурации хранилища.
@@ -107,7 +109,7 @@ func lookupBool(envName string, defaultValue bool) (bool, error) {
 
 // MakeAgentConfig - метод создания конфигурации агента.
 // значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
-func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval time.Duration, hashKey string, rateLimit int) (AgentConfig, error) {
+func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval time.Duration, hashKey string, cryptoKey string, rateLimit int) (AgentConfig, error) {
 	var err error = nil
 	cfg := AgentConfig{}
 	cfg.Address = lookupString("ADDRESS", address)
@@ -120,6 +122,7 @@ func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval 
 		return cfg, err
 	}
 	cfg.HashKey = lookupString("KEY", hashKey)
+	cfg.CryptoKey = lookupString("CRYPTO_KEY", cryptoKey)
 	cfg.RateLimit, err = lookupInt("RATE_LIMIT", rateLimit)
 	if err != nil {
 		return cfg, err
@@ -129,10 +132,11 @@ func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval 
 
 // MakeServerConfig - метод создания конфигурации сервера.
 // значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
-func MakeServerConfig(address, hashKey string) ServerConfig {
+func MakeServerConfig(address, hashKey, cryptoKey string) ServerConfig {
 	cfg := ServerConfig{}
 	cfg.Address = lookupString("ADDRESS", address)
 	cfg.HashKey = lookupString("KEY", hashKey)
+	cfg.CryptoKey = lookupString("CRYPTO_KEY", cryptoKey)
 	return cfg
 }
 

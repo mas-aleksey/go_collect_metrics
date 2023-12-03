@@ -20,6 +20,7 @@ var (
 	pollInterval   *time.Duration
 	timeout        = 5 * time.Second
 	hashKey        *string
+	cryptoKey      *string
 	rateLimit      *int
 	pprofMode      *bool
 	pprofDuration  *time.Duration
@@ -33,13 +34,14 @@ func init() {
 	reportInterval = flag.Duration("r", 10*time.Second, "report interval")
 	pollInterval = flag.Duration("p", 2*time.Second, "pool interval")
 	hashKey = flag.String("k", "", "hash key")
+	cryptoKey = flag.String("crypto-key", "", "public crypto key")
 	rateLimit = flag.Int("l", 10, "rate limit")
 	pprofMode = flag.Bool("pp", false, "pprof mode")
 	pprofDuration = flag.Duration("pd", 30*time.Second, "pprof duration")
 }
 
 func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig) {
-	metricClient := clients.NewMetricClient(config.Address, timeout, config.RateLimit)
+	metricClient := clients.NewMetricClient(config.Address, timeout, config.RateLimit, config.CryptoKey)
 	ticker := time.NewTicker(config.ReportInterval)
 	defer ticker.Stop()
 
@@ -80,7 +82,7 @@ func main() {
 	fmt.Println("Build date:", buildDate)
 	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
-	config, err := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey, *rateLimit)
+	config, err := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey, *cryptoKey, *rateLimit)
 	if err != nil {
 		log.Fatal(err)
 	}
