@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +24,9 @@ var (
 	storeFile     *string
 	hashKey       *string
 	databaseDSN   *string
+	buildVersion  = "N/A"
+	buildDate     = "N/A"
+	buildCommit   = "N/A"
 )
 
 func init() {
@@ -36,6 +40,9 @@ func init() {
 }
 
 func main() {
+	fmt.Println("Build version:", buildVersion)
+	fmt.Println("Build date:", buildDate)
+	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
 	serverConfig := utils.MakeServerConfig(*address, *hashKey)
 	storageConfig, err := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
@@ -78,7 +85,8 @@ func main() {
 	}()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server Shutdown Failed:%+v", err)
+		log.Printf("Server Shutdown Failed:%+v", err)
+	} else {
+		log.Print("Server Exited Properly")
 	}
-	log.Print("Server Exited Properly")
 }

@@ -56,7 +56,6 @@ func (mc MetricClient) SendJSONReport(report *utils.JSONReport) error {
 	}
 	g.Go(func() error {
 		for _, metric := range report.Metrics {
-			//m := &metric
 			metricCh <- metric
 		}
 		close(metricCh)

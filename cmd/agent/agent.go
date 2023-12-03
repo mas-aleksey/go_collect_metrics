@@ -3,6 +3,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -22,6 +23,9 @@ var (
 	rateLimit      *int
 	pprofMode      *bool
 	pprofDuration  *time.Duration
+	buildVersion   = "N/A"
+	buildDate      = "N/A"
+	buildCommit    = "N/A"
 )
 
 func init() {
@@ -72,6 +76,9 @@ func updateMemCPUStatistic(statistic *utils.Statistic, config utils.AgentConfig)
 }
 
 func main() {
+	fmt.Println("Build version:", buildVersion)
+	fmt.Println("Build date:", buildDate)
+	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
 	config, err := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey, *rateLimit)
 	if err != nil {
