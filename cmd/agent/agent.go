@@ -21,6 +21,7 @@ var (
 	timeout        = 5 * time.Second
 	hashKey        *string
 	cryptoKey      *string
+	configFile     *string
 	rateLimit      *int
 	pprofMode      *bool
 	pprofDuration  *time.Duration
@@ -35,6 +36,7 @@ func init() {
 	pollInterval = flag.Duration("p", 2*time.Second, "pool interval")
 	hashKey = flag.String("k", "", "hash key")
 	cryptoKey = flag.String("crypto-key", "", "public crypto key")
+	configFile = flag.String("config", "", "config file")
 	rateLimit = flag.Int("l", 10, "rate limit")
 	pprofMode = flag.Bool("pp", false, "pprof mode")
 	pprofDuration = flag.Duration("pd", 30*time.Second, "pprof duration")
@@ -82,7 +84,7 @@ func main() {
 	fmt.Println("Build date:", buildDate)
 	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
-	config, err := utils.MakeAgentConfig(*address, *reportInterval, *pollInterval, *hashKey, *cryptoKey, *rateLimit)
+	config, err := utils.MakeAgentConfig(*configFile, *address, *reportInterval, *pollInterval, *hashKey, *cryptoKey, *rateLimit)
 	if err != nil {
 		log.Fatal(err)
 	}

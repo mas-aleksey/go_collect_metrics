@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -10,27 +12,27 @@ import (
 
 // AgentConfig - структура конфигурации агента.
 type AgentConfig struct {
-	Address        string
-	ReportInterval time.Duration
-	PollInterval   time.Duration
-	HashKey        string
-	CryptoKey      string
-	RateLimit      int
+	Address        string        `json:"address,omitempty"`
+	ReportInterval time.Duration `json:"report_interval,omitempty"`
+	PollInterval   time.Duration `json:"poll_interval,omitempty"`
+	HashKey        string        `json:"hash_key,omitempty"`
+	CryptoKey      string        `json:"crypto_key,omitempty"`
+	RateLimit      int           `json:"rate_limit,omitempty"`
 }
 
 // ServerConfig - структура конфигурации сервера.
 type ServerConfig struct {
-	Address   string
-	HashKey   string
-	CryptoKey string
+	Address   string `json:"address,omitempty"`
+	HashKey   string `json:"hash_key,omitempty"`
+	CryptoKey string `json:"crypto_key,omitempty"`
 }
 
 // StorageConfig - структура конфигурации хранилища.
 type StorageConfig struct {
-	StoreInterval time.Duration
-	StoreFile     string
-	Restore       bool
-	DatabaseDSN   string
+	StoreInterval time.Duration `json:"store_interval,omitempty"`
+	StoreFile     string        `json:"store_file,omitempty"`
+	Restore       bool          `json:"restore,omitempty"`
+	DatabaseDSN   string        `json:"database_dsn,omitempty"`
 }
 
 // EnvError - тип ошибки, связанный с получением переменной из окружения.
@@ -53,18 +55,59 @@ func newEnvError(eName, eType string, err error) error {
 	}
 }
 
-func lookupString(envName, defaultValue string) string {
-	result := defaultValue
+func loadFromFile(filePath string, v any) error {
+	if filePath == "" {
+		return nil
+	}
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, v)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func isFlagPassed(name string) bool {
+	found := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			found = true
+		}
+	})
+	return found
+}
+
+func lookupString(flagName, envName, valueFromConfigFile, defaultFlagValue string) string {
+	var result string
+	if valueFromConfigFile != "" {
+		result = valueFromConfigFile
+	} else {
+		result = defaultFlagValue
+	}
+	if isFlagPassed(flagName) {
+		result = defaultFlagValue
+	}
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
 		result = valueEnv
 	}
-	log.Printf("env %s = %s", envName, result)
+	log.Printf("env %s = %v", envName, result)
 	return result
 }
 
-func lookupInt(envName string, defaultValue int) (int, error) {
-	result := defaultValue
+func lookupInt(flagName, envName string, valueFromConfigFile, defaultFlagValue int) (int, error) {
+	var result int
+	if valueFromConfigFile != 0 {
+		result = valueFromConfigFile
+	} else {
+		result = defaultFlagValue
+	}
+	if isFlagPassed(flagName) {
+		result = defaultFlagValue
+	}
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
 		intVar, err := strconv.Atoi(valueEnv)
@@ -74,56 +117,78 @@ func lookupInt(envName string, defaultValue int) (int, error) {
 			result = intVar
 		}
 	}
-	log.Printf("env %s = %d", envName, result)
+	log.Printf("env %s = %v", envName, result)
 	return result, nil
 }
 
-func lookupDuration(envName string, defaultValue time.Duration) (time.Duration, error) {
-	result := defaultValue
+func lookupDuration(flagName, envName string, valueFromConfigFile, defaultFlagValue time.Duration) (time.Duration, error) {
+	var result time.Duration
+	if valueFromConfigFile != 0 {
+		result = valueFromConfigFile
+	} else {
+		result = defaultFlagValue
+	}
+	if isFlagPassed(flagName) {
+		result = defaultFlagValue
+	}
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
 		value, err := time.ParseDuration(valueEnv)
 		if err != nil {
-			return result, newEnvError(envName, "int", err)
+			return result, newEnvError(envName, "duration", err)
 		} else {
 			result = value
 		}
 	}
-	log.Printf("env %s = %s", envName, result)
+	log.Printf("env %s = %v", envName, result)
 	return result, nil
 }
 
-func lookupBool(envName string, defaultValue bool) (bool, error) {
-	result := defaultValue
+func lookupBool(flagName, envName string, valueFromConfigFile, defaultFlagValue bool) (bool, error) {
+	result := valueFromConfigFile
+	if isFlagPassed(flagName) {
+		result = defaultFlagValue
+	}
 	valueEnv, ok := os.LookupEnv(envName)
 	if ok {
 		value, err := strconv.ParseBool(valueEnv)
 		if err != nil {
-			return result, newEnvError(envName, "int", err)
+			return result, newEnvError(envName, "bool", err)
 		} else {
 			result = value
 		}
 	}
+	log.Printf("env %s = %v", envName, result)
 	return result, nil
 }
 
 // MakeAgentConfig - метод создания конфигурации агента.
 // значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
-func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval time.Duration, hashKey string, cryptoKey string, rateLimit int) (AgentConfig, error) {
+func MakeAgentConfig(
+	configFile string, address string, reportInterval time.Duration,
+	pollInterval time.Duration, hashKey string, cryptoKey string, rateLimit int,
+) (AgentConfig, error) {
+
 	var err error = nil
 	cfg := AgentConfig{}
-	cfg.Address = lookupString("ADDRESS", address)
-	cfg.ReportInterval, err = lookupDuration("REPORT_INTERVAL", reportInterval)
+	configFile = lookupString("config", "CONFIG", "", configFile)
+	err = loadFromFile(configFile, &cfg)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.PollInterval, err = lookupDuration("POLL_INTERVAL", pollInterval)
+	cfg.Address = lookupString("a", "ADDRESS", cfg.Address, address)
+
+	cfg.ReportInterval, err = lookupDuration("r", "REPORT_INTERVAL", cfg.ReportInterval, reportInterval)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.HashKey = lookupString("KEY", hashKey)
-	cfg.CryptoKey = lookupString("CRYPTO_KEY", cryptoKey)
-	cfg.RateLimit, err = lookupInt("RATE_LIMIT", rateLimit)
+	cfg.PollInterval, err = lookupDuration("p", "POLL_INTERVAL", cfg.PollInterval, pollInterval)
+	if err != nil {
+		return cfg, err
+	}
+	cfg.HashKey = lookupString("k", "KEY", cfg.HashKey, hashKey)
+	cfg.CryptoKey = lookupString("crypto-key", "CRYPTO_KEY", cfg.CryptoKey, cryptoKey)
+	cfg.RateLimit, err = lookupInt("l", "RATE_LIMIT", cfg.RateLimit, rateLimit)
 	if err != nil {
 		return cfg, err
 	}
@@ -132,28 +197,39 @@ func MakeAgentConfig(address string, reportInterval time.Duration, pollInterval 
 
 // MakeServerConfig - метод создания конфигурации сервера.
 // значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
-func MakeServerConfig(address, hashKey, cryptoKey string) ServerConfig {
+func MakeServerConfig(configFile, address, hashKey, cryptoKey string) (ServerConfig, error) {
+	var err error = nil
 	cfg := ServerConfig{}
-	cfg.Address = lookupString("ADDRESS", address)
-	cfg.HashKey = lookupString("KEY", hashKey)
-	cfg.CryptoKey = lookupString("CRYPTO_KEY", cryptoKey)
-	return cfg
+	configFile = lookupString("config", "CONFIG", "", configFile)
+	err = loadFromFile(configFile, &cfg)
+	if err != nil {
+		return cfg, err
+	}
+	cfg.Address = lookupString("a", "ADDRESS", cfg.Address, address)
+	cfg.HashKey = lookupString("k", "KEY", cfg.HashKey, hashKey)
+	cfg.CryptoKey = lookupString("crypto-key", "CRYPTO_KEY", cfg.CryptoKey, cryptoKey)
+	return cfg, nil
 }
 
 // MakeStorageConfig - метод создания конфигурации хранилища.
 // значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
-func MakeStorageConfig(restore bool, storeInterval time.Duration, storeFile, databaseDSN string) (StorageConfig, error) {
+func MakeStorageConfig(configFile string, restore bool, storeInterval time.Duration, storeFile, databaseDSN string) (StorageConfig, error) {
 	var err error = nil
 	cfg := StorageConfig{}
-	cfg.Restore, err = lookupBool("RESTORE", restore)
+	configFile = lookupString("config", "CONFIG", "", configFile)
+	err = loadFromFile(configFile, &cfg)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.StoreInterval, err = lookupDuration("STORE_INTERVAL", storeInterval)
+	cfg.Restore, err = lookupBool("r", "RESTORE", cfg.Restore, restore)
 	if err != nil {
 		return cfg, err
 	}
-	cfg.StoreFile = lookupString("STORE_FILE", storeFile)
-	cfg.DatabaseDSN = lookupString("DATABASE_DSN", databaseDSN)
+	cfg.StoreInterval, err = lookupDuration("i", "STORE_INTERVAL", cfg.StoreInterval, storeInterval)
+	if err != nil {
+		return cfg, err
+	}
+	cfg.StoreFile = lookupString("f", "STORE_FILE", cfg.StoreFile, storeFile)
+	cfg.DatabaseDSN = lookupString("d", "DATABASE_DSN", cfg.DatabaseDSN, databaseDSN)
 	return cfg, nil
 }

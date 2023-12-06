@@ -25,6 +25,7 @@ var (
 	hashKey       *string
 	cryptoKey     *string
 	databaseDSN   *string
+	configFile    *string
 	buildVersion  = "N/A"
 	buildDate     = "N/A"
 	buildCommit   = "N/A"
@@ -38,6 +39,7 @@ func init() {
 	hashKey = flag.String("k", "", "hash key")
 	cryptoKey = flag.String("crypto-key", "", "private crypto key")
 	databaseDSN = flag.String("d", "", "database connection string")
+	configFile = flag.String("config", "", "config file")
 	// postgresql://ml_platform_orchestrator_admin:pwd@localhost:5467/yandex
 }
 
@@ -46,8 +48,11 @@ func main() {
 	fmt.Println("Build date:", buildDate)
 	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
-	serverConfig := utils.MakeServerConfig(*address, *hashKey, *cryptoKey)
-	storageConfig, err := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
+	serverConfig, err := utils.MakeServerConfig(*configFile, *address, *hashKey, *cryptoKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	storageConfig, err := utils.MakeStorageConfig(*configFile, *restore, *storeInterval, *storeFile, *databaseDSN)
 	if err != nil {
 		log.Fatal(err)
 	}
