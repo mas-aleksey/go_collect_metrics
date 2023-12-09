@@ -60,10 +60,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load private key: ", err)
 	}
-	ctx := context.Background()
+	dbCtx, dbCancel := context.WithCancel(context.Background())
 
 	db := storage.NewStorage(&storageConfig)
-	err = db.Init(ctx)
+	err = db.Init(dbCtx)
 	if err != nil {
 		log.Printf("Error init db: %s", err)
 	} else {
@@ -91,6 +91,7 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer func() {
+		dbCancel()
 		db.Close(ctx)
 		cancel()
 	}()

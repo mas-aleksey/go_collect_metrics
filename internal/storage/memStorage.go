@@ -18,19 +18,28 @@ type MemStorage struct {
 	CounterMetrics map[string]int64     `json:"CounterMetrics"`
 	Mutex          sync.RWMutex         `json:"-"`
 	Config         *utils.StorageConfig `json:"-"`
+	WG             sync.WaitGroup       `json:"-"`
 }
 
-func flushBackground(m *MemStorage, interval time.Duration) {
+func flushBackground(ctx context.Context, m *MemStorage, interval time.Duration) {
+	defer m.WG.Done()
 	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-	for range ticker.C {
-		m.saveToFile()
+	for {
+		select {
+		case <-ticker.C:
+			m.saveToFile()
+		case <-ctx.Done():
+			ticker.Stop()
+			m.saveToFile()
+			return
+		}
 	}
 }
 
 func (m *MemStorage) Init(ctx context.Context) error {
 	if m.Config.StoreInterval != 0 {
-		go flushBackground(m, m.Config.StoreInterval)
+		go flushBackground(ctx, m, m.Config.StoreInterval)
+		m.WG.Add(1)
 	}
 	if !m.Config.Restore {
 		return fmt.Errorf("no need restore")
@@ -53,7 +62,7 @@ func (m *MemStorage) Init(ctx context.Context) error {
 }
 
 func (m *MemStorage) Close(ctx context.Context) {
-	m.saveToFile()
+	m.WG.Wait()
 }
 
 func (m *MemStorage) Ping(ctx context.Context) bool {
