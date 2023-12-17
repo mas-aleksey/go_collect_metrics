@@ -18,10 +18,12 @@ type MetricClient struct {
 }
 
 // NewMetricClient - метод для создания клиента отправки метрик
-func NewMetricClient(baseURL string, timeout time.Duration, rateLimit int, publicKeyPath string) *MetricClient {
-	return &MetricClient{
-		BaseClient: NewBaseClient(baseURL, timeout, rateLimit, publicKeyPath),
+func NewMetricClient(baseURL string, timeout time.Duration, rateLimit int, publicKeyPath string) (*MetricClient, error) {
+	baseClient, err := NewBaseClient(baseURL, timeout, rateLimit, publicKeyPath)
+	if err != nil {
+		return nil, err
 	}
+	return &MetricClient{BaseClient: baseClient}, nil
 }
 
 // SendJSONReport - метод для отправки отчета в формате JSON

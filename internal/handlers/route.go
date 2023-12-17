@@ -18,6 +18,10 @@ func GetRouter(db storage.Storage, config utils.ServerConfig, privateKey *utils.
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(middleware.Compress(1, "application/json", "text/html", "text/plain"))
 	r.Use(middleware.AllowContentEncoding("gzip"))
+	if config.TrustedNetPrefix != nil {
+		r.Use(middleware.RealIP)
+		r.Use(CheckTrustedSubnet(config.TrustedNetPrefix))
+	}
 	r.Get("/", IndexHandler(db))
 	r.Get("/ping", GetPingHandler(db))
 	r.Get("/value/{mType}/{mName}", GetValueMetricHandler(db))

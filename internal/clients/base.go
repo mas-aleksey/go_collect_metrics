@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -36,23 +37,44 @@ type BaseClient struct {
 	client    *http.Client
 	rateLimit int
 	publicKey *utils.PublicKey
+	xRealIP   string
+}
+
+func getXRealIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+	return "", fmt.Errorf("can't get x-real-ip")
 }
 
 // NewBaseClient - метод для создания базового клиента.
-func NewBaseClient(baseURL string, timeout time.Duration, rateLimit int, publicKeyPath string) *BaseClient {
+func NewBaseClient(baseURL string, timeout time.Duration, rateLimit int, publicKeyPath string) (*BaseClient, error) {
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "http://" + baseURL
 	}
 	publicKey, err := utils.LoadPublicKey(publicKeyPath)
 	if err != nil {
-		log.Fatal("Failed to load public key:", err)
+		return nil, err
+	}
+	xRealIP, err := getXRealIP()
+	if err != nil {
+		return nil, err
 	}
 	return &BaseClient{
 		baseURL:   baseURL,
 		client:    &http.Client{Timeout: timeout},
 		rateLimit: rateLimit,
 		publicKey: publicKey,
-	}
+		xRealIP:   xRealIP,
+	}, nil
 }
 
 // MakeURL - метод формирует url для запроса.
@@ -88,6 +110,7 @@ func (c *BaseClient) DoRequest(r *Request) (Response, error) {
 	} else {
 		requestBody = *bytes.NewBuffer(r.Body)
 	}
+	r.Headers["X-Real-IP"] = c.xRealIP
 
 	req, err := http.NewRequest(r.Method, r.URL, &requestBody)
 	if err != nil {

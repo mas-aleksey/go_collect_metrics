@@ -68,8 +68,10 @@ func main() {
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	stat := utils.NewStatistic()
-	metricClient := clients.NewMetricClient(config.Address, timeout, config.RateLimit, config.CryptoKey)
-
+	metricClient, err := clients.NewMetricClient(config.Address, timeout, config.RateLimit, config.CryptoKey)
+	if err != nil {
+		log.Fatal(err)
+	}
 	reportStatisticTicker := time.NewTicker(config.ReportInterval)
 	updateStatisticTicker := time.NewTicker(config.PollInterval)
 	updateMemCPUStatisticTicker := time.NewTicker(config.PollInterval)
