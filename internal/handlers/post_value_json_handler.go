@@ -11,10 +11,10 @@ import (
 
 // GetJSONMetricHandler - метод получения значения метрики в формате JSON
 // POST /value/
-func GetJSONMetricHandler(db storage.Storage, hashKey string) http.HandlerFunc {
+func GetJSONMetricHandler(db storage.Storage, hashKey string, privateKey *utils.PrivateKey) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		body, err := ReadBody(r)
+		body, err := ReadEncryptedBody(r, privateKey)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

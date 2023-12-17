@@ -23,7 +23,9 @@ var (
 	storeInterval *time.Duration
 	storeFile     *string
 	hashKey       *string
+	cryptoKey     *string
 	databaseDSN   *string
+	configFile    *string
 	buildVersion  = "N/A"
 	buildDate     = "N/A"
 	buildCommit   = "N/A"
@@ -35,7 +37,9 @@ func init() {
 	storeInterval = flag.Duration("i", 30*time.Second, "store interval")
 	storeFile = flag.String("f", "/tmp/devops-metrics-db.json", "store file")
 	hashKey = flag.String("k", "", "hash key")
+	cryptoKey = flag.String("crypto-key", "", "private crypto key")
 	databaseDSN = flag.String("d", "", "database connection string")
+	configFile = flag.String("config", "", "config file")
 	// postgresql://ml_platform_orchestrator_admin:pwd@localhost:5467/yandex
 }
 
@@ -44,29 +48,36 @@ func main() {
 	fmt.Println("Build date:", buildDate)
 	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
-	serverConfig := utils.MakeServerConfig(*address, *hashKey)
-	storageConfig, err := utils.MakeStorageConfig(*restore, *storeInterval, *storeFile, *databaseDSN)
+	serverConfig, err := utils.MakeServerConfig(*configFile, *address, *hashKey, *cryptoKey)
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx := context.Background()
+	storageConfig, err := utils.MakeStorageConfig(*configFile, *restore, *storeInterval, *storeFile, *databaseDSN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	privateKey, err := utils.LoadPrivateKey(serverConfig.CryptoKey)
+	if err != nil {
+		log.Fatal("Failed to load private key: ", err)
+	}
+	dbCtx, dbCancel := context.WithCancel(context.Background())
 
 	db := storage.NewStorage(&storageConfig)
-	err = db.Init(ctx)
+	err = db.Init(dbCtx)
 	if err != nil {
 		log.Printf("Error init db: %s", err)
 	} else {
 		log.Print("Init db success")
 	}
 
-	router := handlers.GetRouter(db, serverConfig)
+	router := handlers.GetRouter(db, serverConfig, privateKey)
 	srv := &http.Server{
 		Addr:    serverConfig.Address,
 		Handler: router,
 	}
 
 	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -80,6 +91,7 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer func() {
+		dbCancel()
 		db.Close(ctx)
 		cancel()
 	}()

@@ -17,8 +17,8 @@ import (
 )
 
 func TestNewMetricClient(t *testing.T) {
-	expected := MetricClient{BaseClient: NewBaseClient("localhost:8080", 1*time.Second, 1)}
-	result := NewMetricClient("localhost:8080", 1*time.Second, 1)
+	expected := MetricClient{BaseClient: NewBaseClient("localhost:8080", 1*time.Second, 1, "")}
+	result := NewMetricClient("localhost:8080", 1*time.Second, 1, "")
 	assert.Equal(t, *result, expected)
 }
 
@@ -56,7 +56,7 @@ func TestMetricClient_postMetric(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 			}))
 			defer svr.Close()
-			mc := NewMetricClient(svr.URL, 1*time.Second, 1)
+			mc := NewMetricClient(svr.URL, 1*time.Second, 1, "")
 			tt.metric.Hash = utils.CalcHash(tt.metric.String(), tt.hashKey)
 			body, err := json.Marshal(tt.metric)
 			assert.Nil(t, err)
@@ -79,7 +79,7 @@ func TestMetricClient_SendJSONReport(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL, 1*time.Second, 1)
+	mc := NewMetricClient(svr.URL, 1*time.Second, 1, "")
 	err := mc.SendJSONReport(report)
 	assert.Nil(t, err)
 }
@@ -107,7 +107,7 @@ func TestMetricClient_SendBatchJSONReport(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL, 1*time.Second, 1)
+	mc := NewMetricClient(svr.URL, 1*time.Second, 1, "")
 	err := mc.SendBatchJSONReport(report)
 	assert.Nil(t, err)
 }
@@ -124,7 +124,7 @@ func BenchmarkSendReport(b *testing.B) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL, 1*time.Second, 1)
+	mc := NewMetricClient(svr.URL, 1*time.Second, 1, "")
 
 	b.Run("by_one", func(b *testing.B) {
 		for i := 0; i < triesN; i++ {
@@ -145,7 +145,7 @@ func ExampleMetricClient_SendBatchJSONReport() {
 	requestPerSecond := 10
 	hashKey := "secret"
 
-	metricClient := NewMetricClient(metricServerHost, requestTimeout, requestPerSecond)
+	metricClient := NewMetricClient(metricServerHost, requestTimeout, requestPerSecond, "")
 
 	statistic := utils.NewStatistic()
 	report := utils.NewJSONReport(statistic, hashKey)
