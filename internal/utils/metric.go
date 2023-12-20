@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	pb "github.com/tiraill/go_collect_metrics/cmd/proto"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -153,4 +154,21 @@ func (m JSONMetric) ValidatesAll(hashKey string) error {
 		return ErrMetricValue
 	}
 	return nil
+}
+
+func JSONMetricToPbMetric(m *JSONMetric) *pb.Metric {
+	pbMetric := &pb.Metric{
+		Id:   m.ID,
+		Type: m.MType,
+	}
+	if m.Delta != nil {
+		pbMetric.Delta = *m.Delta
+	}
+	if m.Value != nil {
+		pbMetric.Value = *m.Value
+	}
+	if m.Hash != nil {
+		pbMetric.Hash = *m.Hash
+	}
+	return pbMetric
 }

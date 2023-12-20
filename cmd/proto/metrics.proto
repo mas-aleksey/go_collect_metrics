@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package main;
+
+option go_package = "main/proto";
+
+message Metric {
+  string id = 1;     // имя метрики
+  string type = 2;   // параметр, принимающий значение gauge или counter
+  sint64 delta = 3;  // значение метрики в случае передачи counter
+  double value = 4;  // значение метрики в случае передачи gauge
+  string hash = 5;   // значение хеш-функции
+}
+
+message SaveMetricRequest {
+  Metric metric = 1;
+}
+
+message SaveMetricResponse {
+  Metric metric = 1;
+}
+
+message SaveBatchMetricRequest {
+  repeated Metric metrics = 1; // список metric
+}
+
+message SaveBatchMetricResponse {
+  repeated Metric metrics = 1;
+}
+
+message GetMetricRequest {
+  Metric metric = 1;
+}
+
+message GetMetricResponse {
+  Metric metric = 1;
+}
+
+message ListMetricRequest {
+}
+
+message ListMetricResponse {
+  repeated Metric metrics = 1; // список metric
+}
+
+message PingRequest {
+}
+
+message PingResponse {
+}
+
+
+service Metrics {
+  rpc SaveMetric(SaveMetricRequest) returns (SaveMetricResponse);
+  rpc SaveBatchMetrics(SaveBatchMetricRequest) returns (SaveBatchMetricResponse);
+  rpc GetMetric(GetMetricRequest) returns (GetMetricResponse);
+  rpc GetListMetrics(ListMetricRequest) returns (ListMetricResponse);
+  rpc Ping(PingRequest) returns (PingResponse);
+}
