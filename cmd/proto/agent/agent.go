@@ -32,7 +32,7 @@ var (
 )
 
 func init() {
-	address = flag.String("a", "127.0.0.1:8080", "server address")
+	address = flag.String("a", "127.0.0.1:3200", "server address")
 	reportInterval = flag.Duration("r", 10*time.Second, "report interval")
 	pollInterval = flag.Duration("p", 2*time.Second, "pool interval")
 	hashKey = flag.String("k", "", "hash key")
@@ -81,10 +81,13 @@ func main() {
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	stat := utils.NewStatistic()
 
-	conn, err := grpc.Dial(
-		":3200",
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(
+		ctx,
+		config.Address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithTimeout(timeout),
 	)
 	if err != nil {
 		log.Fatal(err)

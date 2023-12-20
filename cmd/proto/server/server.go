@@ -34,7 +34,7 @@ var (
 )
 
 func init() {
-	address = flag.String("a", "127.0.0.1:8080", "server address")
+	address = flag.String("a", "127.0.0.1:3200", "server address")
 	restore = flag.Bool("r", true, "restore flag")
 	storeInterval = flag.Duration("i", 30*time.Second, "store interval")
 	storeFile = flag.String("f", "/tmp/devops-metrics-db.json", "store file")
@@ -55,7 +55,7 @@ type MetricsServer struct {
 	db     storage.Storage
 }
 
-func pbMetricToJsonMetric(m *pb.Metric) utils.JSONMetric {
+func pbMetricToJSONMetric(m *pb.Metric) utils.JSONMetric {
 	return utils.JSONMetric{
 		ID:    m.Id,
 		MType: m.Type,
@@ -68,7 +68,7 @@ func pbMetricToJsonMetric(m *pb.Metric) utils.JSONMetric {
 func (s *MetricsServer) SaveMetric(ctx context.Context, in *pb.SaveMetricRequest) (*pb.SaveMetricResponse, error) {
 	log.Print("Handle SaveMetric")
 	var response pb.SaveMetricResponse
-	metric := pbMetricToJsonMetric(in.Metric)
+	metric := pbMetricToJSONMetric(in.Metric)
 	err := metric.ValidatesAll(s.config.HashKey)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка валидации метрики: %v", err)
@@ -87,7 +87,7 @@ func (s *MetricsServer) SaveBatchMetrics(ctx context.Context, in *pb.SaveBatchMe
 	var response pb.SaveBatchMetricResponse
 	metrics := make([]utils.JSONMetric, len(in.Metrics))
 	for i, metric := range in.Metrics {
-		metrics[i] = pbMetricToJsonMetric(metric)
+		metrics[i] = pbMetricToJSONMetric(metric)
 		err := metrics[i].ValidatesAll(s.config.HashKey)
 		if err != nil {
 			return nil, fmt.Errorf("ошибка валидации метрики: %v", err)
@@ -111,7 +111,7 @@ func (s *MetricsServer) SaveBatchMetrics(ctx context.Context, in *pb.SaveBatchMe
 func (s *MetricsServer) GetMetric(ctx context.Context, in *pb.GetMetricRequest) (*pb.GetMetricResponse, error) {
 	log.Print("Handle GetMetric")
 	var response pb.GetMetricResponse
-	metric := pbMetricToJsonMetric(in.Metric)
+	metric := pbMetricToJSONMetric(in.Metric)
 	if !metric.IsValidType() {
 		return nil, fmt.Errorf("ошибка валидации метрики")
 	}
@@ -162,7 +162,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// определяем порт для сервера
-	listen, err := net.Listen("tcp", ":3200")
+	listen, err := net.Listen("tcp", serverConfig.Address)
 	if err != nil {
 		log.Fatal(err)
 	}
