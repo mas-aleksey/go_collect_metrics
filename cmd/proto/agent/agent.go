@@ -1,17 +1,20 @@
-// Агент для периодической отправки CPU, Memory и других метрик.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"github.com/tiraill/go_collect_metrics/internal/utils"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/tiraill/go_collect_metrics/internal/clients"
-	"github.com/tiraill/go_collect_metrics/internal/utils"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	pb "github.com/tiraill/go_collect_metrics/cmd/proto"
 )
 
 var (
@@ -29,7 +32,7 @@ var (
 )
 
 func init() {
-	address = flag.String("a", "127.0.0.1:8080", "server address")
+	address = flag.String("a", "127.0.0.1:3200", "server address")
 	reportInterval = flag.Duration("r", 10*time.Second, "report interval")
 	pollInterval = flag.Duration("p", 2*time.Second, "pool interval")
 	hashKey = flag.String("k", "", "hash key")
@@ -38,7 +41,7 @@ func init() {
 	rateLimit = flag.Int("l", 10, "rate limit")
 }
 
-func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig, metricClient *clients.MetricClient) {
+func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig, metricClient pb.MetricsClient) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in f", r)
@@ -47,7 +50,15 @@ func reportStatistic(statistic *utils.Statistic, config utils.AgentConfig, metri
 	log.Println("Sending report...")
 	statCopy := statistic.Copy()
 	report := utils.NewJSONReport(statCopy, config.HashKey)
-	err := metricClient.SendBatchJSONReport(report)
+	metrics := make([]*pb.Metric, 0, len(report.Metrics))
+	for _, m := range report.Metrics {
+		pbMetric := utils.JSONMetricToPbMetric(&m)
+		metrics = append(metrics, pbMetric)
+	}
+	_, err := metricClient.SaveBatchMetrics(
+		context.Background(),
+		&pb.SaveBatchMetricRequest{Metrics: metrics},
+	)
 	if err != nil {
 		log.Println("Fail send report", statCopy.Counter, err)
 	} else {
@@ -61,6 +72,7 @@ func main() {
 	fmt.Println("Build date:", buildDate)
 	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
+
 	config, err := utils.MakeAgentConfig(*configFile, *address, *reportInterval, *pollInterval, *hashKey, *cryptoKey, *rateLimit)
 	if err != nil {
 		log.Fatal(err)
@@ -68,10 +80,21 @@ func main() {
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	stat := utils.NewStatistic()
-	metricClient, err := clients.NewMetricClient(config.Address, timeout, config.RateLimit, config.CryptoKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(
+		ctx,
+		config.Address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer conn.Close()
+	client := pb.NewMetricsClient(conn)
+
 	reportStatisticTicker := time.NewTicker(config.ReportInterval)
 	updateStatisticTicker := time.NewTicker(config.PollInterval)
 	updateMemCPUStatisticTicker := time.NewTicker(config.PollInterval)
@@ -80,7 +103,7 @@ func main() {
 	for {
 		select {
 		case <-reportStatisticTicker.C:
-			reportStatistic(stat, config, metricClient)
+			reportStatistic(stat, config, client)
 		case <-updateStatisticTicker.C:
 			stat.CollectRuntime()
 		case <-updateMemCPUStatisticTicker.C:
@@ -90,7 +113,7 @@ func main() {
 			reportStatisticTicker.Stop()
 			updateStatisticTicker.Stop()
 			updateMemCPUStatisticTicker.Stop()
-			reportStatistic(stat, config, metricClient)
+			reportStatistic(stat, config, client)
 			log.Print("Exit")
 			return
 		}

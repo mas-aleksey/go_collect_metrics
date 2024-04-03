@@ -17,8 +17,12 @@ import (
 )
 
 func TestNewMetricClient(t *testing.T) {
-	expected := MetricClient{BaseClient: NewBaseClient("localhost:8080", 1*time.Second, 1, "")}
-	result := NewMetricClient("localhost:8080", 1*time.Second, 1, "")
+	baseClient, err := NewBaseClient("localhost:8080", 1*time.Second, 1, "")
+	assert.Nil(t, err)
+	expected := MetricClient{BaseClient: baseClient}
+	assert.Nil(t, err)
+	result, err := NewMetricClient("localhost:8080", 1*time.Second, 1, "")
+	assert.Nil(t, err)
 	assert.Equal(t, *result, expected)
 }
 
@@ -56,7 +60,8 @@ func TestMetricClient_postMetric(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 			}))
 			defer svr.Close()
-			mc := NewMetricClient(svr.URL, 1*time.Second, 1, "")
+			mc, err := NewMetricClient(svr.URL, 1*time.Second, 1, "")
+			assert.Nil(t, err)
 			tt.metric.Hash = utils.CalcHash(tt.metric.String(), tt.hashKey)
 			body, err := json.Marshal(tt.metric)
 			assert.Nil(t, err)
@@ -79,8 +84,9 @@ func TestMetricClient_SendJSONReport(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL, 1*time.Second, 1, "")
-	err := mc.SendJSONReport(report)
+	mc, err := NewMetricClient(svr.URL, 1*time.Second, 1, "")
+	assert.Nil(t, err)
+	err = mc.SendJSONReport(report)
 	assert.Nil(t, err)
 }
 
@@ -107,8 +113,9 @@ func TestMetricClient_SendBatchJSONReport(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL, 1*time.Second, 1, "")
-	err := mc.SendBatchJSONReport(report)
+	mc, err := NewMetricClient(svr.URL, 1*time.Second, 1, "")
+	assert.Nil(t, err)
+	err = mc.SendBatchJSONReport(report)
 	assert.Nil(t, err)
 }
 
@@ -124,8 +131,7 @@ func BenchmarkSendReport(b *testing.B) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer svr.Close()
-	mc := NewMetricClient(svr.URL, 1*time.Second, 1, "")
-
+	mc, _ := NewMetricClient(svr.URL, 1*time.Second, 1, "")
 	b.Run("by_one", func(b *testing.B) {
 		for i := 0; i < triesN; i++ {
 			_ = mc.SendJSONReport(report)
@@ -145,8 +151,7 @@ func ExampleMetricClient_SendBatchJSONReport() {
 	requestPerSecond := 10
 	hashKey := "secret"
 
-	metricClient := NewMetricClient(metricServerHost, requestTimeout, requestPerSecond, "")
-
+	metricClient, _ := NewMetricClient(metricServerHost, requestTimeout, requestPerSecond, "")
 	statistic := utils.NewStatistic()
 	report := utils.NewJSONReport(statistic, hashKey)
 

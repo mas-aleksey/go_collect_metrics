@@ -26,6 +26,7 @@ var (
 	cryptoKey     *string
 	databaseDSN   *string
 	configFile    *string
+	trustedSubnet *string
 	buildVersion  = "N/A"
 	buildDate     = "N/A"
 	buildCommit   = "N/A"
@@ -40,6 +41,7 @@ func init() {
 	cryptoKey = flag.String("crypto-key", "", "private crypto key")
 	databaseDSN = flag.String("d", "", "database connection string")
 	configFile = flag.String("config", "", "config file")
+	trustedSubnet = flag.String("t", "", "trusted subnet")
 	// postgresql://ml_platform_orchestrator_admin:pwd@localhost:5467/yandex
 }
 
@@ -48,7 +50,7 @@ func main() {
 	fmt.Println("Build date:", buildDate)
 	fmt.Println("Build commit:", buildCommit)
 	flag.Parse()
-	serverConfig, err := utils.MakeServerConfig(*configFile, *address, *hashKey, *cryptoKey)
+	serverConfig, err := utils.MakeServerConfig(*configFile, *address, *hashKey, *cryptoKey, *trustedSubnet)
 	if err != nil {
 		log.Fatal(err)
 	}

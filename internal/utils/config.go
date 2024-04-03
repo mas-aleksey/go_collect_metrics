@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/netip"
 	"os"
 	"strconv"
 	"time"
@@ -22,9 +23,11 @@ type AgentConfig struct {
 
 // ServerConfig - структура конфигурации сервера.
 type ServerConfig struct {
-	Address   string `json:"address,omitempty"`
-	HashKey   string `json:"hash_key,omitempty"`
-	CryptoKey string `json:"crypto_key,omitempty"`
+	Address          string        `json:"address,omitempty"`
+	HashKey          string        `json:"hash_key,omitempty"`
+	CryptoKey        string        `json:"crypto_key,omitempty"`
+	TrustedSubnet    string        `json:"trusted_subnet,omitempty"`
+	TrustedNetPrefix *netip.Prefix `json:"-"`
 }
 
 // StorageConfig - структура конфигурации хранилища.
@@ -197,7 +200,7 @@ func MakeAgentConfig(
 
 // MakeServerConfig - метод создания конфигурации сервера.
 // значения, переданные через параметры запуска, переопределяются значениями из переменных окружения.
-func MakeServerConfig(configFile, address, hashKey, cryptoKey string) (ServerConfig, error) {
+func MakeServerConfig(configFile, address, hashKey, cryptoKey, trustedSubnet string) (ServerConfig, error) {
 	var err error = nil
 	cfg := ServerConfig{}
 	configFile = lookupString("config", "CONFIG", "", configFile)
@@ -208,6 +211,14 @@ func MakeServerConfig(configFile, address, hashKey, cryptoKey string) (ServerCon
 	cfg.Address = lookupString("a", "ADDRESS", cfg.Address, address)
 	cfg.HashKey = lookupString("k", "KEY", cfg.HashKey, hashKey)
 	cfg.CryptoKey = lookupString("crypto-key", "CRYPTO_KEY", cfg.CryptoKey, cryptoKey)
+	cfg.TrustedSubnet = lookupString("t", "TRUSTED_SUBNET", cfg.TrustedSubnet, trustedSubnet)
+	if cfg.TrustedSubnet != "" {
+		network, err := netip.ParsePrefix(cfg.TrustedSubnet)
+		if err != nil {
+			return cfg, err
+		}
+		cfg.TrustedNetPrefix = &network
+	}
 	return cfg, nil
 }
 
